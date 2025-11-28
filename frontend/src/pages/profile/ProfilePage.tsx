@@ -41,8 +41,8 @@ export default function ProfilePage() {
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<ProfileForm>({
     values: agency ? {
-      commercialName: agency.commercialName,
-      whatsapp: agency.whatsapp,
+      commercialName: agency.commercialName || '',
+      whatsapp: agency.whatsapp || '',
       phone: agency.phone || '',
       addressStreet: agency.addressStreet || '',
       addressCity: agency.addressCity || '',
@@ -51,7 +51,18 @@ export default function ProfilePage() {
       facebookUrl: agency.facebookUrl || '',
       websiteUrl: agency.websiteUrl || '',
       logoUrl: agency.logoUrl || '',
-    } : undefined,
+    } : {
+      commercialName: '',
+      whatsapp: '',
+      phone: '',
+      addressStreet: '',
+      addressCity: '',
+      addressState: '',
+      instagramUrl: '',
+      facebookUrl: '',
+      websiteUrl: '',
+      logoUrl: '',
+    },
   })
 
   const updateMutation = useMutation({

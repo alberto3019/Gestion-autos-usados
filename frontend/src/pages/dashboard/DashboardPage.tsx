@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const { data: agencyData } = useQuery({
     queryKey: ['myAgency'],
     queryFn: agenciesApi.getMyAgency,
-    enabled: user?.role !== 'super_admin',
+    enabled: !!user && user.role !== 'super_admin',
   })
 
   const { data: usersData } = useQuery({

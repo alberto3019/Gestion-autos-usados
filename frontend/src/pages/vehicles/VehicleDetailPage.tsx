@@ -39,10 +39,13 @@ export default function VehicleDetailPage() {
   })
 
   const favoriteMutation = useMutation({
-    mutationFn: () =>
-      vehicle?.isFavorite
-        ? favoritesApi.removeFavorite(id!)
-        : favoritesApi.addFavorite(id!),
+    mutationFn: async () => {
+      if (vehicle?.isFavorite) {
+        await favoritesApi.removeFavorite(id!)
+      } else {
+        await favoritesApi.addFavorite(id!)
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicle', id] })
     },

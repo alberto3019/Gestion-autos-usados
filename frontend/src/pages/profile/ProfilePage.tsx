@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { agenciesApi } from '../../api/agencies'
 import { uploadApi } from '../../api/upload'
 import Button from '../../components/common/Button'
@@ -31,12 +31,13 @@ export default function ProfilePage() {
     queryKey: ['myAgency'],
     queryFn: agenciesApi.getMyAgency,
     enabled: user?.role !== 'super_admin',
-    onSuccess: (data) => {
-      if (data.logoUrl) {
-        setLogoUrl(data.logoUrl)
-      }
-    },
   })
+
+  useEffect(() => {
+    if (agency?.logoUrl) {
+      setLogoUrl(agency.logoUrl)
+    }
+  }, [agency])
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<ProfileForm>({
     values: agency ? {

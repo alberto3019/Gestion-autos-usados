@@ -1,0 +1,16 @@
+# Configuración para Render.com
+# Este archivo ayuda a Render a configurar correctamente el servicio
+
+services:
+  - type: web
+    name: dealership-network-backend
+    env: node
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Agregar aquí las demás variables de entorno desde el dashboard de Render
+

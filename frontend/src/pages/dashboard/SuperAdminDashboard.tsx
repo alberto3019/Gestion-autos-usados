@@ -248,9 +248,9 @@ export default function SuperAdminDashboard() {
                               outerRadius={80}
                               fill="#8884d8"
                               dataKey="value"
-                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              label={({ name, percent }: { name: string; percent?: number }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                             >
-                              {advancedStats.distribution.vehiclesByStatus.map((entry, index) => (
+                              {advancedStats.distribution.vehiclesByStatus.map((entry: { name: string; value: number }, index: number) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
@@ -405,7 +405,7 @@ export default function SuperAdminDashboard() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             {agency.status === 'pending' && (
                               <Button
-                                variant="success"
+                                variant="primary"
                                 size="sm"
                                 onClick={() => approveMutation.mutate(agency.id)}
                                 isLoading={approveMutation.isPending}

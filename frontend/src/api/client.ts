@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
         const refreshToken = useAuthStore.getState().refreshToken
         if (refreshToken) {
           const response = await axios.post(
-            `${import.meta.env.VITE_API_URL}/auth/refresh`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
             { refreshToken }
           )
           const { accessToken } = response.data

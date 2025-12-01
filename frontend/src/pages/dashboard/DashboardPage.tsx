@@ -113,18 +113,21 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Información de la Agencia */}
         {agencyData && (
-          <div className="card bg-gradient-to-r from-primary-500 to-primary-700 text-white">
-            <div className="flex items-start justify-between">
+          <div 
+            className="card bg-gradient-to-r from-primary-500 to-primary-700 text-white relative overflow-hidden"
+            style={agencyData.logoUrl ? {
+              backgroundImage: `url(${agencyData.logoUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            } : {}}
+          >
+            {/* Overlay oscuro para mejorar legibilidad del texto */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-500/90 to-primary-700/90"></div>
+            
+            <div className="relative z-10 flex items-start justify-between">
               <div className="flex items-center">
-                {agencyData.logoUrl ? (
-                  <img
-                    src={agencyData.logoUrl}
-                    alt={`Logo ${agencyData.commercialName}`}
-                    className="h-12 w-12 mr-3 opacity-90 flex-shrink-0 object-contain bg-white rounded p-1"
-                  />
-                ) : (
-                  <BuildingOfficeIcon className="h-12 w-12 mr-3 opacity-90 flex-shrink-0" />
-                )}
+                <BuildingOfficeIcon className="h-12 w-12 mr-3 opacity-90 flex-shrink-0" />
                 <div>
                   <h2 className="text-xl font-bold">{agencyData.commercialName}</h2>
                   <p className="text-primary-100 text-xs mt-1">

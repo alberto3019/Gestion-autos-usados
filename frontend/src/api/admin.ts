@@ -19,6 +19,13 @@ export const adminApi = {
     return response.data
   },
 
+  resetAgencyPassword: async (id: string, newPassword: string): Promise<any> => {
+    const response = await apiClient.patch(`/admin/agencies/${id}/reset-password`, {
+      newPassword,
+    })
+    return response.data
+  },
+
   getStats: async (): Promise<AdminStats> => {
     const response = await apiClient.get('/admin/stats')
     return response.data

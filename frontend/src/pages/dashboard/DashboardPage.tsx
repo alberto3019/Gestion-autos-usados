@@ -84,7 +84,7 @@ export default function DashboardPage() {
     .reduce((sum, v) => sum + Number(v.price), 0);
 
   // Convertir todo a ARS
-  const usdRate = exchangeRate?.rate || 1000;
+  const usdRate = exchangeRate?.rate || 1425;
   const eurRate = usdRate * 1.1; // EUR aproximado
   
   const totalInventoryARS = inventoryARS + (inventoryUSD * usdRate) + (inventoryEUR * eurRate);
@@ -116,7 +116,15 @@ export default function DashboardPage() {
           <div className="card bg-gradient-to-r from-primary-500 to-primary-700 text-white">
             <div className="flex items-start justify-between">
               <div className="flex items-center">
-                <BuildingOfficeIcon className="h-12 w-12 mr-3 opacity-90 flex-shrink-0" />
+                {agencyData.logoUrl ? (
+                  <img
+                    src={agencyData.logoUrl}
+                    alt={`Logo ${agencyData.commercialName}`}
+                    className="h-12 w-12 mr-3 opacity-90 flex-shrink-0 object-contain bg-white rounded p-1"
+                  />
+                ) : (
+                  <BuildingOfficeIcon className="h-12 w-12 mr-3 opacity-90 flex-shrink-0" />
+                )}
                 <div>
                   <h2 className="text-xl font-bold">{agencyData.commercialName}</h2>
                   <p className="text-primary-100 text-xs mt-1">

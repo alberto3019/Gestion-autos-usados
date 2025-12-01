@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import * as https from 'https';
 
 @Injectable()
-export class ExchangeRateService {
+export class ExchangeRateService implements OnModuleInit {
   private readonly logger = new Logger(ExchangeRateService.name);
-  private usdToArs: number = 1000; // Valor por defecto inicial
+  private usdToArs: number = 1425; // Valor por defecto inicial (dólar blue)
   private lastUpdated: Date = new Date();
 
   async getUsdRate(): Promise<number> {
@@ -20,22 +21,41 @@ export class ExchangeRateService {
     try {
       this.logger.log('Actualizando tipo de cambio...');
       
-      // Intentar obtener desde API de DolarHoy
-      const response = await fetch('https://dolarapi.com/v1/dolares/blue');
+      // Usar https nativo para hacer la petición
+      const url = 'https://dolarapi.com/v1/dolares/blue';
       
-      if (response.ok) {
-        const data = await response.json();
-        const newRate = data.venta; // Precio de venta del dólar blue
-        
-        if (newRate && newRate > 0) {
-          this.usdToArs = newRate;
-          this.lastUpdated = new Date();
-          this.logger.log(`Tipo de cambio actualizado: 1 USD = ${this.usdToArs} ARS`);
-        } else {
-          this.logger.warn('Respuesta inválida de la API de dólar');
-        }
+      const data = await new Promise<any>((resolve, reject) => {
+        https.get(url, (res) => {
+          let body = '';
+          
+          res.on('data', (chunk) => {
+            body += chunk;
+          });
+          
+          res.on('end', () => {
+            try {
+              if (res.statusCode === 200) {
+                resolve(JSON.parse(body));
+              } else {
+                reject(new Error(`HTTP error! status: ${res.statusCode}`));
+              }
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }).on('error', (err) => {
+          reject(err);
+        });
+      });
+      
+      const newRate = data.venta; // Precio de venta del dólar blue
+      
+      if (newRate && newRate > 0) {
+        this.usdToArs = newRate;
+        this.lastUpdated = new Date();
+        this.logger.log(`Tipo de cambio actualizado: 1 USD = ${this.usdToArs} ARS`);
       } else {
-        this.logger.warn(`Error al obtener tipo de cambio: ${response.status}`);
+        this.logger.warn('Respuesta inválida de la API de dólar');
       }
     } catch (error) {
       this.logger.error('Error al actualizar tipo de cambio:', error);

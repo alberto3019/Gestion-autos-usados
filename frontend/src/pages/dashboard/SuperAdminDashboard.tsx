@@ -5,6 +5,7 @@ import { adminApi } from '../../api/admin'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
+import Input from '../../components/common/Input'
 import {
   BuildingOfficeIcon,
   TruckIcon,
@@ -16,6 +17,8 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   MagnifyingGlassIcon,
+  KeyIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import {
   BarChart,
@@ -44,6 +47,14 @@ export default function SuperAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [showAgencies, setShowAgencies] = useState(true)
   const [showStats, setShowStats] = useState(true)
+  const [resetPasswordModal, setResetPasswordModal] = useState<{ open: boolean; agencyId: string | null; agencyName: string }>({
+    open: false,
+    agencyId: null,
+    agencyName: '',
+  })
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   const { data: stats } = useQuery({
     queryKey: ['adminStats'],
@@ -75,6 +86,49 @@ export default function SuperAdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
     },
   })
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ agencyId, newPassword }: { agencyId: string; newPassword: string }) =>
+      adminApi.resetAgencyPassword(agencyId, newPassword),
+    onSuccess: () => {
+      setResetPasswordModal({ open: false, agencyId: null, agencyName: '' })
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordError(null)
+      alert('Contraseña actualizada exitosamente para todos los usuarios de la agencia')
+    },
+    onError: (error: any) => {
+      setPasswordError(error.response?.data?.message || 'Error al cambiar la contraseña')
+    },
+  })
+
+  const handleOpenResetPassword = (agencyId: string, agencyName: string) => {
+    setResetPasswordModal({ open: true, agencyId, agencyName })
+    setNewPassword('')
+    setConfirmPassword('')
+    setPasswordError(null)
+  }
+
+  const handleResetPassword = () => {
+    setPasswordError(null)
+    
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
+    if (resetPasswordModal.agencyId) {
+      resetPasswordMutation.mutate({
+        agencyId: resetPasswordModal.agencyId,
+        newPassword,
+      })
+    }
+  }
 
   const totalPages = agenciesData ? Math.ceil(agenciesData.total / agenciesData.limit) : 1
   const formatCurrency = (value: number) =>
@@ -407,36 +461,56 @@ export default function SuperAdminDashboard() {
                             <StatusBadge status={agency.status} />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {agency.status === 'pending' && (
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => approveMutation.mutate(agency.id)}
-                                isLoading={approveMutation.isPending}
-                              >
-                                Aprobar
-                              </Button>
-                            )}
-                            {agency.status === 'active' && (
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => blockMutation.mutate(agency.id)}
-                                isLoading={blockMutation.isPending}
-                              >
-                                Bloquear
-                              </Button>
-                            )}
-                            {agency.status === 'blocked' && (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => approveMutation.mutate(agency.id)}
-                                isLoading={approveMutation.isPending}
-                              >
-                                Desbloquear
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {agency.status === 'pending' && (
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={() => approveMutation.mutate(agency.id)}
+                                  isLoading={approveMutation.isPending}
+                                >
+                                  Aprobar
+                                </Button>
+                              )}
+                              {agency.status === 'active' && (
+                                <>
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => blockMutation.mutate(agency.id)}
+                                    isLoading={blockMutation.isPending}
+                                  >
+                                    Bloquear
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => handleOpenResetPassword(agency.id, agency.commercialName)}
+                                  >
+                                    <KeyIcon className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              {agency.status === 'blocked' && (
+                                <>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => approveMutation.mutate(agency.id)}
+                                    isLoading={approveMutation.isPending}
+                                  >
+                                    Desbloquear
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => handleOpenResetPassword(agency.id, agency.commercialName)}
+                                  >
+                                    <KeyIcon className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -479,26 +553,46 @@ export default function SuperAdminDashboard() {
                           </Button>
                         )}
                         {agency.status === 'active' && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => blockMutation.mutate(agency.id)}
-                            isLoading={blockMutation.isPending}
-                            className="flex-1"
-                          >
-                            Bloquear
-                          </Button>
+                          <>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => blockMutation.mutate(agency.id)}
+                              isLoading={blockMutation.isPending}
+                              className="flex-1"
+                            >
+                              Bloquear
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleOpenResetPassword(agency.id, agency.commercialName)}
+                              className="flex-1"
+                            >
+                              <KeyIcon className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                         {agency.status === 'blocked' && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => approveMutation.mutate(agency.id)}
-                            isLoading={approveMutation.isPending}
-                            className="flex-1"
-                          >
-                            Desbloquear
-                          </Button>
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => approveMutation.mutate(agency.id)}
+                              isLoading={approveMutation.isPending}
+                              className="flex-1"
+                            >
+                              Desbloquear
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleOpenResetPassword(agency.id, agency.commercialName)}
+                              className="flex-1"
+                            >
+                              <KeyIcon className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -531,6 +625,76 @@ export default function SuperAdminDashboard() {
           </>
         )}
       </div>
+
+      {/* Modal para cambiar contraseña */}
+      {resetPasswordModal.open && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Cambiar Contraseña
+              </h3>
+              <button
+                onClick={() => {
+                  setResetPasswordModal({ open: false, agencyId: null, agencyName: '' })
+                  setNewPassword('')
+                  setConfirmPassword('')
+                  setPasswordError(null)
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Cambiar contraseña para todos los usuarios de: <strong>{resetPasswordModal.agencyName}</strong>
+            </p>
+            {passwordError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-800">{passwordError}</p>
+              </div>
+            )}
+            <div className="space-y-4">
+              <Input
+                label="Nueva Contraseña *"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+              />
+              <Input
+                label="Confirmar Contraseña *"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repite la contraseña"
+              />
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setResetPasswordModal({ open: false, agencyId: null, agencyName: '' })
+                  setNewPassword('')
+                  setConfirmPassword('')
+                  setPasswordError(null)
+                }}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleResetPassword}
+                isLoading={resetPasswordMutation.isPending}
+                className="flex-1"
+              >
+                Cambiar Contraseña
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

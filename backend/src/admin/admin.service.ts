@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { EmailService } from '../email/email.service';
 import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -138,6 +139,49 @@ export class AdminService {
       message: 'Agencia bloqueada exitosamente',
       reason,
       agency: updated,
+    };
+  }
+
+  async resetAgencyPassword(agencyId: string, newPassword: string) {
+    const agency = await this.prisma.agency.findUnique({
+      where: { id: agencyId },
+      include: {
+        users: true,
+      },
+    });
+
+    if (!agency) {
+      throw new NotFoundException('Agencia no encontrada');
+    }
+
+    // Hash de la nueva contraseña
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña de todos los usuarios de la agencia
+    await this.prisma.user.updateMany({
+      where: { agencyId },
+      data: { passwordHash },
+    });
+
+    // Log activity para cada usuario
+    for (const user of agency.users) {
+      await this.activityLogsService.log({
+        userId: user.id,
+        agencyId: agency.id,
+        type: 'user_updated',
+        action: 'Cambio de Contraseña Forzado',
+        description: `Super Admin cambió la contraseña del usuario ${user.firstName} ${user.lastName}`,
+        metadata: {
+          userId: user.id,
+          userName: `${user.firstName} ${user.lastName}`,
+          changedBy: 'super_admin',
+        },
+      });
+    }
+
+    return {
+      message: 'Contraseña actualizada exitosamente para todos los usuarios de la agencia',
+      usersUpdated: agency.users.length,
     };
   }
 

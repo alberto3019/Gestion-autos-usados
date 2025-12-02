@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -9,32 +10,47 @@ import * as fs from 'fs/promises';
 @Injectable()
 export class UploadService {
   private s3Client: S3Client | null = null;
+  private supabaseClient: SupabaseClient | null = null;
   private useS3: boolean;
+  private useSupabase: boolean;
   private uploadDir: string;
 
   constructor(private configService: ConfigService) {
-    this.useS3 = !!this.configService.get('AWS_ACCESS_KEY_ID');
+    // Verificar Supabase primero (prioridad)
+    const supabaseUrl = this.configService.get('SUPABASE_URL');
+    const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    if (this.useS3) {
-      const accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
-      const secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
+    if (supabaseUrl && supabaseKey) {
+      this.supabaseClient = createClient(supabaseUrl, supabaseKey);
+      this.useSupabase = true;
+      this.useS3 = false;
+    } else {
+      this.useSupabase = false;
       
-      if (accessKeyId && secretAccessKey) {
-        this.s3Client = new S3Client({
-          region: this.configService.get('AWS_REGION') || 'us-east-1',
-          credentials: {
-            accessKeyId,
-            secretAccessKey,
-          },
-        });
-      } else {
-        this.useS3 = false;
+      // Verificar S3
+      this.useS3 = !!this.configService.get('AWS_ACCESS_KEY_ID');
+      
+      if (this.useS3) {
+        const accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
+        const secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
+        
+        if (accessKeyId && secretAccessKey) {
+          this.s3Client = new S3Client({
+            region: this.configService.get('AWS_REGION') || 'us-east-1',
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          });
+        } else {
+          this.useS3 = false;
+        }
       }
-    }
-    
-    if (!this.useS3) {
-      // Usar almacenamiento local
-      this.uploadDir = this.configService.get('UPLOAD_DIR') || './uploads';
+      
+      if (!this.useS3) {
+        // Usar almacenamiento local como fallback
+        this.uploadDir = this.configService.get('UPLOAD_DIR') || './uploads';
+      }
     }
   }
 
@@ -88,7 +104,29 @@ export class UploadService {
     // Generar nombre único
     const fileName = `${crypto.randomUUID()}.${format}`;
 
-    if (this.useS3 && this.s3Client) {
+    if (this.useSupabase && this.supabaseClient) {
+      // Subir a Supabase Storage
+      const bucketName = 'vehicles';
+      const filePath = fileName;
+
+      const { data, error } = await this.supabaseClient.storage
+        .from(bucketName)
+        .upload(filePath, processedBuffer, {
+          contentType: `image/${format}`,
+          upsert: false,
+        });
+
+      if (error) {
+        throw new BadRequestException(`Error al subir imagen a Supabase: ${error.message}`);
+      }
+
+      // Obtener URL pública
+      const { data: urlData } = this.supabaseClient.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
+      return urlData.publicUrl;
+    } else if (this.useS3 && this.s3Client) {
       // Subir a S3
       const bucketName = this.configService.get('AWS_S3_BUCKET');
       if (!bucketName) {
@@ -111,7 +149,7 @@ export class UploadService {
       const region = this.configService.get('AWS_REGION') || 'us-east-1';
       return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
     } else {
-      // Guardar localmente
+      // Guardar localmente (fallback)
       await this.ensureUploadDir();
       const filePath = path.join(this.uploadDir, fileName);
       await fs.writeFile(filePath, processedBuffer);
@@ -137,7 +175,28 @@ export class UploadService {
   }
 
   async deleteImage(imageUrl: string): Promise<void> {
-    if (this.useS3) {
+    if (this.useSupabase && this.supabaseClient) {
+      // Extraer el path del archivo de la URL de Supabase
+      try {
+        const url = new URL(imageUrl);
+        const pathParts = url.pathname.split('/');
+        const bucketIndex = pathParts.findIndex(part => part === 'storage');
+        if (bucketIndex !== -1 && pathParts[bucketIndex + 1] === 'v1') {
+          const bucketName = pathParts[bucketIndex + 2];
+          const filePath = pathParts.slice(bucketIndex + 4).join('/');
+          
+          const { error } = await this.supabaseClient.storage
+            .from(bucketName)
+            .remove([filePath]);
+          
+          if (error) {
+            console.error('Error deleting image from Supabase:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing Supabase URL:', error);
+      }
+    } else if (this.useS3) {
       // Implementar eliminación de S3 si es necesario
       // Por ahora, las imágenes en S3 pueden tener políticas de expiración
       return;

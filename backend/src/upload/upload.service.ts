@@ -78,9 +78,9 @@ export class UploadService {
       throw new BadRequestException('El archivo debe ser una imagen');
     }
 
-    const maxWidth = options?.maxWidth || 1920;
-    const maxHeight = options?.maxHeight || 1080;
-    const quality = options?.quality || 85;
+    const maxWidth = options?.maxWidth || 1280;
+    const maxHeight = options?.maxHeight || 720;
+    const quality = options?.quality || 80;
     const format = options?.format || 'jpeg';
 
     // Procesar imagen con sharp

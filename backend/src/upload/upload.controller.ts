@@ -27,9 +27,9 @@ export class UploadController {
     }
 
     const url = await this.uploadService.uploadImage(file, {
-      maxWidth: 1920,
-      maxHeight: 1080,
-      quality: 85,
+      maxWidth: 1280,
+      maxHeight: 720,
+      quality: 80,
       format: 'jpeg',
     });
 
@@ -48,9 +48,9 @@ export class UploadController {
     }
 
     const urls = await this.uploadService.uploadMultipleImages(files, {
-      maxWidth: 1920,
-      maxHeight: 1080,
-      quality: 85,
+      maxWidth: 1280,
+      maxHeight: 720,
+      quality: 80,
       format: 'jpeg',
     });
 

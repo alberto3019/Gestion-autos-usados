@@ -20,6 +20,10 @@ export class SearchVehiclesDto {
   version?: string;
 
   @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   yearMin?: number;

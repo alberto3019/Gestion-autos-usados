@@ -112,6 +112,7 @@ export interface SearchFilters {
   brand?: string
   model?: string
   version?: string
+  color?: string
   yearMin?: number
   yearMax?: number
   priceMin?: number

@@ -114,6 +114,13 @@ export default function SearchPage() {
               onChange={(e) => handleFilterChange('model', e.target.value)}
             />
 
+            <Input
+              label="Color"
+              placeholder="Ej: BLANCO"
+              value={filters.color || ''}
+              onChange={(e) => handleFilterChange('color', e.target.value)}
+            />
+
             <div className="grid grid-cols-2 gap-2">
               <Input
                 label="Año Desde"

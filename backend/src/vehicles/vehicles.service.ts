@@ -32,6 +32,17 @@ export class VehiclesService {
     return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
   }
 
+  /**
+   * Normaliza el color del vehículo: todo en mayúsculas
+   * Ejemplo: "blanco" -> "BLANCO", "Blanco" -> "BLANCO", "BLANCO" -> "BLANCO"
+   */
+  private normalizeColor(color: string | undefined): string | undefined {
+    if (!color || typeof color !== 'string') return color;
+    const trimmed = color.trim();
+    if (trimmed.length === 0) return trimmed;
+    return trimmed.toUpperCase();
+  }
+
   async getMyVehicles(
     agencyId: string,
     page: number = 1,
@@ -114,7 +125,7 @@ export class VehiclesService {
         kilometers: dto.kilometers,
         fuelType: dto.fuelType,
         transmission: dto.transmission,
-        color: dto.color,
+        color: this.normalizeColor(dto.color),
         licensePlate: dto.licensePlate,
         hideLicensePlate: dto.hideLicensePlate,
         price: dto.price,
@@ -247,6 +258,10 @@ export class VehiclesService {
     // Normalizar marca si viene en el DTO
     if (vehicleData.brand) {
       vehicleData.brand = this.normalizeBrand(vehicleData.brand);
+    }
+    // Normalizar color si viene en el DTO
+    if (vehicleData.color !== undefined) {
+      vehicleData.color = this.normalizeColor(vehicleData.color);
     }
 
     // Actualizar datos del vehículo
@@ -548,6 +563,9 @@ export class VehiclesService {
     }
     if (dto.version) {
       where.version = { contains: dto.version, mode: 'insensitive' };
+    }
+    if (dto.color) {
+      where.color = { contains: dto.color, mode: 'insensitive' };
     }
     if (dto.yearMin || dto.yearMax) {
       where.year = {};
@@ -854,7 +872,7 @@ export class VehiclesService {
         vehicleData.transmission = this.normalizeTransmission(
           String(transmission).toLowerCase(),
         ) as any;
-        vehicleData.color = String(color).trim();
+        vehicleData.color = this.normalizeColor(String(color).trim());
         vehicleData.licensePlate = String(licensePlate).trim();
         vehicleData.hideLicensePlate =
           String(hideLicensePlate).toLowerCase() === 'sí' ||

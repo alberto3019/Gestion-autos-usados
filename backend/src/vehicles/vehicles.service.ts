@@ -21,6 +21,17 @@ export class VehiclesService {
     private activityLogsService: ActivityLogsService,
   ) {}
 
+  /**
+   * Normaliza la marca del vehículo: primera letra mayúscula, resto minúsculas
+   * Ejemplo: "FORD" -> "Ford", "ford" -> "Ford", "FoRd" -> "Ford"
+   */
+  private normalizeBrand(brand: string): string {
+    if (!brand || typeof brand !== 'string') return brand;
+    const trimmed = brand.trim();
+    if (trimmed.length === 0) return trimmed;
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+  }
+
   async getMyVehicles(
     agencyId: string,
     page: number = 1,
@@ -96,7 +107,7 @@ export class VehiclesService {
     const vehicle = await this.prisma.vehicle.create({
       data: {
         agencyId,
-        brand: dto.brand,
+        brand: this.normalizeBrand(dto.brand),
         model: dto.model,
         version: dto.version,
         year: dto.year,
@@ -232,6 +243,11 @@ export class VehiclesService {
 
     // Extraer fotos del DTO
     const { photos, ...vehicleData } = dto as any;
+
+    // Normalizar marca si viene en el DTO
+    if (vehicleData.brand) {
+      vehicleData.brand = this.normalizeBrand(vehicleData.brand);
+    }
 
     // Actualizar datos del vehículo
     const updated = await this.prisma.vehicle.update({
@@ -827,7 +843,7 @@ export class VehiclesService {
           );
         }
 
-        vehicleData.brand = String(brand).trim();
+        vehicleData.brand = this.normalizeBrand(String(brand).trim());
         vehicleData.model = String(model).trim();
         vehicleData.version = String(version).trim();
         vehicleData.year = parseInt(String(year));

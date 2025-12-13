@@ -32,7 +32,7 @@ Crea un archivo `.env` en la raíz del proyecto (puedes copiar `.env.example`):
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/dealership_network?schema=public"
 JWT_SECRET="tu-secreto-super-seguro"
-JWT_EXPIRES_IN="15m"
+JWT_EXPIRES_IN="30m"
 JWT_REFRESH_SECRET="tu-refresh-token-secreto"
 JWT_REFRESH_EXPIRES_IN="7d"
 PORT=3000
@@ -233,7 +233,7 @@ Para debug con VS Code, agrega esto a `.vscode/launch.json`:
 
 - El puerto por defecto es `3000`
 - La API está prefijada con `/api`
-- Los access tokens expiran en 15 minutos
+- Los access tokens expiran en 30 minutos
 - Los refresh tokens expiran en 7 días
 - Las agencias nuevas quedan en estado `pending` hasta aprobación
 

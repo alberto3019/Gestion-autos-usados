@@ -40,7 +40,7 @@ Configura estas variables de entorno en **Render Dashboard → Environment**:
 ```
 DATABASE_URL=postgresql://postgres.fnijnweluhggvvqxhmmw:V0Np1fnnq8LcAnIQ@db.fnijnweluhggvvqxhmmw.supabase.co:6543/postgres?pgbouncer=true&schema=public
 JWT_SECRET=ezLPdetfG7Qh2894i90AwmCdl7v9Z0HcAY/N0YqZ3ZA=
-JWT_EXPIRES_IN=15m
+JWT_EXPIRES_IN=30m
 JWT_REFRESH_SECRET=H/ZTqrRluLe06OSuwqzE4fTA9oisqInUk86wRWUbWNA=
 JWT_REFRESH_EXPIRES_IN=7d
 NODE_ENV=production

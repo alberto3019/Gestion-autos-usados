@@ -36,7 +36,13 @@ export default function SearchPage() {
   })
 
   const handleFilterChange = (key: string, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }))
+    if (key === 'page') {
+      // Si estamos cambiando la página, solo actualizamos la página
+      setFilters((prev) => ({ ...prev, page: value }))
+    } else {
+      // Si estamos cambiando otro filtro, reseteamos a la página 1
+      setFilters((prev) => ({ ...prev, [key]: value, page: 1 }))
+    }
   }
 
   const handleQuickSearch = (e: React.FormEvent) => {

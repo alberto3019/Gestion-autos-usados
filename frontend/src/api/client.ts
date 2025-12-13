@@ -40,8 +40,14 @@ apiClient.interceptors.response.use(
           useAuthStore.getState().setAccessToken(accessToken)
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return apiClient(originalRequest)
+        } else {
+          // Si no hay refreshToken, hacer logout inmediatamente
+          useAuthStore.getState().logout()
+          window.location.href = '/login'
+          return Promise.reject(error)
         }
       } catch (refreshError) {
+        // Si el refresh falla, hacer logout y redirigir
         useAuthStore.getState().logout()
         window.location.href = '/login'
         return Promise.reject(refreshError)

@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "npx nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "npx nest start",

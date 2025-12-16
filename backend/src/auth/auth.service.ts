@@ -175,11 +175,14 @@ export class AuthService {
     // Generar tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
-    // Guardar refresh token
+    // Guardar refresh token y actualizar último login
     const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken: hashedRefreshToken },
+      data: { 
+        refreshToken: hashedRefreshToken,
+        lastLogin: new Date(),
+      },
     });
 
     // Log activity

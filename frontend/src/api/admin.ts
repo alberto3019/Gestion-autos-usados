@@ -35,5 +35,10 @@ export const adminApi = {
     const response = await apiClient.get('/admin/stats/advanced')
     return response.data
   },
+
+  getUsersWithLastLogin: async (): Promise<any> => {
+    const response = await apiClient.get('/admin/users/last-login')
+    return response.data
+  },
 }
 

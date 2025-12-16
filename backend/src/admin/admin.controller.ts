@@ -56,5 +56,10 @@ export class AdminController {
   async getAdvancedStats() {
     return this.adminService.getAdvancedStats();
   }
+
+  @Get('users/last-login')
+  async getUsersWithLastLogin() {
+    return this.adminService.getUsersWithLastLogin();
+  }
 }
 

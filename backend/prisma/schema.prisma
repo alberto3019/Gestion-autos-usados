@@ -117,6 +117,7 @@ model User {
   refreshToken       String?  @map("refresh_token") @db.Text
   passwordResetToken String?  @map("password_reset_token") @db.Text
   passwordResetExpires DateTime? @map("password_reset_expires")
+  lastLogin          DateTime? @map("last_login")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 

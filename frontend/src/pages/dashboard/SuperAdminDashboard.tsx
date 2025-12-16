@@ -47,6 +47,7 @@ export default function SuperAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [showAgencies, setShowAgencies] = useState(true)
   const [showStats, setShowStats] = useState(true)
+  const [showUsers, setShowUsers] = useState(true)
   const [resetPasswordModal, setResetPasswordModal] = useState<{ open: boolean; agencyId: string | null; agencyName: string }>({
     open: false,
     agencyId: null,
@@ -69,6 +70,11 @@ export default function SuperAdminDashboard() {
   const { data: agenciesData, isLoading: isLoadingAgencies } = useQuery({
     queryKey: ['adminAgencies', page, statusFilter],
     queryFn: () => adminApi.getAgencies({ page, limit: 20, status: statusFilter || undefined }),
+  })
+
+  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['adminUsersLastLogin'],
+    queryFn: adminApi.getUsersWithLastLogin,
   })
 
   const approveMutation = useMutation({
@@ -623,6 +629,102 @@ export default function SuperAdminDashboard() {
               </div>
             )}
           </>
+        )}
+      </div>
+
+      {/* Sección de Usuarios con Último Login */}
+      <div className="card mb-8">
+        <button
+          onClick={() => setShowUsers(!showUsers)}
+          className="w-full flex items-center justify-between py-2 hover:bg-gray-50 rounded transition-colors"
+        >
+          <h2 className="text-xl font-bold text-gray-900 flex items-center">
+            <UsersIcon className="h-6 w-6 mr-2" />
+            Último Inicio de Sesión de Usuarios
+          </h2>
+          {showUsers ? (
+            <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+          ) : (
+            <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+          )}
+        </button>
+
+        {showUsers && (
+          <div className="mt-6">
+            {isLoadingUsers ? (
+              <p className="text-center py-8 text-gray-500">Cargando usuarios...</p>
+            ) : usersData && usersData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Usuario
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Agencia
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Rol
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Último Login
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {usersData.map((user: any) => (
+                      <tr key={user.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.firstName} {user.lastName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {user.agency?.commercialName || 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {user.role === 'agency_admin' ? 'Admin' : 'Usuario'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.lastLogin ? (
+                            <div className="text-sm text-gray-900">
+                              <div className="font-medium">
+                                {dayjs(user.lastLogin).format('DD/MM/YYYY')}
+                              </div>
+                              <div className="text-gray-500">
+                                {dayjs(user.lastLogin).format('HH:mm')} hs
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                {dayjs(user.lastLogin).fromNow()}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-400 italic">Nunca</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <p className="mt-2 text-gray-500">No hay usuarios para mostrar</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 

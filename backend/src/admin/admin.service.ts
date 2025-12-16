@@ -542,5 +542,46 @@ export class AdminService {
     }
     return result;
   }
+
+  async getUsersWithLastLogin() {
+    const users = await this.prisma.user.findMany({
+      where: {
+        role: {
+          not: 'super_admin',
+        },
+      },
+      include: {
+        agency: {
+          select: {
+            id: true,
+            commercialName: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        lastLogin: {
+          sort: 'desc',
+          nulls: 'last',
+        },
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      lastLogin: user.lastLogin,
+      agency: user.agency
+        ? {
+            id: user.agency.id,
+            commercialName: user.agency.commercialName,
+            status: user.agency.status,
+          }
+        : null,
+    }));
+  }
 }
 

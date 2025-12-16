@@ -36,6 +36,12 @@ import {
   Cell,
 } from 'recharts'
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/es'
+
+dayjs.extend(relativeTime)
+dayjs.locale('es')
+
 import ArgentinaMap from '../../components/charts/ArgentinaMap'
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6B7280', '#A78BFA', '#F472B6', '#EAB308']

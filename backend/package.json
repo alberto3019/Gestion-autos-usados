@@ -1,7 +1,7 @@
 {
   "name": "dealership-network-backend",
   "version": "1.0.0",
-  "description": "Backend para plataforma SaaS de red de agencias de autos",
+  "description": "Backend para AutoStock360 - Plataforma SaaS de red de agencias de autos",
   "author": "Tu Nombre",
   "private": true,
   "license": "MIT",

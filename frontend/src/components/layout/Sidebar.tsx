@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 flex-shrink-0">
           <h1 className="text-xl font-bold text-primary-600">
-            Red de Agencias
+            AutoStock360
           </h1>
           {/* Botón cerrar solo en móvil */}
           <button

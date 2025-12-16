@@ -1,6 +1,6 @@
-# Backend - Plataforma SaaS para Red de Agencias de Autos
+# Backend - AutoStock360
 
-Backend desarrollado con **NestJS**, **Prisma** y **PostgreSQL** para la plataforma de gestión y búsqueda de vehículos entre agencias.
+Backend desarrollado con **NestJS**, **Prisma** y **PostgreSQL** para AutoStock360, plataforma de gestión y búsqueda de vehículos entre agencias.
 
 ## 🚀 Tecnologías
 

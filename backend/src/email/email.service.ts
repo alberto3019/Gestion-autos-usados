@@ -84,7 +84,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>¡Bienvenido a Red de Agencias de Autos!</h1>
+              <h1>¡Bienvenido a AutoStock360!</h1>
             </div>
             <div class="content">
               <p>Hola ${userName},</p>
@@ -98,14 +98,14 @@ export class EmailService {
               </ul>
               <a href="${this.configService.get('FRONTEND_URL') || 'http://localhost:5173'}" class="button">Acceder a la plataforma</a>
               <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
-              <p>Saludos,<br>El equipo de Red de Agencias de Autos</p>
+              <p>Saludos,<br>El equipo de AutoStock360</p>
             </div>
           </div>
         </body>
       </html>
     `;
 
-    return this.sendEmail(userEmail, 'Bienvenido a Red de Agencias de Autos', html);
+    return this.sendEmail(userEmail, 'Bienvenido a AutoStock360', html);
   }
 
   async sendPasswordResetEmail(userEmail: string, resetToken: string) {
@@ -139,14 +139,14 @@ export class EmailService {
               <div class="warning">
                 <strong>⚠️ Importante:</strong> Este enlace expirará en 1 hora. Si no solicitaste este cambio, ignora este email.
               </div>
-              <p>Saludos,<br>El equipo de Red de Agencias de Autos</p>
+              <p>Saludos,<br>El equipo de AutoStock360</p>
             </div>
           </div>
         </body>
       </html>
     `;
 
-    return this.sendEmail(userEmail, 'Recuperación de Contraseña - Red de Agencias de Autos', html);
+    return this.sendEmail(userEmail, 'Recuperación de Contraseña - AutoStock360', html);
   }
 
   async sendSearchAlertEmail(userEmail: string, userName: string, alertName: string, vehicles: any[]) {
@@ -182,7 +182,7 @@ export class EmailService {
               <p>Hemos encontrado <strong>${vehicles.length}</strong> vehículo(s) que coinciden con tu alerta "<strong>${alertName}</strong>":</p>
               ${vehiclesList}
               <a href="${this.configService.get('FRONTEND_URL') || 'http://localhost:5173'}/search-alerts" class="button">Ver todas mis alertas</a>
-              <p>Saludos,<br>El equipo de Red de Agencias de Autos</p>
+              <p>Saludos,<br>El equipo de AutoStock360</p>
             </div>
           </div>
         </body>
@@ -221,14 +221,14 @@ export class EmailService {
                 <li>Recibir consultas de clientes</li>
               </ul>
               <a href="${this.configService.get('FRONTEND_URL') || 'http://localhost:5173'}" class="button">Acceder a tu cuenta</a>
-              <p>Saludos,<br>El equipo de Red de Agencias de Autos</p>
+              <p>Saludos,<br>El equipo de AutoStock360</p>
             </div>
           </div>
         </body>
       </html>
     `;
 
-    return this.sendEmail(agencyEmail, 'Agencia Aprobada - Red de Agencias de Autos', html);
+    return this.sendEmail(agencyEmail, 'Agencia Aprobada - AutoStock360', html);
   }
 }
 

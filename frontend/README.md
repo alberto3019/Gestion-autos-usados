@@ -1,6 +1,6 @@
-# Frontend - Plataforma SaaS para Red de Agencias de Autos
+# Frontend - AutoStock360
 
-Frontend desarrollado con **React 18**, **TypeScript**, **Vite** y **Tailwind CSS** para la plataforma de gestión y búsqueda de vehículos entre agencias.
+Frontend desarrollado con **React 18**, **TypeScript**, **Vite** y **Tailwind CSS** para AutoStock360, plataforma de gestión y búsqueda de vehículos entre agencias.
 
 ## 🚀 Tecnologías
 

@@ -1,4 +1,4 @@
-# 🚗 Plataforma SaaS para Red de Agencias de Autos
+# 🚗 AutoStock360
 
 Sistema completo B2B para crear una red colaborativa entre agencias de autos, permitiéndoles compartir inventarios, buscar vehículos y contactarse entre sí.
 

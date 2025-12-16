@@ -1,7 +1,7 @@
 {
   "name": "dealership-network-frontend",
   "version": "1.0.0",
-  "description": "Frontend para plataforma SaaS de red de agencias de autos",
+  "description": "Frontend para AutoStock360 - Plataforma SaaS de red de agencias de autos",
   "type": "module",
   "scripts": {
     "dev": "vite",

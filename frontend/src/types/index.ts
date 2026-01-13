@@ -26,6 +26,8 @@ export interface Agency {
   status: 'pending' | 'active' | 'blocked'
   vehicleCount?: number
   userCount?: number
+  subscriptionPlan?: 'basic' | 'premium' | 'enterprise' | null
+  subscriptionActive?: boolean
   createdAt?: string
 }
 

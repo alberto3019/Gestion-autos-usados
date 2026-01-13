@@ -437,6 +437,9 @@ export default function SuperAdminDashboard() {
                           Usuarios
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Plan
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Estado
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -468,6 +471,22 @@ export default function SuperAdminDashboard() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {agency.userCount}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {agency.subscriptionPlan ? (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                agency.subscriptionPlan === 'enterprise' 
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : agency.subscriptionPlan === 'premium'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {agency.subscriptionPlan === 'enterprise' ? 'Enterprise' : 
+                                 agency.subscriptionPlan === 'premium' ? 'Premium' : 'Básico'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">Sin plan</span>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <StatusBadge status={agency.status} />
@@ -567,10 +586,24 @@ export default function SuperAdminDashboard() {
                       <div className="space-y-1 text-sm mb-3">
                         <p className="text-gray-600">{agency.email}</p>
                         <p className="text-gray-600">WhatsApp: {agency.whatsapp}</p>
-                        <div className="flex gap-4 text-xs text-gray-500">
+                        <div className="flex gap-4 text-xs text-gray-500 mb-2">
                           <span>🚗 {agency.vehicleCount} vehículos</span>
                           <span>👥 {agency.userCount} usuarios</span>
                         </div>
+                        {agency.subscriptionPlan && (
+                          <div className="mt-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              agency.subscriptionPlan === 'enterprise' 
+                                ? 'bg-purple-100 text-purple-800'
+                                : agency.subscriptionPlan === 'premium'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              Plan: {agency.subscriptionPlan === 'enterprise' ? 'Enterprise' : 
+                                     agency.subscriptionPlan === 'premium' ? 'Premium' : 'Básico'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         {agency.status === 'pending' && (

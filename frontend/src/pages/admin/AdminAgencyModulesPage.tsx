@@ -34,6 +34,11 @@ export default function AdminAgencyModulesPage() {
       modulesApi.enableModule(agencyId!, module),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agencyModules', agencyId] })
+      alert('Módulo habilitado exitosamente')
+    },
+    onError: (error: any) => {
+      console.error('Error al habilitar módulo:', error)
+      alert(`Error al habilitar módulo: ${error?.response?.data?.message || error.message || 'Error desconocido'}`)
     },
   })
 
@@ -42,6 +47,11 @@ export default function AdminAgencyModulesPage() {
       modulesApi.disableModule(agencyId!, module),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agencyModules', agencyId] })
+      alert('Módulo deshabilitado exitosamente')
+    },
+    onError: (error: any) => {
+      console.error('Error al deshabilitar módulo:', error)
+      alert(`Error al deshabilitar módulo: ${error?.response?.data?.message || error.message || 'Error desconocido'}`)
     },
   })
 
@@ -63,15 +73,23 @@ export default function AdminAgencyModulesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {allModules.map((module) => {
           const isEnabled = enabledModules.includes(module)
+          const moduleData = modulesData?.modules.find(m => m.module === module)
           return (
             <div
               key={module}
-              className={`card ${isEnabled ? 'border-green-500' : 'border-gray-200'}`}
+              className={`card ${isEnabled ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">{MODULE_NAMES[module]}</h3>
-                  <p className="text-sm text-gray-500">{module}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">{MODULE_NAMES[module]}</h3>
+                    {isEnabled && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                        Habilitado
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{module}</p>
                 </div>
                 <Button
                   onClick={() =>
@@ -82,6 +100,10 @@ export default function AdminAgencyModulesPage() {
                   variant={isEnabled ? 'danger' : 'primary'}
                   disabled={
                     enableMutation.isPending || disableMutation.isPending
+                  }
+                  isLoading={
+                    (enableMutation.isPending && !isEnabled) ||
+                    (disableMutation.isPending && isEnabled)
                   }
                 >
                   {isEnabled ? 'Deshabilitar' : 'Habilitar'}

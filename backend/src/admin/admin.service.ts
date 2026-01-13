@@ -35,6 +35,12 @@ export class AdminService {
               users: true,
             },
           },
+          subscription: {
+            select: {
+              plan: true,
+              isActive: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -55,6 +61,8 @@ export class AdminService {
       status: agency.status,
       vehicleCount: agency._count.vehicles,
       userCount: agency._count.users,
+      subscriptionPlan: agency.subscription?.plan || null,
+      subscriptionActive: agency.subscription?.isActive || false,
       createdAt: agency.createdAt,
     }));
 

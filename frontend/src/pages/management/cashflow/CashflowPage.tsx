@@ -6,6 +6,7 @@ import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 import Pagination from '../../../components/common/Pagination'
 import { formatNumber } from '../../../utils/format'
+import { translateCategory } from '../../../utils/categoryTranslations'
 
 export default function CashflowPage() {
   const queryClient = useQueryClient()
@@ -70,6 +71,8 @@ export default function CashflowPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vehículo</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
@@ -85,7 +88,17 @@ export default function CashflowPage() {
                         {transaction.type === 'income' ? 'Ingreso' : 'Egreso'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm">{transaction.category}</td>
+                    <td className="px-4 py-3 text-sm">{translateCategory(transaction.category)}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {transaction.vehicle ? (
+                        <span className="font-medium">{transaction.vehicle.licensePlate}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {transaction.description || <span className="text-gray-400">-</span>}
+                    </td>
                     <td className={`px-4 py-3 text-sm font-semibold ${
                       transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                     }`}>

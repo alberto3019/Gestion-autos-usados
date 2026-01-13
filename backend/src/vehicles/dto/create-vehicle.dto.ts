@@ -51,8 +51,8 @@ export class CreateVehicleDto {
   color?: string;
 
   @IsString()
-  @IsOptional()
-  licensePlate?: string;
+  @IsNotEmpty()
+  licensePlate: string;
 
   @IsBoolean()
   @IsOptional()

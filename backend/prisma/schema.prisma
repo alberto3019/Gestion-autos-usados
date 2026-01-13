@@ -200,7 +200,7 @@ model Vehicle {
   fuelType         FuelType         @map("fuel_type")
   transmission     Transmission
   color            String?
-  licensePlate     String?          @map("license_plate")
+  licensePlate     String           @unique @map("license_plate")
   hideLicensePlate Boolean          @default(false) @map("hide_license_plate")
   price            Decimal          @db.Decimal(15, 2)
   currency         Currency         @default(ARS)
@@ -232,6 +232,7 @@ model Vehicle {
   @@index([status])
   @@index([year])
   @@index([price])
+  @@index([licensePlate])
   @@index([createdAt(sort: Desc)])
   @@map("vehicles")
 }

@@ -6,6 +6,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { BalanceHelperService } from '../balances/balance-helper.service';
 import { SalesStatsService } from '../sales-stats/sales-stats.service';
 import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
+import { translateCategory } from './utils/category-translations';
 
 @Injectable()
 export class CashflowService {
@@ -262,6 +263,7 @@ export class CashflowService {
       },
       byCategory: Object.entries(byCategory).map(([category, values]) => ({
         category,
+        categoryLabel: translateCategory(category as TransactionCategory),
         income: values.income.toNumber(),
         expense: values.expense.toNumber(),
         net: values.income.minus(values.expense).toNumber(),

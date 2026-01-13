@@ -115,7 +115,7 @@ export default function CashflowReportPage() {
                   <tbody className="divide-y divide-gray-200">
                     {report.byCategory.map((item: any) => (
                       <tr key={item.category}>
-                        <td className="px-4 py-2">{item.category}</td>
+                        <td className="px-4 py-2">{item.categoryLabel || translateCategory(item.category)}</td>
                         <td className="px-4 py-2 text-right text-green-600">
                           {formatNumber(item.income)}
                         </td>

@@ -43,7 +43,7 @@ export interface Vehicle {
   fuelType: 'gasoline' | 'diesel' | 'hybrid' | 'electric' | 'other'
   transmission: 'manual' | 'automatic' | 'cvt' | 'other'
   color?: string
-  licensePlate?: string
+  licensePlate: string
   hideLicensePlate: boolean
   price: number
   currency: 'ARS' | 'USD' | 'EUR'

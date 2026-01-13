@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
@@ -113,6 +114,15 @@ export class VehiclesService {
       throw new ForbiddenException(
         'No puedes crear vehículos mientras tu agencia esté bloqueada o pendiente de aprobación',
       );
+    }
+
+    // Verificar que la patente no exista
+    const existingVehicle = await this.prisma.vehicle.findUnique({
+      where: { licensePlate: dto.licensePlate },
+    });
+
+    if (existingVehicle) {
+      throw new ConflictException('Ya existe un vehículo con esta patente');
     }
 
     const vehicle = await this.prisma.vehicle.create({
@@ -262,6 +272,17 @@ export class VehiclesService {
     // Normalizar color si viene en el DTO
     if (vehicleData.color !== undefined) {
       vehicleData.color = this.normalizeColor(vehicleData.color);
+    }
+
+    // Si se está actualizando la patente, verificar que no exista en otro vehículo
+    if (vehicleData.licensePlate && vehicleData.licensePlate !== vehicle.licensePlate) {
+      const existingVehicle = await this.prisma.vehicle.findUnique({
+        where: { licensePlate: vehicleData.licensePlate },
+      });
+
+      if (existingVehicle) {
+        throw new ConflictException('Ya existe un vehículo con esta patente');
+      }
     }
 
     // Actualizar datos del vehículo

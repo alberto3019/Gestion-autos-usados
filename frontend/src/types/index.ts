@@ -5,6 +5,7 @@ export interface User {
   lastName: string
   role: 'super_admin' | 'agency_admin' | 'agency_user'
   agency: Agency | null
+  commissionPercentage?: number | null
 }
 
 export interface Agency {
@@ -288,8 +289,14 @@ export interface VehicleBalance {
   id: string
   vehicleId: string
   purchasePrice: number
+  purchaseCurrency?: 'ARS' | 'USD' | 'EUR'
+  purchaseExchangeRate?: number
   investment: number
+  investmentCurrency?: 'ARS' | 'USD' | 'EUR'
+  investmentExchangeRate?: number
   salePrice?: number
+  saleCurrency?: 'ARS' | 'USD' | 'EUR'
+  saleExchangeRate?: number
   profit?: number
   profitMargin?: number
   createdAt: string

@@ -5,6 +5,7 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
+  IsDecimal,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -30,5 +31,9 @@ export class CreateUserDto {
   })
   @IsOptional()
   role?: string;
+
+  @IsDecimal()
+  @IsOptional()
+  commissionPercentage?: string;
 }
 

@@ -42,8 +42,12 @@ export class BalanceHelperService {
     amount: Decimal,
     currency: Currency = 'ARS',
   ) {
+    // Obtener tipo de cambio del día
+    const exchangeRate = await this.exchangeRateService.getUsdRate();
+    
     // Convertir a ARS antes de guardar
     const amountInArs = await this.convertToArs(amount, currency);
+    
     // Obtener o crear el balance
     let balance = await this.prisma.vehicleBalance.findUnique({
       where: { vehicleId },
@@ -59,12 +63,14 @@ export class BalanceHelperService {
       });
     }
 
-    // Si es compra de vehículo, actualizar purchasePrice
+    // Si es compra de vehículo, actualizar purchasePrice con tipo de cambio
     if (category === 'vehicle_purchase') {
       await this.prisma.vehicleBalance.update({
         where: { vehicleId },
         data: {
           purchasePrice: amountInArs,
+          purchaseCurrency: currency,
+          purchaseExchangeRate: currency !== 'ARS' ? exchangeRate : null,
         },
       });
     }
@@ -79,6 +85,8 @@ export class BalanceHelperService {
         where: { vehicleId },
         data: {
           investment: newInvestment,
+          investmentCurrency: currency,
+          investmentExchangeRate: currency !== 'ARS' ? exchangeRate : null,
         },
       });
     }
@@ -91,8 +99,12 @@ export class BalanceHelperService {
    * Actualiza el salePrice del balance cuando se crea una venta
    */
   async updateBalanceFromSale(vehicleId: string, salePrice: Decimal, currency: Currency = 'ARS') {
+    // Obtener tipo de cambio del día
+    const exchangeRate = await this.exchangeRateService.getUsdRate();
+    
     // Convertir a ARS antes de guardar
     const salePriceInArs = await this.convertToArs(salePrice, currency);
+    
     // Obtener o crear el balance
     let balance = await this.prisma.vehicleBalance.findUnique({
       where: { vehicleId },
@@ -114,6 +126,8 @@ export class BalanceHelperService {
         where: { vehicleId },
         data: {
           salePrice: salePriceInArs,
+          saleCurrency: currency,
+          saleExchangeRate: currency !== 'ARS' ? exchangeRate : null,
         },
       });
     }

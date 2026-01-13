@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -24,6 +25,7 @@ export class UsersService {
         lastName: true,
         role: true,
         isActive: true,
+        commissionPercentage: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -54,6 +56,9 @@ export class UsersService {
         lastName: dto.lastName,
         role: (dto.role as UserRole) || UserRole.agency_user,
         isActive: true,
+        commissionPercentage: dto.commissionPercentage 
+          ? new Decimal(dto.commissionPercentage)
+          : null,
       },
       select: {
         id: true,
@@ -62,6 +67,7 @@ export class UsersService {
         lastName: true,
         role: true,
         isActive: true,
+        commissionPercentage: true,
         createdAt: true,
       },
     });
@@ -108,6 +114,9 @@ export class UsersService {
         lastName: dto.lastName,
         role: dto.role as UserRole,
         isActive: dto.isActive,
+        commissionPercentage: dto.commissionPercentage !== undefined
+          ? (dto.commissionPercentage ? new Decimal(dto.commissionPercentage) : null)
+          : undefined,
       },
       select: {
         id: true,
@@ -116,6 +125,7 @@ export class UsersService {
         lastName: true,
         role: true,
         isActive: true,
+        commissionPercentage: true,
         createdAt: true,
       },
     });

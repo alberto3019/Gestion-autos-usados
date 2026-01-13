@@ -31,5 +31,9 @@ export class CreateTransactionDto {
   @IsString()
   @IsOptional()
   vehicleId?: string;
+
+  @IsString()
+  @IsOptional()
+  sellerId?: string;
 }
 

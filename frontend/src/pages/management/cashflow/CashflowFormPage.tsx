@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { cashflowApi } from '../../../api/cashflow'
 import { vehiclesApi } from '../../../api/vehicles'
+import { usersApi } from '../../../api/users'
 import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 
@@ -18,12 +19,20 @@ export default function CashflowFormPage() {
     description: '',
     date: new Date().toISOString().split('T')[0],
     vehicleId: '',
+    sellerId: '',
   })
 
   // Cargar vehículos para el selector
   const { data: vehicles } = useQuery({
     queryKey: ['myVehicles'],
     queryFn: () => vehiclesApi.getMyVehicles({ page: 1, limit: 1000 }),
+  })
+
+  // Cargar usuarios para el selector de vendedor (solo si es venta)
+  const { data: users } = useQuery({
+    queryKey: ['agencyUsers'],
+    queryFn: usersApi.getAgencyUsers,
+    enabled: formData.category === 'vehicle_sale',
   })
 
   // Determinar si se necesita seleccionar un vehículo
@@ -44,7 +53,17 @@ export default function CashflowFormPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createMutation.mutate(formData as any)
+    const submitData: any = {
+      type: formData.type,
+      category: formData.category,
+      amount: formData.amount,
+      currency: formData.currency,
+      description: formData.description || undefined,
+      date: formData.date,
+      vehicleId: formData.vehicleId || undefined,
+      sellerId: formData.sellerId || undefined,
+    }
+    createMutation.mutate(submitData)
   }
 
   return (
@@ -145,6 +164,27 @@ export default function CashflowFormPage() {
                 {vehicles?.data.map((vehicle) => (
                   <option key={vehicle.id} value={vehicle.id}>
                     {vehicle.brand} {vehicle.model} ({vehicle.year}) - {vehicle.price} {vehicle.currency}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {formData.category === 'vehicle_sale' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vendedor (opcional - para generar comisión)
+              </label>
+              <select
+                value={formData.sellerId}
+                onChange={(e) => setFormData({ ...formData, sellerId: e.target.value })}
+                className="input"
+              >
+                <option value="">Sin vendedor</option>
+                {users?.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName}
+                    {user.commissionPercentage ? ` (${user.commissionPercentage}%)` : ''}
                   </option>
                 ))}
               </select>

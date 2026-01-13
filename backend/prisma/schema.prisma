@@ -491,15 +491,21 @@ model Financing {
 }
 
 model VehicleBalance {
-  id            String   @id @default(uuid())
-  vehicleId     String   @unique @map("vehicle_id")
-  purchasePrice Decimal  @map("purchase_price") @db.Decimal(15, 2)
-  investment    Decimal  @db.Decimal(15, 2)
-  salePrice     Decimal? @map("sale_price") @db.Decimal(15, 2)
-  profit        Decimal? @db.Decimal(15, 2)
-  profitMargin  Decimal? @map("profit_margin") @db.Decimal(5, 2)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid())
+  vehicleId     String    @unique @map("vehicle_id")
+  purchasePrice Decimal   @map("purchase_price") @db.Decimal(15, 2)
+  purchaseCurrency Currency? @map("purchase_currency") @default(ARS)
+  purchaseExchangeRate Decimal? @map("purchase_exchange_rate") @db.Decimal(10, 2)
+  investment    Decimal   @db.Decimal(15, 2)
+  investmentCurrency Currency? @map("investment_currency") @default(ARS)
+  investmentExchangeRate Decimal? @map("investment_exchange_rate") @db.Decimal(10, 2)
+  salePrice     Decimal?  @map("sale_price") @db.Decimal(15, 2)
+  saleCurrency  Currency? @map("sale_currency") @default(ARS)
+  saleExchangeRate Decimal? @map("sale_exchange_rate") @db.Decimal(10, 2)
+  profit        Decimal?  @db.Decimal(15, 2)
+  profitMargin  Decimal?  @map("profit_margin") @db.Decimal(5, 2)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 

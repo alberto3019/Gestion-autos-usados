@@ -112,12 +112,15 @@ export default function UsersManagementPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Rol
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                  Acciones
-                </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Comisión
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Estado
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                    Acciones
+                  </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -140,6 +143,21 @@ export default function UsersManagementPage() {
                       <option value="agency_admin">Administrador</option>
                       <option value="agency_user">Usuario</option>
                     </select>
+                  </td>
+                  <td className="px-6 py-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={user.commissionPercentage || ''}
+                      onChange={(e) => updateMutation.mutate({
+                        id: user.id,
+                        data: { commissionPercentage: e.target.value ? parseFloat(e.target.value) : null },
+                      })}
+                      placeholder="%"
+                      className="text-xs px-2 py-1 w-20 rounded border border-gray-300 focus:ring-2 focus:ring-primary-500"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <button
@@ -256,6 +274,16 @@ export default function UsersManagementPage() {
                   <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
                 )}
               </div>
+
+              <Input
+                label="Porcentaje de Comisión (%)"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                {...register('commissionPercentage')}
+                placeholder="Ej: 5.5"
+              />
 
               <div className="flex justify-end space-x-3 pt-4">
                 <Button

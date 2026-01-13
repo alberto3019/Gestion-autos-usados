@@ -4,12 +4,14 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionType, TransactionCategory } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { BalanceHelperService } from '../balances/balance-helper.service';
+import { SalesStatsService } from '../sales-stats/sales-stats.service';
 
 @Injectable()
 export class CashflowService {
   constructor(
     private prisma: PrismaService,
     private balanceHelper: BalanceHelperService,
+    private salesStatsService: SalesStatsService,
   ) {}
 
   async createTransaction(agencyId: string, dto: CreateTransactionDto) {
@@ -43,6 +45,27 @@ export class CashflowService {
       } catch (error) {
         // Log error but don't fail the transaction creation
         console.error('Error updating balance from cashflow:', error);
+      }
+    }
+
+    // Si es una venta de vehículo y tiene vendedor, crear Sale automáticamente
+    if (
+      dto.category === TransactionCategory.vehicle_sale &&
+      dto.vehicleId &&
+      dto.sellerId
+    ) {
+      try {
+        await this.salesStatsService.createSale(agencyId, {
+          vehicleId: dto.vehicleId,
+          sellerId: dto.sellerId,
+          salePrice: dto.amount,
+          currency: dto.currency || 'ARS',
+          saleDate: dto.date,
+          notes: dto.description,
+        });
+      } catch (error) {
+        // Log error but don't fail the transaction creation
+        console.error('Error creating sale from cashflow:', error);
       }
     }
 

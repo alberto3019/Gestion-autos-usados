@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsEnum, IsBoolean, IsOptional, IsDecimal } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -18,5 +18,9 @@ export class UpdateUserDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsDecimal()
+  @IsOptional()
+  commissionPercentage?: string;
 }
 

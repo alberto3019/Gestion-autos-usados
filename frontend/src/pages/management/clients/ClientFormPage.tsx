@@ -80,7 +80,8 @@ export default function ClientFormPage() {
     },
     onError: (error: any) => {
       console.error('Error creating client:', error)
-      alert(error?.response?.data?.message || 'Error al crear cliente')
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear cliente'
+      alert(errorMessage)
     },
   })
 
@@ -138,16 +139,18 @@ export default function ClientFormPage() {
     e.preventDefault()
     
     try {
-      // Si hay vehículos nuevos para crear, crearlos primero
+      let finalCurrentVehicleId = formData.currentVehicleId
+      let finalDesiredVehicleId = formData.desiredVehicleId
+
+      // Si hay vehículos nuevos para crear, crearlos primero y obtener sus IDs
       if (showCreateCurrentVehicle && newCurrentVehicle.brand && newCurrentVehicle.model) {
-        await createCurrentVehicleMutation.mutateAsync(newCurrentVehicle)
+        const newVehicle = await createCurrentVehicleMutation.mutateAsync(newCurrentVehicle)
+        finalCurrentVehicleId = newVehicle.id
       }
       if (showCreateDesiredVehicle && newDesiredVehicle.brand && newDesiredVehicle.model) {
-        await createDesiredVehicleMutation.mutateAsync(newDesiredVehicle)
+        const newVehicle = await createDesiredVehicleMutation.mutateAsync(newDesiredVehicle)
+        finalDesiredVehicleId = newVehicle.id
       }
-
-      // Esperar un momento para que se actualicen los IDs
-      await new Promise(resolve => setTimeout(resolve, 100))
 
       // Preparar datos para enviar
       const submitData: any = {
@@ -159,19 +162,20 @@ export default function ClientFormPage() {
         documentNumber: formData.documentNumber || undefined,
         address: formData.address || undefined,
         notes: formData.notes || undefined,
-        currentVehicleId: formData.currentVehicleId || undefined,
-        desiredVehicleId: formData.desiredVehicleId || undefined,
+        currentVehicleId: finalCurrentVehicleId || undefined,
+        desiredVehicleId: finalDesiredVehicleId || undefined,
         alertEnabled: formData.alertEnabled,
         alertDays: formData.alertDays,
       }
 
       if (isEditing) {
-        updateMutation.mutate(submitData)
+        await updateMutation.mutateAsync(submitData)
       } else {
-        createMutation.mutate(submitData)
+        await createMutation.mutateAsync(submitData)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleSubmit:', error)
+      alert(error?.response?.data?.message || 'Error al crear cliente')
     }
   }
 

@@ -7,6 +7,7 @@ export interface AgencyUser {
   lastName: string
   role: 'agency_admin' | 'agency_user'
   isActive: boolean
+  commissionPercentage?: number | null
   createdAt: string
 }
 
@@ -16,6 +17,7 @@ export interface CreateUserData {
   firstName: string
   lastName: string
   role?: 'agency_admin' | 'agency_user'
+  commissionPercentage?: number | null
 }
 
 export interface UpdateUserData {
@@ -23,6 +25,7 @@ export interface UpdateUserData {
   lastName?: string
   role?: 'agency_admin' | 'agency_user'
   isActive?: boolean
+  commissionPercentage?: number | null
 }
 
 export const usersApi = {

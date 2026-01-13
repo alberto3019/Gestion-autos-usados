@@ -87,13 +87,37 @@ export default function BalancesPage() {
                     {balance.vehicle?.brand} {balance.vehicle?.model}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {formatNumber(balance.purchasePrice)}
+                    <div>{formatNumber(balance.purchasePrice)} ARS</div>
+                    {balance.purchaseCurrency && balance.purchaseCurrency !== 'ARS' && balance.purchaseExchangeRate && (
+                      <div className="text-xs text-gray-500">
+                        ≈ {formatNumber(balance.purchasePrice / balance.purchaseExchangeRate)} {balance.purchaseCurrency}
+                        <span className="ml-1">(TC: {balance.purchaseExchangeRate.toFixed(2)})</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {formatNumber(balance.investment)}
+                    <div>{formatNumber(balance.investment)} ARS</div>
+                    {balance.investmentCurrency && balance.investmentCurrency !== 'ARS' && balance.investmentExchangeRate && (
+                      <div className="text-xs text-gray-500">
+                        ≈ {formatNumber(balance.investment / balance.investmentExchangeRate)} {balance.investmentCurrency}
+                        <span className="ml-1">(TC: {balance.investmentExchangeRate.toFixed(2)})</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {balance.salePrice ? formatNumber(balance.salePrice) : '-'}
+                    {balance.salePrice ? (
+                      <>
+                        <div>{formatNumber(balance.salePrice)} ARS</div>
+                        {balance.saleCurrency && balance.saleCurrency !== 'ARS' && balance.saleExchangeRate && (
+                          <div className="text-xs text-gray-500">
+                            ≈ {formatNumber(balance.salePrice / balance.saleExchangeRate)} {balance.saleCurrency}
+                            <span className="ml-1">(TC: {balance.saleExchangeRate.toFixed(2)})</span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      '-'
+                    )}
                   </td>
                   <td className={`px-4 py-3 text-right font-semibold ${
                     (balance.profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'

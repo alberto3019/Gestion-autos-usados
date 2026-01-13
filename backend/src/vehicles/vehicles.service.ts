@@ -116,13 +116,15 @@ export class VehiclesService {
       );
     }
 
-    // Verificar que la patente no exista
-    const existingVehicle = await this.prisma.vehicle.findUnique({
-      where: { licensePlate: dto.licensePlate },
-    });
+    // Verificar que la patente no exista (solo si se proporciona)
+    if (dto.licensePlate) {
+      const existingVehicle = await this.prisma.vehicle.findUnique({
+        where: { licensePlate: dto.licensePlate },
+      });
 
-    if (existingVehicle) {
-      throw new ConflictException('Ya existe un vehículo con esta patente');
+      if (existingVehicle) {
+        throw new ConflictException('Ya existe un vehículo con esta patente');
+      }
     }
 
     const vehicle = await this.prisma.vehicle.create({
@@ -280,7 +282,7 @@ export class VehiclesService {
         where: { licensePlate: vehicleData.licensePlate },
       });
 
-      if (existingVehicle) {
+      if (existingVehicle && existingVehicle.id !== vehicleId) {
         throw new ConflictException('Ya existe un vehículo con esta patente');
       }
     }

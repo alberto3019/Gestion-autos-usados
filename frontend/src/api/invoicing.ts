@@ -17,13 +17,13 @@ export const invoicingApi = {
     return response.data
   },
 
-  createInvoice: async (
-    data: any,
-    vehicleId?: string
-  ): Promise<Invoice> => {
-    const response = await apiClient.post('/invoicing', data, {
-      params: vehicleId ? { vehicleId } : {},
-    })
+  createInvoice: async (data: any): Promise<Invoice> => {
+    const response = await apiClient.post('/invoicing', data)
+    return response.data
+  },
+
+  getSoldVehicles: async (): Promise<any[]> => {
+    const response = await apiClient.get('/invoicing/sold-vehicles')
     return response.data
   },
 

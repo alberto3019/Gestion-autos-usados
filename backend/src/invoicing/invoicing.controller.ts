@@ -33,6 +33,13 @@ export class InvoicingController {
     return this.invoicingService.getAgencyAfipSettings(req.user.agencyId);
   }
 
+  @Get('sold-vehicles')
+  @RequireModulePermission(ManagementModule.invoicing_afip)
+  @Roles('agency_admin', 'agency_user')
+  async getSoldVehicles(@Request() req) {
+    return this.invoicingService.getSoldVehicles(req.user.agencyId);
+  }
+
   @Patch('afip-settings')
   @RequireModulePermission(ManagementModule.invoicing_afip)
   @Roles('agency_admin')
@@ -55,16 +62,8 @@ export class InvoicingController {
   @Post()
   @RequireModulePermission(ManagementModule.invoicing_afip)
   @Roles('agency_admin', 'agency_user')
-  async createInvoice(
-    @Request() req,
-    @Body() dto: CreateInvoiceDto,
-    @Query('vehicleId') vehicleId?: string,
-  ) {
-    return this.invoicingService.createInvoice(
-      req.user.agencyId,
-      dto,
-      vehicleId,
-    );
+  async createInvoice(@Request() req, @Body() dto: CreateInvoiceDto) {
+    return this.invoicingService.createInvoice(req.user.agencyId, dto);
   }
 
   @Get()

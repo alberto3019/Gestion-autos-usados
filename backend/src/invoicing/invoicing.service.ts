@@ -69,7 +69,7 @@ export class InvoicingService {
     };
   }
 
-  async createInvoice(agencyId: string, dto: CreateInvoiceDto, vehicleId?: string) {
+  async createInvoice(agencyId: string, dto: CreateInvoiceDto) {
     const agency = await this.prisma.agency.findUnique({
       where: { id: agencyId },
     });
@@ -82,6 +82,38 @@ export class InvoicingService {
       throw new BadRequestException(
         'La agencia debe configurar sus credenciales AFIP primero',
       );
+    }
+
+    // Si hay vehicleId, verificar que el vehículo esté vendido y obtener datos del cliente
+    let saleData = null;
+    if (dto.vehicleId) {
+      const vehicle = await this.prisma.vehicle.findFirst({
+        where: {
+          id: dto.vehicleId,
+          agencyId,
+          status: 'sold',
+        },
+        include: {
+          sales: {
+            take: 1,
+            orderBy: { saleDate: 'desc' },
+            include: {
+              client: true,
+            },
+          },
+        },
+      });
+
+      if (!vehicle) {
+        throw new NotFoundException(
+          'Vehículo no encontrado o no está vendido',
+        );
+      }
+
+      // Si hay una venta asociada, usar datos del cliente de la venta
+      if (vehicle.sales && vehicle.sales.length > 0) {
+        saleData = vehicle.sales[0];
+      }
     }
 
     // Calculate totals
@@ -123,13 +155,19 @@ export class InvoicingService {
         invoiceNumber,
         clientName: dto.clientName,
         clientTaxId: dto.clientTaxId,
+        clientEmail: dto.clientEmail,
+        clientPhone: dto.clientPhone,
+        clientAddress: dto.clientAddress,
+        issueDate: dto.issueDate ? new Date(dto.issueDate) : new Date(),
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+        notes: dto.notes,
         items: dto.items,
         subtotal,
         taxes,
         total,
         currency: dto.currency || 'ARS',
         status: 'draft',
-        vehicleId,
+        vehicleId: dto.vehicleId,
       },
       include: {
         vehicle: {
@@ -139,9 +177,9 @@ export class InvoicingService {
     });
 
     // Actualizar balance automáticamente si hay vehicleId
-    if (vehicleId) {
+    if (dto.vehicleId) {
       try {
-        await this.balanceHelper.updateBalanceFromInvoice(vehicleId, total);
+        await this.balanceHelper.updateBalanceFromInvoice(dto.vehicleId, total);
       } catch (error) {
         // Log error but don't fail the invoice creation
         console.error('Error updating balance from invoice:', error);
@@ -225,6 +263,55 @@ export class InvoicingService {
     });
 
     return { message: 'Factura eliminada exitosamente' };
+  }
+
+  async getSoldVehicles(agencyId: string) {
+    const vehicles = await this.prisma.vehicle.findMany({
+      where: {
+        agencyId,
+        status: 'sold',
+      },
+      include: {
+        photos: { take: 1, orderBy: { order: 'asc' } },
+        sales: {
+          take: 1,
+          orderBy: { saleDate: 'desc' },
+          include: {
+            client: true,
+            seller: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return vehicles.map((vehicle) => ({
+      id: vehicle.id,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      year: vehicle.year,
+      price: vehicle.price,
+      currency: vehicle.currency,
+      photo: vehicle.photos[0]?.url,
+      sale: vehicle.sales[0]
+        ? {
+            id: vehicle.sales[0].id,
+            salePrice: vehicle.sales[0].salePrice.toNumber(),
+            saleDate: vehicle.sales[0].saleDate,
+            client: vehicle.sales[0].client
+              ? {
+                  id: vehicle.sales[0].client.id,
+                  firstName: vehicle.sales[0].client.firstName,
+                  lastName: vehicle.sales[0].client.lastName,
+                  email: vehicle.sales[0].client.email,
+                  phone: vehicle.sales[0].client.phone,
+                  documentNumber: vehicle.sales[0].client.documentNumber,
+                  address: vehicle.sales[0].client.address,
+                }
+              : null,
+          }
+        : null,
+    }));
   }
 }
 

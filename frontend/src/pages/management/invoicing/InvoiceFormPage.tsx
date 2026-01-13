@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { invoicingApi } from '../../../api/invoicing'
 import Button from '../../../components/common/Button'
@@ -13,13 +13,55 @@ export default function InvoiceFormPage() {
     type: 'A' as 'A' | 'B' | 'C',
     clientName: '',
     clientTaxId: '',
+    clientEmail: '',
+    clientPhone: '',
+    clientAddress: '',
+    issueDate: new Date().toISOString().split('T')[0],
+    dueDate: '',
+    notes: '',
     items: [{ description: '', quantity: 1, unitPrice: 0 }],
+    vehicleId: '',
   })
+
+  // Cargar vehículos vendidos
+  const { data: soldVehicles } = useQuery({
+    queryKey: ['soldVehicles'],
+    queryFn: invoicingApi.getSoldVehicles,
+  })
+
+  // Cuando se selecciona un vehículo vendido, pre-llenar datos
+  useEffect(() => {
+    if (formData.vehicleId && soldVehicles) {
+      const selectedVehicle = soldVehicles.find(
+        (v) => v.id === formData.vehicleId,
+      )
+      if (selectedVehicle?.sale?.client) {
+        const client = selectedVehicle.sale.client
+        setFormData((prev) => ({
+          ...prev,
+          clientName: `${client.firstName} ${client.lastName}`,
+          clientTaxId: client.documentNumber || prev.clientTaxId,
+          clientEmail: client.email || prev.clientEmail,
+          clientPhone: client.phone || prev.clientPhone,
+          clientAddress: client.address || prev.clientAddress,
+          // Pre-llenar el primer item con el vehículo
+          items: [
+            {
+              description: `${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.year})`,
+              quantity: 1,
+              unitPrice: selectedVehicle.sale.salePrice,
+            },
+          ],
+        }))
+      }
+    }
+  }, [formData.vehicleId, soldVehicles])
 
   const createMutation = useMutation({
     mutationFn: (data: any) => invoicingApi.createInvoice(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ['soldVehicles'] })
       navigate('/management/invoicing')
     },
   })
@@ -48,6 +90,27 @@ export default function InvoiceFormPage() {
 
       <form onSubmit={handleSubmit} className="card max-w-3xl">
         <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Vehículo Vendido (opcional)
+            </label>
+            <select
+              value={formData.vehicleId}
+              onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
+              className="input"
+            >
+              <option value="">Seleccionar vehículo vendido (opcional)</option>
+              {soldVehicles?.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.brand} {vehicle.model} ({vehicle.year}) - Vendido: {new Date(vehicle.sale?.saleDate || '').toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Si seleccionas un vehículo vendido, se pre-llenarán los datos del cliente y el vehículo
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -86,6 +149,66 @@ export default function InvoiceFormPage() {
                 value={formData.clientTaxId}
                 onChange={(e) => setFormData({ ...formData, clientTaxId: e.target.value })}
                 required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email del Cliente
+              </label>
+              <Input
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Teléfono del Cliente
+              </label>
+              <Input
+                value={formData.clientPhone}
+                onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Dirección del Cliente
+            </label>
+            <textarea
+              value={formData.clientAddress}
+              onChange={(e) => setFormData({ ...formData, clientAddress: e.target.value })}
+              className="input"
+              rows={2}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha de Emisión *
+              </label>
+              <Input
+                type="date"
+                value={formData.issueDate}
+                onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha de Vencimiento
+              </label>
+              <Input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
               />
             </div>
           </div>
@@ -132,6 +255,19 @@ export default function InvoiceFormPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Notas
+            </label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="input"
+              rows={3}
+              placeholder="Notas adicionales sobre la factura..."
+            />
           </div>
 
           <div className="flex gap-2">

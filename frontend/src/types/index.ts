@@ -307,6 +307,12 @@ export interface Invoice {
   caeExpirationDate?: string
   clientName: string
   clientTaxId: string
+  clientEmail?: string
+  clientPhone?: string
+  clientAddress?: string
+  issueDate?: string
+  dueDate?: string
+  notes?: string
   items: Array<{
     description: string
     quantity: number

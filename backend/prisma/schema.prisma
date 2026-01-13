@@ -516,6 +516,12 @@ model Invoice {
   caeExpirationDate DateTime?   @map("cae_expiration_date")
   clientName        String      @map("client_name")
   clientTaxId       String      @map("client_tax_id")
+  clientEmail       String?     @map("client_email")
+  clientPhone       String?     @map("client_phone")
+  clientAddress     String?     @map("client_address") @db.Text
+  issueDate         DateTime?   @map("issue_date")
+  dueDate           DateTime?   @map("due_date")
+  notes             String?     @db.Text
   items             Json
   subtotal          Decimal     @db.Decimal(15, 2)
   taxes             Decimal     @db.Decimal(15, 2)

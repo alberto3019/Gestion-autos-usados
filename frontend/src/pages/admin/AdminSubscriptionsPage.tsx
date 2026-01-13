@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { adminApi } from '../../api/admin'
@@ -11,19 +11,31 @@ export default function AdminSubscriptionsPage() {
   const queryClient = useQueryClient()
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium' | 'enterprise'>('basic')
 
-  const { data: modulesData } = useQuery({
+  const { data: modulesData, isLoading } = useQuery({
     queryKey: ['agencyModules', agencyId],
     queryFn: () => adminApi.getAgencyModules(agencyId!),
     enabled: !!agencyId,
   })
+
+  // Inicializar el plan seleccionado con el plan actual
+  useEffect(() => {
+    if (modulesData?.subscription?.plan) {
+      setSelectedPlan(modulesData.subscription.plan as 'basic' | 'premium' | 'enterprise')
+    }
+  }, [modulesData?.subscription?.plan])
 
   const updateMutation = useMutation({
     mutationFn: (plan: 'basic' | 'premium' | 'enterprise') =>
       adminApi.updateAgencySubscription(agencyId!, { plan }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agencyModules', agencyId] })
+      queryClient.invalidateQueries({ queryKey: ['adminAgencies'] })
       alert('Plan actualizado exitosamente')
-      navigate('/admin')
+      navigate('/dashboard')
+    },
+    onError: (error: any) => {
+      console.error('Error al actualizar plan:', error)
+      alert(`Error al actualizar plan: ${error?.response?.data?.message || error.message || 'Error desconocido'}`)
     },
   })
 
@@ -39,10 +51,23 @@ export default function AdminSubscriptionsPage() {
 
       <div className="card mb-6">
         <h2 className="text-lg font-semibold mb-4">Plan Actual</h2>
-        {modulesData?.subscription && (
-          <p className="text-gray-700">
-            Plan: <span className="font-semibold">{modulesData.subscription.plan}</span>
-          </p>
+        {isLoading ? (
+          <p className="text-gray-500">Cargando...</p>
+        ) : modulesData?.subscription ? (
+          <div>
+            <p className="text-gray-700 mb-2">
+              Plan: <span className="font-semibold capitalize">{modulesData.subscription.plan}</span>
+            </p>
+            <p className="text-sm text-gray-500">
+              Estado: {modulesData.subscription.isActive ? (
+                <span className="text-green-600 font-medium">Activo</span>
+              ) : (
+                <span className="text-red-600 font-medium">Inactivo</span>
+              )}
+            </p>
+          </div>
+        ) : (
+          <p className="text-gray-500">No hay plan asignado</p>
         )}
       </div>
 
@@ -65,7 +90,8 @@ export default function AdminSubscriptionsPage() {
           </div>
           <Button
             onClick={() => updateMutation.mutate(selectedPlan)}
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || isLoading}
+            isLoading={updateMutation.isPending}
           >
             Actualizar Plan
           </Button>

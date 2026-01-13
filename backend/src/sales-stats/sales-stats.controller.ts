@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Query,
@@ -91,6 +92,13 @@ export class SalesStatsController {
   @Roles('agency_admin', 'agency_user')
   async getSale(@Request() req, @Param('id') id: string) {
     return this.salesStatsService.getSale(id, req.user.agencyId);
+  }
+
+  @Patch('sale/:id')
+  @RequireModulePermission(ManagementModule.statistics)
+  @Roles('agency_admin', 'agency_user')
+  async updateSale(@Request() req, @Param('id') id: string, @Body() dto: Partial<CreateSaleDto>) {
+    return this.salesStatsService.updateSale(id, req.user.agencyId, dto);
   }
 }
 

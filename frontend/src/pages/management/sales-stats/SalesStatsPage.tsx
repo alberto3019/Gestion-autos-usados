@@ -77,6 +77,7 @@ export default function SalesStatsPage() {
                     <th className="px-4 py-2 text-left">Vehículo</th>
                     <th className="px-4 py-2 text-right">Precio</th>
                     <th className="px-4 py-2 text-right">Comisión</th>
+                    <th className="px-4 py-2 text-left">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -96,6 +97,11 @@ export default function SalesStatsPage() {
                       </td>
                       <td className="px-4 py-2 text-sm text-right">
                         {sale.commission ? formatNumber(sale.commission) : '-'}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        <Link to={`/management/sales-stats/${sale.id}/edit`}>
+                          <Button size="sm">Editar</Button>
+                        </Link>
                       </td>
                     </tr>
                   ))}

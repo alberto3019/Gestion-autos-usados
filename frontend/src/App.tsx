@@ -171,6 +171,14 @@ function App() {
             }
           />
           <Route
+            path="management/inspections/:id/edit"
+            element={
+              <ModuleGuard module="vehicle_inspection">
+                <InspectionFormPage />
+              </ModuleGuard>
+            }
+          />
+          <Route
             path="management/inspections/:id"
             element={
               <ModuleGuard module="vehicle_inspection">
@@ -244,6 +252,14 @@ function App() {
           />
           <Route
             path="management/sales-stats/new"
+            element={
+              <ModuleGuard module="statistics">
+                <SalesPage />
+              </ModuleGuard>
+            }
+          />
+          <Route
+            path="management/sales-stats/:id/edit"
             element={
               <ModuleGuard module="statistics">
                 <SalesPage />

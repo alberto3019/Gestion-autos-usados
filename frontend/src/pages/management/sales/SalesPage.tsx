@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { salesApi } from '../../../api/sales'
 import { vehiclesApi } from '../../../api/vehicles'
 import { usersApi } from '../../../api/users'
@@ -8,8 +8,10 @@ import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 
 export default function SalesPage() {
+  const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const isEditing = !!id
 
   const [formData, setFormData] = useState({
     vehicleId: '',
@@ -20,6 +22,27 @@ export default function SalesPage() {
     saleDate: new Date().toISOString().split('T')[0],
     notes: '',
   })
+
+  // Cargar datos de la venta si está editando
+  const { data: saleData } = useQuery({
+    queryKey: ['sale', id],
+    queryFn: () => salesApi.getSale(id!),
+    enabled: isEditing,
+  })
+
+  useEffect(() => {
+    if (saleData) {
+      setFormData({
+        vehicleId: saleData.vehicleId,
+        sellerId: saleData.sellerId,
+        clientId: saleData.clientId || '',
+        salePrice: saleData.salePrice.toString(),
+        currency: (saleData as any).currency || 'ARS',
+        saleDate: new Date(saleData.saleDate).toISOString().split('T')[0],
+        notes: saleData.notes || '',
+      })
+    }
+  }, [saleData])
 
   const { data: vehicles } = useQuery({
     queryKey: ['vehiclesForSale'],
@@ -45,6 +68,20 @@ export default function SalesPage() {
     },
   })
 
+  const updateMutation = useMutation({
+    mutationFn: (data: any) => salesApi.updateSale(id!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales'] })
+      queryClient.invalidateQueries({ queryKey: ['myVehicles'] })
+      queryClient.invalidateQueries({ queryKey: ['soldVehicles'] })
+      navigate('/management/sales-stats')
+    },
+    onError: (error: any) => {
+      console.error('Error updating sale:', error)
+      alert(error?.response?.data?.message || 'Error al actualizar venta')
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const submitData: any = {
@@ -56,12 +93,18 @@ export default function SalesPage() {
       notes: formData.notes || undefined,
       clientId: formData.clientId || undefined,
     }
-    createMutation.mutate(submitData)
+    if (isEditing) {
+      updateMutation.mutate(submitData)
+    } else {
+      createMutation.mutate(submitData)
+    }
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Registrar Venta</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+        {isEditing ? 'Editar Venta' : 'Registrar Venta'}
+      </h1>
 
       <form onSubmit={handleSubmit} className="card max-w-2xl">
         <div className="space-y-4">
@@ -160,8 +203,8 @@ export default function SalesPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" disabled={createMutation.isPending}>
-              Registrar Venta
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              {isEditing ? 'Actualizar' : 'Registrar'} Venta
             </Button>
             <Button type="button" variant="secondary" onClick={() => navigate('/management/sales-stats')}>
               Cancelar

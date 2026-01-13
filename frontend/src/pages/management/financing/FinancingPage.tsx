@@ -62,8 +62,13 @@ export default function FinancingPage() {
               <div key={financing.id} className="card">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="font-semibold">{financing.financier}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-semibold text-lg">
+                      {financing.client ? `${financing.client.firstName} ${financing.client.lastName}` : 'Sin cliente'}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {financing.financier}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
                       {formatNumber(financing.amount)} - {financing.installments} cuotas
                     </p>
                   </div>

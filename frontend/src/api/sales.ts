@@ -44,5 +44,10 @@ export const salesApi = {
     const response = await apiClient.get(`/sales-stats/sale/${id}`)
     return response.data
   },
+
+  updateSale: async (id: string, data: any): Promise<Sale> => {
+    const response = await apiClient.patch(`/sales-stats/sale/${id}`, data)
+    return response.data
+  },
 }
 

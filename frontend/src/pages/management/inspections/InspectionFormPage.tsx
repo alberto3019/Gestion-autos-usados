@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { inspectionsApi } from '../../../api/inspections'
@@ -27,6 +27,31 @@ export default function InspectionFormPage() {
     },
   })
 
+  // Cargar datos del peritaje si está editando
+  const { data: inspectionData } = useQuery({
+    queryKey: ['inspection', id],
+    queryFn: () => inspectionsApi.getInspection(id!),
+    enabled: isEditing,
+  })
+
+  useEffect(() => {
+    if (inspectionData) {
+      setFormData({
+        vehicleId: inspectionData.vehicleId,
+        inspectorName: inspectionData.inspectorName,
+        inspectionDate: new Date(inspectionData.inspectionDate).toISOString().split('T')[0],
+        observations: inspectionData.observations || '',
+        status: inspectionData.status,
+        data: inspectionData.data as any || {
+          exterior: {},
+          interior: {},
+          mecanica: {},
+          electrica: {},
+        },
+      })
+    }
+  }, [inspectionData])
+
   // Cargar vehículos para el selector
   const { data: vehicles } = useQuery({
     queryKey: ['myVehicles'],
@@ -41,9 +66,21 @@ export default function InspectionFormPage() {
     },
   })
 
+  const updateMutation = useMutation({
+    mutationFn: (data: any) => inspectionsApi.updateInspection(id!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inspections'] })
+      navigate('/management/inspections')
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createMutation.mutate(formData as any)
+    if (isEditing) {
+      updateMutation.mutate(formData as any)
+    } else {
+      createMutation.mutate(formData as any)
+    }
   }
 
   return (
@@ -124,7 +161,7 @@ export default function InspectionFormPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {isEditing ? 'Actualizar' : 'Crear'} Peritaje
             </Button>
             <Button type="button" variant="secondary" onClick={() => navigate('/management/inspections')}>

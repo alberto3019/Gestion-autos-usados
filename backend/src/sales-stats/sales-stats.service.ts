@@ -239,5 +239,71 @@ export class SalesStatsService {
 
     return sale;
   }
+
+  async updateSale(id: string, agencyId: string, dto: Partial<CreateSaleDto>) {
+    const sale = await this.prisma.sale.findFirst({
+      where: { id, agencyId },
+    });
+
+    if (!sale) {
+      throw new NotFoundException('Venta no encontrada');
+    }
+
+    const salePrice = dto.salePrice ? new Decimal(dto.salePrice) : undefined;
+    let commission: Decimal | null = null;
+
+    // Si cambió el precio o el vendedor, recalcular comisión
+    if (salePrice && (dto.sellerId || sale.sellerId)) {
+      const seller = await this.prisma.user.findFirst({
+        where: {
+          id: dto.sellerId || sale.sellerId,
+          agencyId,
+        },
+      });
+
+      if (seller?.commissionPercentage) {
+        commission = salePrice.times(seller.commissionPercentage).dividedBy(100);
+      }
+    }
+
+    const updated = await this.prisma.sale.update({
+      where: { id },
+      data: {
+        vehicleId: dto.vehicleId,
+        sellerId: dto.sellerId,
+        clientId: dto.clientId,
+        salePrice,
+        commission,
+        saleDate: dto.saleDate ? new Date(dto.saleDate) : undefined,
+        notes: dto.notes,
+      },
+      include: {
+        vehicle: {
+          include: { photos: { take: 1, orderBy: { order: 'asc' } } },
+        },
+        seller: true,
+        client: true,
+      },
+    });
+
+    // Actualizar balance si cambió el precio de venta
+    if (dto.salePrice && dto.currency) {
+      try {
+        const vehicle = await this.prisma.vehicle.findUnique({
+          where: { id: dto.vehicleId || sale.vehicleId },
+          select: { currency: true },
+        });
+        await this.balanceHelper.updateBalanceFromSale(
+          dto.vehicleId || sale.vehicleId,
+          salePrice,
+          dto.currency || vehicle?.currency || 'ARS',
+        );
+      } catch (error) {
+        console.error('Error updating balance from sale update:', error);
+      }
+    }
+
+    return updated;
+  }
 }
 

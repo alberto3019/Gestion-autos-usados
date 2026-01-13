@@ -66,8 +66,11 @@ export default function InspectionsPage() {
                 </p>
               )}
               <div className="flex gap-2 mt-4">
+                <Link to={`/management/inspections/${inspection.id}/edit`}>
+                  <Button size="sm">Editar</Button>
+                </Link>
                 <Link to={`/management/inspections/${inspection.id}`}>
-                  <Button size="sm">Ver Detalle</Button>
+                  <Button size="sm" variant="secondary">Ver Detalle</Button>
                 </Link>
                 <Button
                   size="sm"

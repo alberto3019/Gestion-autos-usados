@@ -747,34 +747,29 @@ export class AdminService {
 
   async getAgencyModules(agencyId: string) {
     try {
-      console.log('getAgencyModules - agencyId:', agencyId);
-      
       const agency = await this.prisma.agency.findUnique({
         where: { id: agencyId },
-        include: {
-          enabledModules: true,
-          subscription: true,
-        },
       });
-
-      console.log('getAgencyModules - agency found:', !!agency);
-      console.log('getAgencyModules - subscription:', agency?.subscription);
-      console.log('getAgencyModules - enabledModules count:', agency?.enabledModules?.length);
 
       if (!agency) {
         throw new NotFoundException('Agencia no encontrada');
       }
 
+      // Get subscription and modules separately to avoid relation errors
+      const subscription = await this.prisma.subscription.findUnique({
+        where: { agencyId },
+      });
+
+      const modules = await this.prisma.agencyModule.findMany({
+        where: { agencyId },
+      });
+
       return {
-        subscription: agency.subscription,
-        modules: agency.enabledModules || [],
+        subscription: subscription || null,
+        modules: modules || [],
       };
     } catch (error) {
-      console.error('Error en getAgencyModules:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        error,
-      });
+      console.error('Error en getAgencyModules:', error);
       throw error;
     }
   }

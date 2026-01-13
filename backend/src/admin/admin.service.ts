@@ -600,33 +600,38 @@ export class AdminService {
     plan: SubscriptionPlan,
     enabledBy: string,
   ) {
-    const agency = await this.prisma.agency.findUnique({
-      where: { id: agencyId },
-    });
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: agencyId },
+      });
 
-    if (!agency) {
-      throw new NotFoundException('Agencia no encontrada');
-    }
+      if (!agency) {
+        throw new NotFoundException('Agencia no encontrada');
+      }
 
-    const subscription = await this.subscriptionsService.createOrUpdateSubscription(
-      agencyId,
-      plan,
-      enabledBy,
-    );
-
-    await this.activityLogsService.log({
-      agencyId,
-      type: 'agency_updated',
-      action: 'Actualización de Suscripción',
-      description: `Plan actualizado a ${plan} para ${agency.commercialName}`,
-      metadata: {
+      const subscription = await this.subscriptionsService.createOrUpdateSubscription(
         agencyId,
         plan,
         enabledBy,
-      },
-    });
+      );
 
-    return subscription;
+      await this.activityLogsService.log({
+        agencyId,
+        type: 'agency_updated',
+        action: 'Actualización de Suscripción',
+        description: `Plan actualizado a ${plan} para ${agency.commercialName}`,
+        metadata: {
+          agencyId,
+          plan,
+          enabledBy,
+        },
+      });
+
+      return subscription;
+    } catch (error) {
+      console.error('Error en updateAgencySubscription:', error);
+      throw error;
+    }
   }
 
   async enableModule(
@@ -634,48 +639,57 @@ export class AdminService {
     module: ManagementModule,
     enabledBy: string,
   ) {
-    const agency = await this.prisma.agency.findUnique({
-      where: { id: agencyId },
-    });
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: agencyId },
+        include: {
+          subscription: true,
+        },
+      });
 
-    if (!agency) {
-      throw new NotFoundException('Agencia no encontrada');
-    }
+      if (!agency) {
+        throw new NotFoundException('Agencia no encontrada');
+      }
 
-    const agencyModule = await this.prisma.agencyModule.upsert({
-      where: {
-        agencyId_module: {
+      const agencyModule = await this.prisma.agencyModule.upsert({
+        where: {
+          agencyId_module: {
+            agencyId,
+            module,
+          },
+        },
+        create: {
           agencyId,
           module,
+          isEnabled: true,
+          enabledBy,
+          enabledAt: new Date(),
+          subscriptionId: agency.subscription?.id || null,
         },
-      },
-      create: {
-        agencyId,
-        module,
-        isEnabled: true,
-        enabledBy,
-        enabledAt: new Date(),
-      },
-      update: {
-        isEnabled: true,
-        enabledBy,
-        enabledAt: new Date(),
-      },
-    });
+        update: {
+          isEnabled: true,
+          enabledBy,
+          enabledAt: new Date(),
+        },
+      });
 
-    await this.activityLogsService.log({
-      agencyId,
-      type: 'agency_updated',
-      action: 'Módulo Habilitado',
-      description: `Módulo ${module} habilitado para ${agency.commercialName}`,
-      metadata: {
+      await this.activityLogsService.log({
         agencyId,
-        module,
-        enabledBy,
-      },
-    });
+        type: 'agency_updated',
+        action: 'Módulo Habilitado',
+        description: `Módulo ${module} habilitado para ${agency.commercialName}`,
+        metadata: {
+          agencyId,
+          module,
+          enabledBy,
+        },
+      });
 
-    return agencyModule;
+      return agencyModule;
+    } catch (error) {
+      console.error('Error en enableModule:', error);
+      throw error;
+    }
   }
 
   async disableModule(
@@ -721,22 +735,27 @@ export class AdminService {
   }
 
   async getAgencyModules(agencyId: string) {
-    const agency = await this.prisma.agency.findUnique({
-      where: { id: agencyId },
-      include: {
-        enabledModules: true,
-        subscription: true,
-      },
-    });
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: agencyId },
+        include: {
+          enabledModules: true,
+          subscription: true,
+        },
+      });
 
-    if (!agency) {
-      throw new NotFoundException('Agencia no encontrada');
+      if (!agency) {
+        throw new NotFoundException('Agencia no encontrada');
+      }
+
+      return {
+        subscription: agency.subscription,
+        modules: agency.enabledModules || [],
+      };
+    } catch (error) {
+      console.error('Error en getAgencyModules:', error);
+      throw error;
     }
-
-    return {
-      subscription: agency.subscription,
-      modules: agency.enabledModules,
-    };
   }
 }
 

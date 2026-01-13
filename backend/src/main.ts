@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as express from 'express';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,6 +23,9 @@ async function bootstrap() {
 
   // Configurar prefijo global para la API
   app.setGlobalPrefix('api');
+
+  // Configurar filtro global de excepciones para mejor logging
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Configurar validación global
   app.useGlobalPipes(

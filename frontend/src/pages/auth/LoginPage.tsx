@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '../../store/authStore'
+import { useModuleStore } from '../../store/moduleStore'
 import { authApi } from '../../api/auth'
+import { subscriptionsApi } from '../../api/subscriptions'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 
@@ -14,6 +16,7 @@ interface LoginForm {
 export default function LoginPage() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
+  const { setEnabledModules } = useModuleStore()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -29,6 +32,18 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(data.email, data.password)
       setAuth(response.user, response.accessToken, response.refreshToken)
+      
+      // Cargar módulos habilitados si no es super_admin
+      if (response.user.role !== 'super_admin') {
+        try {
+          const modules = await subscriptionsApi.getMyEnabledModules()
+          setEnabledModules(modules.modules)
+        } catch (moduleErr) {
+          console.error('Error loading modules:', moduleErr)
+          // No fallar el login si hay error cargando módulos
+        }
+      }
+      
       navigate('/dashboard')
     } catch (err: any) {
       setError(

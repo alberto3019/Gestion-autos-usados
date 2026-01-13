@@ -14,6 +14,17 @@ import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
 import { EmailModule } from './email/email.module';
 import { UploadModule } from './upload/upload.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { UserPermissionsModule } from './user-permissions/user-permissions.module';
+import { StockModule } from './stock/stock.module';
+import { VehicleInspectionsModule } from './vehicle-inspections/vehicle-inspections.module';
+import { ClientsModule } from './clients/clients.module';
+import { CashflowModule } from './cashflow/cashflow.module';
+import { SalesStatsModule } from './sales-stats/sales-stats.module';
+import { FinancingModule } from './financing/financing.module';
+import { BalancesModule } from './balances/balances.module';
+import { InvoicingModule } from './invoicing/invoicing.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -34,6 +45,17 @@ import { NotificationsModule } from './notifications/notifications.module';
     EmailModule,
     UploadModule,
     NotificationsModule,
+    SubscriptionsModule,
+    UserPermissionsModule,
+    StockModule,
+    VehicleInspectionsModule,
+    ClientsModule,
+    CashflowModule,
+    SalesStatsModule,
+    FinancingModule,
+    BalancesModule,
+    InvoicingModule,
+    MetricsModule,
   ],
 })
 export class AppModule {}

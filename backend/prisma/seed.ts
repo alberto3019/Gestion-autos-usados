@@ -8,6 +8,9 @@ async function main() {
 
   // Limpiar todos los datos existentes
   console.log('🧹 Limpiando datos existentes...');
+  await prisma.userModulePermission.deleteMany();
+  await prisma.agencyModule.deleteMany();
+  await prisma.subscription.deleteMany();
   await prisma.activityLog.deleteMany();
   await prisma.whatsappClickLog.deleteMany();
   await prisma.favorite.deleteMany();

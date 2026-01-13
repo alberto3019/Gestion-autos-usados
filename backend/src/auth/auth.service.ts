@@ -16,6 +16,8 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { EmailService } from '../email/email.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { SubscriptionPlan } from '@prisma/client';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -26,6 +28,7 @@ export class AuthService {
     private config: ConfigService,
     private activityLogsService: ActivityLogsService,
     private emailService: EmailService,
+    private subscriptionsService: SubscriptionsService,
   ) {}
 
   async registerAgency(dto: RegisterAgencyDto) {
@@ -88,6 +91,12 @@ export class AuthService {
         users: true,
       },
     });
+
+    // Crear suscripción básica por defecto
+    await this.subscriptionsService.createOrUpdateSubscription(
+      agency.id,
+      SubscriptionPlan.basic,
+    );
 
     // Log activity
     await this.activityLogsService.log({

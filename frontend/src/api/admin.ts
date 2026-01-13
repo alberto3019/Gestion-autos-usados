@@ -40,5 +40,21 @@ export const adminApi = {
     const response = await apiClient.get('/admin/users/last-login')
     return response.data
   },
+
+  updateAgencySubscription: async (
+    agencyId: string,
+    data: { plan: 'basic' | 'premium' | 'enterprise' }
+  ): Promise<any> => {
+    const response = await apiClient.patch(
+      `/admin/agencies/${agencyId}/subscription`,
+      data
+    )
+    return response.data
+  },
+
+  getAgencyModules: async (agencyId: string): Promise<any> => {
+    const response = await apiClient.get(`/admin/agencies/${agencyId}/modules`)
+    return response.data
+  },
 }
 

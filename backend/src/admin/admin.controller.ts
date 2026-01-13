@@ -2,10 +2,13 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Param,
   Query,
   Body,
   UseGuards,
+  Request,
+  ParseEnumPipe,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -13,6 +16,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { BlockAgencyDto } from './dto/block-agency.dto';
 import { ResetAgencyPasswordDto } from './dto/reset-agency-password.dto';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { ManagementModule } from '@prisma/client';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -60,6 +65,44 @@ export class AdminController {
   @Get('users/last-login')
   async getUsersWithLastLogin() {
     return this.adminService.getUsersWithLastLogin();
+  }
+
+  @Patch('agencies/:id/subscription')
+  async updateAgencySubscription(
+    @Param('id') id: string,
+    @Body() dto: UpdateSubscriptionDto,
+    @Request() req,
+  ) {
+    return this.adminService.updateAgencySubscription(
+      id,
+      dto.plan,
+      req.user.id,
+    );
+  }
+
+  @Get('agencies/:id/modules')
+  async getAgencyModules(@Param('id') id: string) {
+    return this.adminService.getAgencyModules(id);
+  }
+
+  @Post('agencies/:id/modules/:module/enable')
+  async enableModule(
+    @Param('id') id: string,
+    @Param('module', new ParseEnumPipe(ManagementModule))
+    module: ManagementModule,
+    @Request() req,
+  ) {
+    return this.adminService.enableModule(id, module, req.user.id);
+  }
+
+  @Post('agencies/:id/modules/:module/disable')
+  async disableModule(
+    @Param('id') id: string,
+    @Param('module', new ParseEnumPipe(ManagementModule))
+    module: ManagementModule,
+    @Request() req,
+  ) {
+    return this.adminService.disableModule(id, module, req.user.id);
   }
 }
 

@@ -4,9 +4,15 @@ import { AdminService } from './admin.service';
 import { ActivityLogsModule } from '../activity-logs/activity-logs.module';
 import { EmailModule } from '../email/email.module';
 import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [ActivityLogsModule, EmailModule, ExchangeRateModule],
+  imports: [
+    ActivityLogsModule,
+    EmailModule,
+    ExchangeRateModule,
+    SubscriptionsModule,
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

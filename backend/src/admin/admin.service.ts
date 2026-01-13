@@ -3,6 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { EmailService } from '../email/email.service';
 import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { SubscriptionPlan, ManagementModule } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class AdminService {
     private activityLogsService: ActivityLogsService,
     private emailService: EmailService,
     private exchangeRateService: ExchangeRateService,
+    private subscriptionsService: SubscriptionsService,
   ) {}
 
   async getAgencies(page: number = 1, limit: number = 20, status?: string) {
@@ -582,6 +585,150 @@ export class AdminService {
           }
         : null,
     }));
+  }
+
+  async updateAgencySubscription(
+    agencyId: string,
+    plan: SubscriptionPlan,
+    enabledBy: string,
+  ) {
+    const agency = await this.prisma.agency.findUnique({
+      where: { id: agencyId },
+    });
+
+    if (!agency) {
+      throw new NotFoundException('Agencia no encontrada');
+    }
+
+    const subscription = await this.subscriptionsService.createOrUpdateSubscription(
+      agencyId,
+      plan,
+      enabledBy,
+    );
+
+    await this.activityLogsService.log({
+      agencyId,
+      type: 'agency_updated',
+      action: 'Actualización de Suscripción',
+      description: `Plan actualizado a ${plan} para ${agency.commercialName}`,
+      metadata: {
+        agencyId,
+        plan,
+        enabledBy,
+      },
+    });
+
+    return subscription;
+  }
+
+  async enableModule(
+    agencyId: string,
+    module: ManagementModule,
+    enabledBy: string,
+  ) {
+    const agency = await this.prisma.agency.findUnique({
+      where: { id: agencyId },
+    });
+
+    if (!agency) {
+      throw new NotFoundException('Agencia no encontrada');
+    }
+
+    const agencyModule = await this.prisma.agencyModule.upsert({
+      where: {
+        agencyId_module: {
+          agencyId,
+          module,
+        },
+      },
+      create: {
+        agencyId,
+        module,
+        isEnabled: true,
+        enabledBy,
+        enabledAt: new Date(),
+      },
+      update: {
+        isEnabled: true,
+        enabledBy,
+        enabledAt: new Date(),
+      },
+    });
+
+    await this.activityLogsService.log({
+      agencyId,
+      type: 'agency_updated',
+      action: 'Módulo Habilitado',
+      description: `Módulo ${module} habilitado para ${agency.commercialName}`,
+      metadata: {
+        agencyId,
+        module,
+        enabledBy,
+      },
+    });
+
+    return agencyModule;
+  }
+
+  async disableModule(
+    agencyId: string,
+    module: ManagementModule,
+    enabledBy: string,
+  ) {
+    const agency = await this.prisma.agency.findUnique({
+      where: { id: agencyId },
+    });
+
+    if (!agency) {
+      throw new NotFoundException('Agencia no encontrada');
+    }
+
+    const agencyModule = await this.prisma.agencyModule.update({
+      where: {
+        agencyId_module: {
+          agencyId,
+          module,
+        },
+      },
+      data: {
+        isEnabled: false,
+        enabledBy,
+        enabledAt: new Date(),
+      },
+    });
+
+    await this.activityLogsService.log({
+      agencyId,
+      type: 'agency_updated',
+      action: 'Módulo Deshabilitado',
+      description: `Módulo ${module} deshabilitado para ${agency.commercialName}`,
+      metadata: {
+        agencyId,
+        module,
+        enabledBy,
+      },
+    });
+
+    return agencyModule;
+  }
+
+  async getAgencyModules(agencyId: string) {
+    const agency = await this.prisma.agency.findUnique({
+      where: { id: agencyId },
+      include: {
+        enabledModules: true,
+        subscription: true,
+      },
+    });
+
+    if (!agency) {
+      throw new NotFoundException('Agencia no encontrada');
+    }
+
+    return {
+      subscription: agency.subscription,
+      modules: agency.enabledModules,
+    };
   }
 }
 

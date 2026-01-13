@@ -9,8 +9,18 @@ import {
   ClockIcon,
   ArrowRightOnRectangleIcon,
   XMarkIcon,
+  ClipboardDocumentCheckIcon,
+  CreditCardIcon,
+  CalculatorIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
 import { useAuthStore } from '../../store/authStore'
+import { useModuleStore } from '../../store/moduleStore'
+import { useQuery } from '@tanstack/react-query'
+import { subscriptionsApi } from '../../api/subscriptions'
+import { ManagementModule } from '../../types'
 import clsx from 'clsx'
 
 interface SidebarProps {
@@ -20,6 +30,18 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuthStore()
+  const { setEnabledModules, hasModule } = useModuleStore()
+
+  // Cargar módulos habilitados
+  useQuery({
+    queryKey: ['enabledModules'],
+    queryFn: async () => {
+      const data = await subscriptionsApi.getMyEnabledModules()
+      setEnabledModules(data.modules)
+      return data
+    },
+    enabled: !!user && user.role !== 'super_admin',
+  })
 
   const handleLogout = () => {
     logout()
@@ -58,6 +80,37 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         name: 'Usuarios',
         href: '/users',
         icon: UsersIcon,
+      })
+    }
+
+    // Módulos de gestión
+    const managementModules = [
+      { name: 'Stock', href: '/management/stock', module: 'stock' as ManagementModule, icon: TruckIcon },
+      { name: 'Peritajes', href: '/management/inspections', module: 'vehicle_inspection' as ManagementModule, icon: ClipboardDocumentCheckIcon },
+      { name: 'Clientes', href: '/management/clients', module: 'clients' as ManagementModule, icon: UsersIcon },
+      { name: 'Cashflow', href: '/management/cashflow', module: 'cashflow' as ManagementModule, icon: CurrencyDollarIcon },
+      { name: 'Estadísticas', href: '/management/sales-stats', module: 'statistics' as ManagementModule, icon: ChartBarIcon },
+      { name: 'Financiamiento', href: '/management/financing', module: 'financing_tracking' as ManagementModule, icon: CreditCardIcon },
+      { name: 'Balances', href: '/management/balances', module: 'balances' as ManagementModule, icon: CalculatorIcon },
+      { name: 'Facturación', href: '/management/invoicing', module: 'invoicing_afip' as ManagementModule, icon: DocumentTextIcon },
+      { name: 'Métricas', href: '/management/metrics', module: 'metrics' as ManagementModule, icon: ChartBarIcon },
+    ]
+
+    // Filtrar módulos habilitados (super_admin ve todos)
+    const enabledManagementModules = managementModules.filter(item => 
+      user?.role === 'super_admin' || hasModule(item.module)
+    )
+
+    // Agregar módulos a la navegación si hay alguno habilitado
+    if (enabledManagementModules.length > 0) {
+      navigation.push({
+        name: '---',
+        href: '#',
+        icon: HomeIcon,
+        divider: true,
+      } as any)
+      enabledManagementModules.forEach(item => {
+        navigation.push(item as any)
       })
     }
   }

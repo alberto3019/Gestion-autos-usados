@@ -1,0 +1,116 @@
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { cashflowApi } from '../../../api/cashflow'
+import Button from '../../../components/common/Button'
+import Input from '../../../components/common/Input'
+
+export default function CashflowFormPage() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const [formData, setFormData] = useState({
+    type: 'income' as 'income' | 'expense',
+    category: 'other',
+    amount: '',
+    currency: 'ARS' as 'ARS' | 'USD' | 'EUR',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    vehicleId: '',
+  })
+
+  const createMutation = useMutation({
+    mutationFn: cashflowApi.createTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cashflow'] })
+      navigate('/management/cashflow')
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    createMutation.mutate(formData as any)
+  }
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Nueva Transacción</h1>
+
+      <form onSubmit={handleSubmit} className="card max-w-2xl">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+              className="input"
+              required
+            >
+              <option value="income">Ingreso</option>
+              <option value="expense">Egreso</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Categoría *</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="input"
+              required
+            >
+              <option value="vehicle_purchase">Compra de Vehículo</option>
+              <option value="vehicle_sale">Venta de Vehículo</option>
+              <option value="service">Servicio</option>
+              <option value="maintenance">Mantenimiento</option>
+              <option value="payroll">Nómina</option>
+              <option value="marketing">Marketing</option>
+              <option value="other">Otro</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Monto *</label>
+            <Input
+              type="number"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha *</label>
+            <Input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="input"
+              rows={3}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="submit" disabled={createMutation.isPending}>
+              Crear Transacción
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => navigate('/management/cashflow')}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+}
+

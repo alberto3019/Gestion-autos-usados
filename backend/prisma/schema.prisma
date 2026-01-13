@@ -75,30 +75,84 @@ enum ActivityType {
   search_performed
 }
 
+enum SubscriptionPlan {
+  basic
+  premium
+  enterprise
+}
+
+enum ManagementModule {
+  stock
+  vehicle_inspection
+  clients
+  cashflow
+  statistics
+  financing_tracking
+  balances
+  invoicing_afip
+  metrics
+  sales_platforms
+}
+
+enum TransactionType {
+  income
+  expense
+}
+
+enum TransactionCategory {
+  vehicle_purchase
+  vehicle_sale
+  service
+  maintenance
+  payroll
+  marketing
+  other
+}
+
+enum InvoiceType {
+  A
+  B
+  C
+}
+
 // Models
 model Agency {
-  id             String        @id @default(uuid())
-  businessName   String        @map("business_name")
-  commercialName String        @map("commercial_name")
-  taxId          String        @unique @map("tax_id")
-  addressStreet  String?       @map("address_street")
-  addressCity    String?       @map("address_city")
-  addressState   String?       @map("address_state")
-  addressCountry String        @default("Argentina") @map("address_country")
-  phone          String?
-  whatsapp       String
-  email          String        @unique
-  instagramUrl   String?       @map("instagram_url")
-  facebookUrl    String?       @map("facebook_url")
-  websiteUrl     String?       @map("website_url")
-  logoUrl        String?       @map("logo_url")
-  status         AgencyStatus  @default(pending)
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  id              String       @id @default(uuid())
+  businessName    String       @map("business_name")
+  commercialName  String       @map("commercial_name")
+  taxId           String       @unique @map("tax_id")
+  addressStreet   String?      @map("address_street")
+  addressCity     String?      @map("address_city")
+  addressState    String?      @map("address_state")
+  addressCountry  String       @default("Argentina") @map("address_country")
+  phone           String?
+  whatsapp        String
+  email           String       @unique
+  instagramUrl    String?      @map("instagram_url")
+  facebookUrl     String?      @map("facebook_url")
+  websiteUrl      String?      @map("website_url")
+  logoUrl         String?      @map("logo_url")
+  status          AgencyStatus @default(pending)
+  stockYellowDays Int?         @default(60) @map("stock_yellow_days")
+  stockRedDays    Int?         @default(90) @map("stock_red_days")
+  afipCuit        String?      @map("afip_cuit")
+  afipPointOfSale Int?         @map("afip_point_of_sale")
+  afipCertificate String?      @map("afip_certificate") @db.Text
+  afipPrivateKey  String?      @map("afip_private_key") @db.Text
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
 
   // Relations
-  users    User[]
-  vehicles Vehicle[]
+  users                User[]
+  vehicles             Vehicle[]
+  subscription         Subscription?
+  enabledModules       AgencyModule[]
+  inspections          VehicleInspection[]
+  clients              Client[]
+  cashflowTransactions CashflowTransaction[]
+  sales                Sale[]
+  financings           Financing[]
+  invoices             Invoice[]
 
   @@index([status])
   @@index([email])
@@ -106,26 +160,29 @@ model Agency {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  agencyId     String?  @map("agency_id")
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  firstName    String   @map("first_name")
-  lastName     String   @map("last_name")
-  role         UserRole @default(agency_user)
-  isActive           Boolean  @default(true) @map("is_active")
-  refreshToken       String?  @map("refresh_token") @db.Text
-  passwordResetToken String?  @map("password_reset_token") @db.Text
+  id                   String    @id @default(uuid())
+  agencyId             String?   @map("agency_id")
+  email                String    @unique
+  passwordHash         String    @map("password_hash")
+  firstName            String    @map("first_name")
+  lastName             String    @map("last_name")
+  role                 UserRole  @default(agency_user)
+  isActive             Boolean   @default(true) @map("is_active")
+  commissionPercentage Decimal?  @map("commission_percentage") @db.Decimal(5, 2)
+  refreshToken         String?   @map("refresh_token") @db.Text
+  passwordResetToken   String?   @map("password_reset_token") @db.Text
   passwordResetExpires DateTime? @map("password_reset_expires")
-  lastLogin          DateTime? @map("last_login")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  lastLogin            DateTime? @map("last_login")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  agency            Agency?            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  agency            Agency?                @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   favorites         Favorite[]
   whatsappClickLogs WhatsappClickLog[]
   notifications     Notification[]
+  modulePermissions UserModulePermission[]
+  sales             Sale[]
 
   @@index([email])
   @@index([agencyId])
@@ -157,10 +214,18 @@ model Vehicle {
   updatedAt        DateTime         @updatedAt @map("updated_at")
 
   // Relations
-  agency            Agency             @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  photos            VehiclePhoto[]
-  favorites         Favorite[]
-  whatsappClickLogs WhatsappClickLog[]
+  agency                Agency                @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  photos                VehiclePhoto[]
+  favorites             Favorite[]
+  whatsappClickLogs     WhatsappClickLog[]
+  currentVehicleClients Client[]              @relation("ClientCurrentVehicle")
+  desiredVehicleClients Client[]              @relation("ClientDesiredVehicle")
+  inspections           VehicleInspection[]
+  cashflowTransactions  CashflowTransaction[]
+  sales                 Sale[]
+  financings            Financing[]
+  balance               VehicleBalance?
+  invoices              Invoice[]
 
   @@index([agencyId])
   @@index([brand, model])
@@ -237,15 +302,15 @@ model ActivityLog {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  type      String   // 'search_alert', 'system', etc.
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String // 'search_alert', 'system', etc.
   title     String
-  message   String   @db.Text
-  data      Json?    // Datos adicionales (vehicleIds, alertId, etc.)
-  isRead    Boolean  @default(false) @map("is_read")
+  message   String    @db.Text
+  data      Json? // Datos adicionales (vehicleIds, alertId, etc.)
+  isRead    Boolean   @default(false) @map("is_read")
   readAt    DateTime? @map("read_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -256,3 +321,215 @@ model Notification {
   @@map("notifications")
 }
 
+model Subscription {
+  id        String           @id @default(uuid())
+  agencyId  String           @unique @map("agency_id")
+  plan      SubscriptionPlan
+  isActive  Boolean          @default(true) @map("is_active")
+  startDate DateTime         @map("start_date")
+  endDate   DateTime?        @map("end_date")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  agency         Agency         @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  enabledModules AgencyModule[]
+
+  @@map("subscriptions")
+}
+
+model AgencyModule {
+  id        String           @id @default(uuid())
+  agencyId  String           @map("agency_id")
+  module    ManagementModule
+  isEnabled Boolean          @default(true) @map("is_enabled")
+  enabledBy String?          @map("enabled_by")
+  enabledAt DateTime?        @map("enabled_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  agency         Agency        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?
+
+  @@unique([agencyId, module])
+  @@index([agencyId])
+  @@map("agency_modules")
+}
+
+model UserModulePermission {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  module    ManagementModule
+  canView   Boolean          @default(false) @map("can_view")
+  canEdit   Boolean          @default(false) @map("can_edit")
+  canDelete Boolean          @default(false) @map("can_delete")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, module])
+  @@index([userId])
+  @@map("user_module_permissions")
+}
+
+model VehicleInspection {
+  id             String   @id @default(uuid())
+  vehicleId      String   @map("vehicle_id")
+  agencyId       String   @map("agency_id")
+  inspectorName  String   @map("inspector_name")
+  inspectionDate DateTime @map("inspection_date")
+  observations   String?  @db.Text
+  status         String
+  data           Json
+  pdfUrl         String?  @map("pdf_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  agency  Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([agencyId])
+  @@map("vehicle_inspections")
+}
+
+model Client {
+  id               String   @id @default(uuid())
+  agencyId         String   @map("agency_id")
+  firstName        String   @map("first_name")
+  lastName         String   @map("last_name")
+  email            String?
+  phone            String?
+  documentType     String?  @map("document_type")
+  documentNumber   String?  @map("document_number")
+  address          String?
+  notes            String?  @db.Text
+  currentVehicleId String?  @map("current_vehicle_id")
+  desiredVehicleId String?  @map("desired_vehicle_id")
+  alertEnabled     Boolean  @default(false) @map("alert_enabled")
+  alertDays        Int?     @map("alert_days")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  agency         Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  currentVehicle Vehicle?    @relation("ClientCurrentVehicle", fields: [currentVehicleId], references: [id])
+  desiredVehicle Vehicle?    @relation("ClientDesiredVehicle", fields: [desiredVehicleId], references: [id])
+  sales          Sale[]
+  financings     Financing[]
+
+  @@index([agencyId])
+  @@map("clients")
+}
+
+model CashflowTransaction {
+  id          String              @id @default(uuid())
+  agencyId    String              @map("agency_id")
+  type        TransactionType
+  category    TransactionCategory
+  amount      Decimal             @db.Decimal(15, 2)
+  currency    Currency            @default(ARS)
+  description String?             @db.Text
+  date        DateTime
+  vehicleId   String?             @map("vehicle_id")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  agency  Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  @@index([agencyId])
+  @@index([date])
+  @@map("cashflow_transactions")
+}
+
+model Sale {
+  id         String   @id @default(uuid())
+  agencyId   String   @map("agency_id")
+  vehicleId  String   @map("vehicle_id")
+  sellerId   String   @map("seller_id")
+  clientId   String?  @map("client_id")
+  salePrice  Decimal  @map("sale_price") @db.Decimal(15, 2)
+  commission Decimal? @db.Decimal(15, 2)
+  saleDate   DateTime @map("sale_date")
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  agency  Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  seller  User    @relation(fields: [sellerId], references: [id])
+  client  Client? @relation(fields: [clientId], references: [id])
+
+  @@index([agencyId])
+  @@index([sellerId])
+  @@index([saleDate])
+  @@map("sales")
+}
+
+model Financing {
+  id              String    @id @default(uuid())
+  agencyId        String    @map("agency_id")
+  vehicleId       String    @map("vehicle_id")
+  clientId        String?   @map("client_id")
+  financier       String
+  amount          Decimal   @db.Decimal(15, 2)
+  installments    Int
+  interestRate    Decimal?  @map("interest_rate") @db.Decimal(5, 2)
+  status          String
+  applicationDate DateTime  @map("application_date")
+  approvalDate    DateTime? @map("approval_date")
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  agency  Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  client  Client? @relation(fields: [clientId], references: [id])
+
+  @@index([agencyId])
+  @@index([status])
+  @@map("financings")
+}
+
+model VehicleBalance {
+  id            String   @id @default(uuid())
+  vehicleId     String   @unique @map("vehicle_id")
+  purchasePrice Decimal  @map("purchase_price") @db.Decimal(15, 2)
+  investment    Decimal  @db.Decimal(15, 2)
+  salePrice     Decimal? @map("sale_price") @db.Decimal(15, 2)
+  profit        Decimal? @db.Decimal(15, 2)
+  profitMargin  Decimal? @map("profit_margin") @db.Decimal(5, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_balances")
+}
+
+model Invoice {
+  id                String      @id @default(uuid())
+  agencyId          String      @map("agency_id")
+  type              InvoiceType
+  pointOfSale       Int         @map("point_of_sale")
+  invoiceNumber     Int         @map("invoice_number")
+  cae               String?
+  caeExpirationDate DateTime?   @map("cae_expiration_date")
+  clientName        String      @map("client_name")
+  clientTaxId       String      @map("client_tax_id")
+  items             Json
+  subtotal          Decimal     @db.Decimal(15, 2)
+  taxes             Decimal     @db.Decimal(15, 2)
+  total             Decimal     @db.Decimal(15, 2)
+  currency          Currency    @default(ARS)
+  status            String
+  vehicleId         String?     @map("vehicle_id")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  agency  Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  @@index([agencyId])
+  @@index([invoiceNumber])
+  @@map("invoices")
+}

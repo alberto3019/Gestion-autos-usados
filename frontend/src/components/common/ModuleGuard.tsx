@@ -13,9 +13,9 @@ export default function ModuleGuard({ module, children, fallback }: Props) {
   const { user } = useAuthStore()
   const { hasModule } = useModuleStore()
 
-  // Super admin has access to everything
+  // Super admin NO tiene acceso a gestión
   if (user?.role === 'super_admin') {
-    return <>{children}</>
+    return <>{fallback || <div className="p-4 text-center text-gray-500">El panel de gestión no está disponible para super administradores.</div>}</>
   }
 
   // Agency admin has access if module is enabled for their agency
@@ -25,6 +25,6 @@ export default function ModuleGuard({ module, children, fallback }: Props) {
     return <>{children}</>
   }
 
-  return <>{fallback || null}</>
+  return <>{fallback || <div className="p-4 text-center text-gray-500">Este módulo no está disponible en tu plan actual.</div>}</>
 }
 

@@ -87,10 +87,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { name: 'Métricas', href: '/management/metrics', module: 'metrics' as ManagementModule, icon: ChartBarIcon },
   ]
 
-  // Filtrar módulos habilitados (super_admin ve todos)
-  const enabledManagementModules = managementModules.filter(item => 
-    user?.role === 'super_admin' || hasModule(item.module)
-  )
+  // Filtrar módulos habilitados (super_admin NO ve gestión)
+  const enabledManagementModules = user?.role === 'super_admin' 
+    ? [] 
+    : managementModules.filter(item => hasModule(item.module))
 
   // Navegación específica para super_admin
   if (user?.role === 'super_admin') {

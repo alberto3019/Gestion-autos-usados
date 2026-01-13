@@ -117,11 +117,8 @@ export class SubscriptionsService {
   private getDefaultModulesForPlan(plan: SubscriptionPlan): ManagementModule[] {
     switch (plan) {
       case SubscriptionPlan.basic:
-        return [
-          ManagementModule.stock,
-          ManagementModule.clients,
-          ManagementModule.statistics,
-        ];
+        // Plan básico no tiene sistema de gestión
+        return [];
       case SubscriptionPlan.premium:
         return [
           ManagementModule.stock,

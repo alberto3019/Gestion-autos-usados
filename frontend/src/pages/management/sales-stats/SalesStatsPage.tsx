@@ -28,9 +28,9 @@ export default function SalesStatsPage() {
         </Link>
       </div>
 
-      {ranking && ranking.length > 0 && (
-        <div className="card mb-6">
-          <h2 className="text-lg font-semibold mb-4">Ranking de Vendedores</h2>
+      <div className="card mb-6">
+        <h2 className="text-lg font-semibold mb-4">Ranking de Vendedores</h2>
+        {ranking && ranking.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-gray-50">
@@ -55,14 +55,18 @@ export default function SalesStatsPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No hay datos de ranking disponibles
+          </div>
+        )}
+      </div>
 
       <div className="card">
         <h2 className="text-lg font-semibold mb-4">Historial de Ventas</h2>
         {isLoading ? (
           <div className="text-center py-8">Cargando...</div>
-        ) : (
+        ) : data && data.data && data.data.length > 0 ? (
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full">
@@ -76,7 +80,7 @@ export default function SalesStatsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {data?.data.map((sale) => (
+                  {data.data.map((sale) => (
                     <tr key={sale.id}>
                       <td className="px-4 py-2 text-sm">
                         {new Date(sale.saleDate).toLocaleDateString()}
@@ -99,14 +103,16 @@ export default function SalesStatsPage() {
               </table>
             </div>
 
-            {data && (
-              <Pagination
-                currentPage={page}
-                totalPages={Math.ceil(data.total / data.limit)}
-                onPageChange={setPage}
-              />
-            )}
+            <Pagination
+              currentPage={page}
+              totalPages={Math.ceil(data.total / data.limit)}
+              onPageChange={setPage}
+            />
           </>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No hay ventas registradas. <Link to="/management/sales-stats/new" className="text-primary-600 hover:text-primary-700">Registrar primera venta</Link>
+          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { financingApi } from '../../../api/financing'
 import { vehiclesApi } from '../../../api/vehicles'
+import { clientsApi } from '../../../api/clients'
 import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 
@@ -55,11 +56,20 @@ export default function FinancingFormPage() {
     queryFn: () => vehiclesApi.getMyVehicles({ limit: 1000 }),
   })
 
+  const { data: clients } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => clientsApi.getClients({ page: 1, limit: 1000 }),
+  })
+
   const createMutation = useMutation({
     mutationFn: financingApi.createFinancing,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financing'] })
       navigate('/management/financing')
+    },
+    onError: (error: any) => {
+      console.error('Error creating financing:', error)
+      alert(error?.response?.data?.message || 'Error al crear financiamiento')
     },
   })
 
@@ -73,10 +83,24 @@ export default function FinancingFormPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    const submitData: any = {
+      vehicleId: formData.vehicleId,
+      financier: formData.financier,
+      amount: formData.amount,
+      installments: formData.installments,
+      interestRate: formData.interestRate || undefined,
+      status: formData.status,
+      applicationDate: formData.applicationDate,
+      approvalDate: formData.approvalDate || undefined,
+      notes: formData.notes || undefined,
+      clientId: formData.clientId || undefined,
+    }
+
     if (isEditing) {
-      updateMutation.mutate(formData)
+      updateMutation.mutate(submitData)
     } else {
-      createMutation.mutate(formData as any)
+      createMutation.mutate(submitData)
     }
   }
 
@@ -101,10 +125,47 @@ export default function FinancingFormPage() {
               <option value="">Seleccionar vehículo</option>
               {vehicles?.data.map((vehicle) => (
                 <option key={vehicle.id} value={vehicle.id}>
-                  {vehicle.brand} {vehicle.model}
+                  {vehicle.brand} {vehicle.model} ({vehicle.year})
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Cliente
+              </label>
+              <Link
+                to="/management/clients/new"
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
+                + Crear nuevo
+              </Link>
+            </div>
+            <select
+              value={formData.clientId}
+              onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
+              className="input"
+            >
+              <option value="">Sin cliente</option>
+              {clients?.data.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.firstName} {client.lastName} {client.email ? `(${client.email})` : ''}
+                </option>
+              ))}
+            </select>
+            {formData.clientId && clients?.data.find(c => c.id === formData.clientId) && (
+              <div className="mt-2 p-3 bg-gray-50 rounded text-sm">
+                <p><strong>Email:</strong> {clients.data.find(c => c.id === formData.clientId)?.email || 'N/A'}</p>
+                <p><strong>Teléfono:</strong> {clients.data.find(c => c.id === formData.clientId)?.phone || 'N/A'}</p>
+                {clients.data.find(c => c.id === formData.clientId)?.alertEnabled && (
+                  <p className="text-primary-600 mt-1">
+                    ⚠️ Alertas habilitadas ({clients.data.find(c => c.id === formData.clientId)?.alertDays} días)
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div>

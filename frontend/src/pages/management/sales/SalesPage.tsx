@@ -36,13 +36,27 @@ export default function SalesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] })
       queryClient.invalidateQueries({ queryKey: ['myVehicles'] })
+      queryClient.invalidateQueries({ queryKey: ['soldVehicles'] })
       navigate('/management/sales-stats')
+    },
+    onError: (error: any) => {
+      console.error('Error creating sale:', error)
+      alert(error?.response?.data?.message || 'Error al registrar venta')
     },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createMutation.mutate(formData as any)
+    const submitData: any = {
+      vehicleId: formData.vehicleId,
+      sellerId: formData.sellerId,
+      salePrice: formData.salePrice,
+      currency: formData.currency,
+      saleDate: formData.saleDate,
+      notes: formData.notes || undefined,
+      clientId: formData.clientId || undefined,
+    }
+    createMutation.mutate(submitData)
   }
 
   return (

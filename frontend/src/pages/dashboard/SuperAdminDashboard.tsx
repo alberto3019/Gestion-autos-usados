@@ -473,7 +473,7 @@ export default function SuperAdminDashboard() {
                             <StatusBadge status={agency.status} />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               {agency.status === 'pending' && (
                                 <Button
                                   variant="primary"
@@ -494,6 +494,16 @@ export default function SuperAdminDashboard() {
                                   >
                                     Bloquear
                                   </Button>
+                                  <Link to={`/admin/agencies/${agency.id}/subscription`}>
+                                    <Button variant="secondary" size="sm">
+                                      Plan
+                                    </Button>
+                                  </Link>
+                                  <Link to={`/admin/agencies/${agency.id}/modules`}>
+                                    <Button variant="secondary" size="sm">
+                                      Módulos
+                                    </Button>
+                                  </Link>
                                   <Button
                                     variant="secondary"
                                     size="sm"
@@ -513,6 +523,16 @@ export default function SuperAdminDashboard() {
                                   >
                                     Desbloquear
                                   </Button>
+                                  <Link to={`/admin/agencies/${agency.id}/subscription`}>
+                                    <Button variant="secondary" size="sm">
+                                      Plan
+                                    </Button>
+                                  </Link>
+                                  <Link to={`/admin/agencies/${agency.id}/modules`}>
+                                    <Button variant="secondary" size="sm">
+                                      Módulos
+                                    </Button>
+                                  </Link>
                                   <Button
                                     variant="secondary"
                                     size="sm"
@@ -552,7 +572,7 @@ export default function SuperAdminDashboard() {
                           <span>👥 {agency.userCount} usuarios</span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         {agency.status === 'pending' && (
                           <Button
                             variant="primary"
@@ -575,6 +595,16 @@ export default function SuperAdminDashboard() {
                             >
                               Bloquear
                             </Button>
+                            <Link to={`/admin/agencies/${agency.id}/subscription`} className="flex-1">
+                              <Button variant="secondary" size="sm" className="w-full">
+                                Plan
+                              </Button>
+                            </Link>
+                            <Link to={`/admin/agencies/${agency.id}/modules`} className="flex-1">
+                              <Button variant="secondary" size="sm" className="w-full">
+                                Módulos
+                              </Button>
+                            </Link>
                             <Button
                               variant="secondary"
                               size="sm"
@@ -596,6 +626,16 @@ export default function SuperAdminDashboard() {
                             >
                               Desbloquear
                             </Button>
+                            <Link to={`/admin/agencies/${agency.id}/subscription`} className="flex-1">
+                              <Button variant="secondary" size="sm" className="w-full">
+                                Plan
+                              </Button>
+                            </Link>
+                            <Link to={`/admin/agencies/${agency.id}/modules`} className="flex-1">
+                              <Button variant="secondary" size="sm" className="w-full">
+                                Módulos
+                              </Button>
+                            </Link>
                             <Button
                               variant="secondary"
                               size="sm"

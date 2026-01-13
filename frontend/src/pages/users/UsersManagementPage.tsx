@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 import { usersApi, CreateUserData } from '../../api/users'
-import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, KeyIcon } from '@heroicons/react/24/outline'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 
@@ -153,12 +154,25 @@ export default function UsersManagementPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {user.role === 'agency_user' && (
+                        <Link to={`/users/${user.id}/permissions`}>
+                          <button
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Gestionar permisos"
+                          >
+                            <KeyIcon className="h-5 w-5" />
+                          </button>
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Eliminar usuario"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

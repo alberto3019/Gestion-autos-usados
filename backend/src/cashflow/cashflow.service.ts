@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionType, TransactionCategory } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { BalanceHelperService } from '../balances/balance-helper.service';
 
 @Injectable()
 export class CashflowService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private balanceHelper: BalanceHelperService,
+  ) {}
 
   async createTransaction(agencyId: string, dto: CreateTransactionDto) {
     const transaction = await this.prisma.cashflowTransaction.create({
@@ -26,6 +30,20 @@ export class CashflowService {
         },
       },
     });
+
+    // Actualizar balance automáticamente si hay vehicleId
+    if (dto.vehicleId && dto.category) {
+      try {
+        await this.balanceHelper.updateBalanceFromCashflow(
+          dto.vehicleId,
+          dto.category,
+          new Decimal(dto.amount),
+        );
+      } catch (error) {
+        // Log error but don't fail the transaction creation
+        console.error('Error updating balance from cashflow:', error);
+      }
+    }
 
     return transaction;
   }

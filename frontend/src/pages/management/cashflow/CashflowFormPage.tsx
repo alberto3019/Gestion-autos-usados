@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { cashflowApi } from '../../../api/cashflow'
+import { vehiclesApi } from '../../../api/vehicles'
 import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 
@@ -18,6 +19,20 @@ export default function CashflowFormPage() {
     date: new Date().toISOString().split('T')[0],
     vehicleId: '',
   })
+
+  // Cargar vehículos para el selector
+  const { data: vehicles } = useQuery({
+    queryKey: ['myVehicles'],
+    queryFn: () => vehiclesApi.getMyVehicles({ page: 1, limit: 1000 }),
+  })
+
+  // Determinar si se necesita seleccionar un vehículo
+  const needsVehicle = 
+    formData.category === 'vehicle_purchase' ||
+    formData.category === 'vehicle_sale' ||
+    formData.category === 'service' ||
+    formData.category === 'maintenance' ||
+    formData.category === 'other'
 
   const createMutation = useMutation({
     mutationFn: cashflowApi.createTransaction,
@@ -99,6 +114,27 @@ export default function CashflowFormPage() {
               rows={3}
             />
           </div>
+
+          {needsVehicle && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vehículo {formData.category === 'vehicle_purchase' ? '*' : '(opcional)'}
+              </label>
+              <select
+                value={formData.vehicleId}
+                onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
+                className="input"
+                required={formData.category === 'vehicle_purchase'}
+              >
+                <option value="">Seleccionar vehículo</option>
+                {vehicles?.data.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.id}>
+                    {vehicle.brand} {vehicle.model} ({vehicle.year}) - {vehicle.price} {vehicle.currency}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Button type="submit" disabled={createMutation.isPending}>

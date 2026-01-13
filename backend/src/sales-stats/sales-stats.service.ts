@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { Decimal } from '@prisma/client/runtime/library';
+import { BalanceHelperService } from '../balances/balance-helper.service';
 
 @Injectable()
 export class SalesStatsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private balanceHelper: BalanceHelperService,
+  ) {}
 
   async createSale(agencyId: string, dto: CreateSaleDto) {
     const seller = await this.prisma.user.findFirst({
@@ -51,6 +55,14 @@ export class SalesStatsService {
       where: { id: dto.vehicleId },
       data: { status: 'sold' },
     });
+
+    // Actualizar balance automáticamente con el precio de venta
+    try {
+      await this.balanceHelper.updateBalanceFromSale(dto.vehicleId, salePrice);
+    } catch (error) {
+      // Log error but don't fail the sale creation
+      console.error('Error updating balance from sale:', error);
+    }
 
     return sale;
   }

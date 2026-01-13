@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { Decimal } from '@prisma/client/runtime/library';
+import { BalanceHelperService } from '../balances/balance-helper.service';
 
 @Injectable()
 export class InvoicingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private balanceHelper: BalanceHelperService,
+  ) {}
 
   async getAgencyAfipSettings(agencyId: string) {
     const agency = await this.prisma.agency.findUnique({
@@ -133,6 +137,16 @@ export class InvoicingService {
         },
       },
     });
+
+    // Actualizar balance automáticamente si hay vehicleId
+    if (vehicleId) {
+      try {
+        await this.balanceHelper.updateBalanceFromInvoice(vehicleId, total);
+      } catch (error) {
+        // Log error but don't fail the invoice creation
+        console.error('Error updating balance from invoice:', error);
+      }
+    }
 
     return invoice;
   }

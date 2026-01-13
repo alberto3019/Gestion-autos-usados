@@ -43,8 +43,8 @@ export class SubscriptionsService {
       },
     });
 
-    // Enable default modules for the plan
-    await this.enableDefaultModulesForPlan(agencyId, plan, enabledBy);
+    // Enable default modules for the plan (pass subscriptionId directly)
+    await this.enableDefaultModulesForPlan(agencyId, plan, subscription.id, enabledBy);
 
     return subscription;
   }
@@ -74,7 +74,7 @@ export class SubscriptionsService {
 
     // If plan changed, update default modules
     if (dto.plan && dto.plan !== subscription.plan) {
-      await this.enableDefaultModulesForPlan(agencyId, dto.plan, enabledBy);
+      await this.enableDefaultModulesForPlan(agencyId, dto.plan, updated.id, enabledBy);
     }
 
     return updated;
@@ -83,6 +83,7 @@ export class SubscriptionsService {
   async enableDefaultModulesForPlan(
     agencyId: string,
     plan: SubscriptionPlan,
+    subscriptionId: string,
     enabledBy?: string,
   ) {
     const defaultModules = this.getDefaultModulesForPlan(plan);
@@ -101,11 +102,13 @@ export class SubscriptionsService {
           isEnabled: true,
           enabledBy,
           enabledAt: new Date(),
+          subscriptionId: subscriptionId,
         },
         update: {
           isEnabled: true,
           enabledBy,
           enabledAt: new Date(),
+          subscriptionId: subscriptionId,
         },
       });
     }

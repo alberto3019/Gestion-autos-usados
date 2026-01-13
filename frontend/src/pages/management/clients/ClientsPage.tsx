@@ -56,8 +56,11 @@ export default function ClientsPage() {
                   <p className="text-sm text-yellow-600 mt-2">⚠️ Alerta activa</p>
                 )}
                 <div className="flex gap-2 mt-4">
+                  <Link to={`/management/clients/${client.id}/edit`}>
+                    <Button size="sm">Editar</Button>
+                  </Link>
                   <Link to={`/management/clients/${client.id}`}>
-                    <Button size="sm">Ver Detalle</Button>
+                    <Button size="sm" variant="secondary">Ver Detalle</Button>
                   </Link>
                   <Button
                     size="sm"

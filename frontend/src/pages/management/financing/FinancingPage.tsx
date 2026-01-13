@@ -82,8 +82,8 @@ export default function FinancingPage() {
                   </p>
                 )}
                 <div className="flex gap-2">
-                  <Link to={`/management/financing/${financing.id}`}>
-                    <Button size="sm">Ver Detalle</Button>
+                  <Link to={`/management/financing/${financing.id}/edit`}>
+                    <Button size="sm">Editar</Button>
                   </Link>
                   <Button
                     size="sm"

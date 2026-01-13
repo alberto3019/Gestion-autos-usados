@@ -195,6 +195,14 @@ function App() {
             }
           />
           <Route
+            path="management/clients/:id/edit"
+            element={
+              <ModuleGuard module="clients">
+                <ClientFormPage />
+              </ModuleGuard>
+            }
+          />
+          <Route
             path="management/clients/:id"
             element={
               <ModuleGuard module="clients">
@@ -252,6 +260,14 @@ function App() {
           />
           <Route
             path="management/financing/new"
+            element={
+              <ModuleGuard module="financing_tracking">
+                <FinancingFormPage />
+              </ModuleGuard>
+            }
+          />
+          <Route
+            path="management/financing/:id/edit"
             element={
               <ModuleGuard module="financing_tracking">
                 <FinancingFormPage />

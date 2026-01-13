@@ -39,6 +39,7 @@ export default function FinancingFormPage() {
         clientId: financingData.clientId || '',
         financier: financingData.financier,
         amount: financingData.amount.toString(),
+        currency: (financingData as any).currency || 'ARS',
         installments: financingData.installments,
         interestRate: financingData.interestRate?.toString() || '',
         status: financingData.status,

@@ -33,6 +33,12 @@ export default function ClientFormPage() {
     enabled: isEditing,
   })
 
+  // Cargar vehículos para los selectores
+  const { data: vehicles } = useQuery({
+    queryKey: ['myVehicles'],
+    queryFn: () => vehiclesApi.getMyVehicles({ page: 1, limit: 1000 }),
+  })
+
   useEffect(() => {
     if (clientData) {
       setFormData({
@@ -150,6 +156,42 @@ export default function ClientFormPage() {
                 />
               </div>
             )}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Vehículo Actual
+            </label>
+            <select
+              value={formData.currentVehicleId}
+              onChange={(e) => setFormData({ ...formData, currentVehicleId: e.target.value })}
+              className="input"
+            >
+              <option value="">Ninguno</option>
+              {vehicles?.data.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.brand} {vehicle.model} ({vehicle.year})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Vehículo Deseado
+            </label>
+            <select
+              value={formData.desiredVehicleId}
+              onChange={(e) => setFormData({ ...formData, desiredVehicleId: e.target.value })}
+              className="input"
+            >
+              <option value="">Ninguno</option>
+              {vehicles?.data.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.brand} {vehicle.model} ({vehicle.year})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="md:col-span-2">

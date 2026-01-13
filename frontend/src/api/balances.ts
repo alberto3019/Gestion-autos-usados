@@ -25,6 +25,9 @@ export const balancesApi = {
       purchasePrice?: string
       investment?: string
       salePrice?: string
+      purchasePriceCurrency?: string
+      investmentCurrency?: string
+      salePriceCurrency?: string
     }
   ): Promise<VehicleBalance> => {
     const response = await apiClient.patch(

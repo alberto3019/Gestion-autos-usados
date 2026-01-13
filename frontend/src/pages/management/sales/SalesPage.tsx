@@ -16,6 +16,7 @@ export default function SalesPage() {
     sellerId: '',
     clientId: '',
     salePrice: '',
+    currency: 'ARS' as 'ARS' | 'USD' | 'EUR',
     saleDate: new Date().toISOString().split('T')[0],
     notes: '',
   })
@@ -90,17 +91,34 @@ export default function SalesPage() {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Precio de Venta *
-            </label>
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.salePrice}
-              onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio de Venta *
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.salePrice}
+                onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Moneda *
+              </label>
+              <select
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value as any })}
+                className="input"
+                required
+              >
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
           </div>
 
           <div>

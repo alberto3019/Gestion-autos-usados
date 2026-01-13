@@ -38,6 +38,7 @@ export class CashflowService {
           dto.vehicleId,
           dto.category,
           new Decimal(dto.amount),
+          dto.currency || 'ARS',
         );
       } catch (error) {
         // Log error but don't fail the transaction creation

@@ -23,7 +23,7 @@ export class VehicleInspectionsService {
         inspectionDate: new Date(dto.inspectionDate),
         observations: dto.observations,
         status: dto.status,
-        data: dto.data,
+        data: dto.data || {},
       },
       include: {
         vehicle: {

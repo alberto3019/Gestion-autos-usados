@@ -23,6 +23,12 @@ export class SalesStatsService {
       throw new NotFoundException('Vendedor no encontrado');
     }
 
+    // Obtener la moneda del vehículo si no se especifica
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { id: dto.vehicleId },
+      select: { currency: true },
+    });
+
     const salePrice = new Decimal(dto.salePrice);
     let commission: Decimal | null = null;
 
@@ -58,7 +64,11 @@ export class SalesStatsService {
 
     // Actualizar balance automáticamente con el precio de venta
     try {
-      await this.balanceHelper.updateBalanceFromSale(dto.vehicleId, salePrice);
+      await this.balanceHelper.updateBalanceFromSale(
+        dto.vehicleId,
+        salePrice,
+        dto.currency || vehicle?.currency || 'ARS',
+      );
     } catch (error) {
       // Log error but don't fail the sale creation
       console.error('Error updating balance from sale:', error);

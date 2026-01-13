@@ -1,10 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
+import { Currency } from '@prisma/client';
 
 @Injectable()
 export class BalancesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private exchangeRateService: ExchangeRateService,
+  ) {}
+
+  /**
+   * Convierte un monto a ARS usando el tipo de cambio del día
+   */
+  private async convertToArs(amount: Decimal, currency: Currency): Promise<Decimal> {
+    if (currency === 'ARS') {
+      return amount;
+    }
+    
+    const usdRate = await this.exchangeRateService.getUsdRate();
+    
+    if (currency === 'USD') {
+      return amount.times(usdRate);
+    }
+    
+    // EUR aproximado
+    if (currency === 'EUR') {
+      return amount.times(usdRate).times(1.1);
+    }
+    
+    return amount;
+  }
 
   async getVehicleBalance(vehicleId: string, agencyId: string) {
     const vehicle = await this.prisma.vehicle.findFirst({
@@ -61,6 +88,9 @@ export class BalancesService {
       purchasePrice?: string;
       investment?: string;
       salePrice?: string;
+      purchasePriceCurrency?: string;
+      investmentCurrency?: string;
+      salePriceCurrency?: string;
     },
   ) {
     const vehicle = await this.prisma.vehicle.findFirst({
@@ -71,25 +101,41 @@ export class BalancesService {
       throw new NotFoundException('Vehículo no encontrado');
     }
 
+    // Convertir montos a ARS antes de guardar
+    let purchasePriceInArs = data.purchasePrice
+      ? await this.convertToArs(
+          new Decimal(data.purchasePrice),
+          (data.purchasePriceCurrency as Currency) || 'ARS',
+        )
+      : undefined;
+
+    let investmentInArs = data.investment
+      ? await this.convertToArs(
+          new Decimal(data.investment),
+          (data.investmentCurrency as Currency) || 'ARS',
+        )
+      : undefined;
+
+    let salePriceInArs = data.salePrice
+      ? await this.convertToArs(
+          new Decimal(data.salePrice),
+          (data.salePriceCurrency as Currency) || 'ARS',
+        )
+      : undefined;
+
     const balance = await this.prisma.vehicleBalance.upsert({
       where: { vehicleId },
       create: {
         vehicleId,
-        purchasePrice: data.purchasePrice
-          ? new Decimal(data.purchasePrice)
-          : new Decimal(0),
-        investment: data.investment
-          ? new Decimal(data.investment)
-          : new Decimal(0),
-        salePrice: data.salePrice ? new Decimal(data.salePrice) : null,
+        purchasePrice: purchasePriceInArs || new Decimal(0),
+        investment: investmentInArs || new Decimal(0),
+        salePrice: salePriceInArs || null,
       },
       update: {
-        purchasePrice: data.purchasePrice
-          ? new Decimal(data.purchasePrice)
-          : undefined,
-        investment: data.investment ? new Decimal(data.investment) : undefined,
-        salePrice: data.salePrice
-          ? new Decimal(data.salePrice)
+        purchasePrice: purchasePriceInArs,
+        investment: investmentInArs,
+        salePrice: salePriceInArs !== undefined
+          ? salePriceInArs
           : data.salePrice === null
             ? null
             : undefined,

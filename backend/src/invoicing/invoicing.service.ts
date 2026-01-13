@@ -179,7 +179,11 @@ export class InvoicingService {
     // Actualizar balance automáticamente si hay vehicleId
     if (dto.vehicleId) {
       try {
-        await this.balanceHelper.updateBalanceFromInvoice(dto.vehicleId, total);
+        await this.balanceHelper.updateBalanceFromInvoice(
+          dto.vehicleId,
+          total,
+          dto.currency || 'ARS',
+        );
       } catch (error) {
         // Log error but don't fail the invoice creation
         console.error('Error updating balance from invoice:', error);

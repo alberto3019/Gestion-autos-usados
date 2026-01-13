@@ -17,6 +17,7 @@ export default function FinancingFormPage() {
     clientId: '',
     financier: '',
     amount: '',
+    currency: 'ARS' as 'ARS' | 'USD' | 'EUR',
     installments: 12,
     interestRate: '',
     status: 'pending',
@@ -116,7 +117,7 @@ export default function FinancingFormPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Monto *
@@ -128,6 +129,22 @@ export default function FinancingFormPage() {
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Moneda *
+              </label>
+              <select
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value as any })}
+                className="input"
+                required
+              >
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
             </div>
 
             <div>

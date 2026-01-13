@@ -61,6 +61,9 @@ export class BalancesController {
       purchasePrice?: string;
       investment?: string;
       salePrice?: string;
+      purchasePriceCurrency?: string;
+      investmentCurrency?: string;
+      salePriceCurrency?: string;
     },
   ) {
     return this.balancesService.updateVehicleBalance(

@@ -1,11 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
-import { TransactionCategory } from '@prisma/client';
+import { TransactionCategory, Currency } from '@prisma/client';
+import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
 
 @Injectable()
 export class BalanceHelperService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private exchangeRateService: ExchangeRateService,
+  ) {}
+
+  /**
+   * Convierte un monto a ARS usando el tipo de cambio del día
+   */
+  private async convertToArs(amount: Decimal, currency: Currency): Promise<Decimal> {
+    if (currency === 'ARS') {
+      return amount;
+    }
+    
+    const usdRate = await this.exchangeRateService.getUsdRate();
+    
+    if (currency === 'USD') {
+      return amount.times(usdRate);
+    }
+    
+    // EUR aproximado
+    if (currency === 'EUR') {
+      return amount.times(usdRate).times(1.1);
+    }
+    
+    return amount;
+  }
 
   /**
    * Actualiza el balance de un vehículo automáticamente basado en transacciones de cashflow
@@ -14,7 +40,10 @@ export class BalanceHelperService {
     vehicleId: string,
     category: TransactionCategory,
     amount: Decimal,
+    currency: Currency = 'ARS',
   ) {
+    // Convertir a ARS antes de guardar
+    const amountInArs = await this.convertToArs(amount, currency);
     // Obtener o crear el balance
     let balance = await this.prisma.vehicleBalance.findUnique({
       where: { vehicleId },
@@ -35,7 +64,7 @@ export class BalanceHelperService {
       await this.prisma.vehicleBalance.update({
         where: { vehicleId },
         data: {
-          purchasePrice: amount,
+          purchasePrice: amountInArs,
         },
       });
     }
@@ -45,7 +74,7 @@ export class BalanceHelperService {
       category === 'maintenance' ||
       category === 'other'
     ) {
-      const newInvestment = balance.investment.plus(amount);
+      const newInvestment = balance.investment.plus(amountInArs);
       await this.prisma.vehicleBalance.update({
         where: { vehicleId },
         data: {
@@ -61,7 +90,9 @@ export class BalanceHelperService {
   /**
    * Actualiza el salePrice del balance cuando se crea una venta
    */
-  async updateBalanceFromSale(vehicleId: string, salePrice: Decimal) {
+  async updateBalanceFromSale(vehicleId: string, salePrice: Decimal, currency: Currency = 'ARS') {
+    // Convertir a ARS antes de guardar
+    const salePriceInArs = await this.convertToArs(salePrice, currency);
     // Obtener o crear el balance
     let balance = await this.prisma.vehicleBalance.findUnique({
       where: { vehicleId },
@@ -82,7 +113,7 @@ export class BalanceHelperService {
       await this.prisma.vehicleBalance.update({
         where: { vehicleId },
         data: {
-          salePrice,
+          salePrice: salePriceInArs,
         },
       });
     }
@@ -94,7 +125,9 @@ export class BalanceHelperService {
   /**
    * Actualiza el salePrice del balance cuando se crea una factura (si aplica)
    */
-  async updateBalanceFromInvoice(vehicleId: string, total: Decimal) {
+  async updateBalanceFromInvoice(vehicleId: string, total: Decimal, currency: Currency = 'ARS') {
+    // Convertir a ARS antes de guardar
+    const totalInArs = await this.convertToArs(total, currency);
     // Obtener o crear el balance
     let balance = await this.prisma.vehicleBalance.findUnique({
       where: { vehicleId },
@@ -115,7 +148,7 @@ export class BalanceHelperService {
       await this.prisma.vehicleBalance.update({
         where: { vehicleId },
         data: {
-          salePrice: total,
+          salePrice: totalInArs,
         },
       });
     }

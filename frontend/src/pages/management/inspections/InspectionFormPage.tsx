@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { inspectionsApi } from '../../../api/inspections'
+import { vehiclesApi } from '../../../api/vehicles'
 import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 
@@ -17,7 +18,19 @@ export default function InspectionFormPage() {
     inspectionDate: new Date().toISOString().split('T')[0],
     observations: '',
     status: 'pending',
-    data: {},
+    data: {
+      // Datos del peritaje (estructura básica)
+      exterior: {},
+      interior: {},
+      mecanica: {},
+      electrica: {},
+    },
+  })
+
+  // Cargar vehículos para el selector
+  const { data: vehicles } = useQuery({
+    queryKey: ['myVehicles'],
+    queryFn: () => vehiclesApi.getMyVehicles({ page: 1, limit: 1000 }),
   })
 
   const createMutation = useMutation({
@@ -43,13 +56,21 @@ export default function InspectionFormPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              ID del Vehículo *
+              Vehículo *
             </label>
-            <Input
+            <select
               value={formData.vehicleId}
               onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
+              className="input"
               required
-            />
+            >
+              <option value="">Seleccionar vehículo</option>
+              {vehicles?.data.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.brand} {vehicle.model} ({vehicle.year})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

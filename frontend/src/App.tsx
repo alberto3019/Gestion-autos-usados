@@ -44,6 +44,7 @@ import SalesPage from './pages/management/sales/SalesPage'
 import FinancingPage from './pages/management/financing/FinancingPage'
 import FinancingFormPage from './pages/management/financing/FinancingFormPage'
 import BalancesPage from './pages/management/balances/BalancesPage'
+import VehicleBalanceFormPage from './pages/management/balances/VehicleBalanceFormPage'
 import InvoicingPage from './pages/management/invoicing/InvoicingPage'
 import AfipSettingsPage from './pages/management/invoicing/AfipSettingsPage'
 import InvoiceFormPage from './pages/management/invoicing/InvoiceFormPage'
@@ -262,6 +263,14 @@ function App() {
             element={
               <ModuleGuard module="balances">
                 <BalancesPage />
+              </ModuleGuard>
+            }
+          />
+          <Route
+            path="management/balances/vehicle/:vehicleId"
+            element={
+              <ModuleGuard module="balances">
+                <VehicleBalanceFormPage />
               </ModuleGuard>
             }
           />

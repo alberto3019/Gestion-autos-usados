@@ -1,4 +1,5 @@
-import { IsString, IsDateString, IsOptional, IsDecimal } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsDecimal, IsEnum } from 'class-validator';
+import { Currency } from '@prisma/client';
 
 export class CreateSaleDto {
   @IsString()
@@ -13,6 +14,10 @@ export class CreateSaleDto {
 
   @IsDecimal()
   salePrice: string;
+
+  @IsEnum(Currency)
+  @IsOptional()
+  currency?: Currency;
 
   @IsDateString()
   saleDate: string;

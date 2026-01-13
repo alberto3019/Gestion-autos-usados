@@ -18,6 +18,7 @@ export class CreateInspectionDto {
   status: string;
 
   @IsObject()
-  data: Record<string, any>;
+  @IsOptional()
+  data?: Record<string, any>;
 }
 

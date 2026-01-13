@@ -57,19 +57,35 @@ export default function CashflowReportPage() {
 
       {report && (
         <div className="space-y-6">
+          {report.exchangeRate && (
+            <div className="card bg-blue-50 border border-blue-200">
+              <p className="text-sm text-blue-800">
+                <strong>Tipo de cambio utilizado:</strong> 1 USD = {report.exchangeRate.usdToArs.toFixed(2)} ARS
+                {report.exchangeRate.lastUpdated && (
+                  <span className="ml-2 text-xs">
+                    (Actualizado: {new Date(report.exchangeRate.lastUpdated).toLocaleDateString()})
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                Todos los valores están convertidos a ARS
+              </p>
+            </div>
+          )}
+
           <div className="card">
             <h2 className="text-lg font-semibold mb-4">Resumen</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Total Ingresos</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatNumber(report.summary.totalIncome)}
+                  {formatNumber(report.summary.totalIncome)} ARS
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Egresos</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {formatNumber(report.summary.totalExpenses)}
+                  {formatNumber(report.summary.totalExpenses)} ARS
                 </p>
               </div>
               <div>
@@ -77,7 +93,7 @@ export default function CashflowReportPage() {
                 <p className={`text-2xl font-bold ${
                   report.summary.netCashflow >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {formatNumber(report.summary.netCashflow)}
+                  {formatNumber(report.summary.netCashflow)} ARS
                 </p>
               </div>
             </div>
@@ -91,9 +107,9 @@ export default function CashflowReportPage() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left">Categoría</th>
-                      <th className="px-4 py-2 text-right">Ingresos</th>
-                      <th className="px-4 py-2 text-right">Egresos</th>
-                      <th className="px-4 py-2 text-right">Neto</th>
+                      <th className="px-4 py-2 text-right">Ingresos (ARS)</th>
+                      <th className="px-4 py-2 text-right">Egresos (ARS)</th>
+                      <th className="px-4 py-2 text-right">Neto (ARS)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

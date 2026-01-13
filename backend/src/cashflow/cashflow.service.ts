@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { TransactionType, TransactionCategory } from '@prisma/client';
+import { TransactionType, TransactionCategory, Currency } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { BalanceHelperService } from '../balances/balance-helper.service';
 import { SalesStatsService } from '../sales-stats/sales-stats.service';
+import { ExchangeRateService } from '../exchange-rate/exchange-rate.service';
 
 @Injectable()
 export class CashflowService {
@@ -12,6 +13,7 @@ export class CashflowService {
     private prisma: PrismaService,
     private balanceHelper: BalanceHelperService,
     private salesStatsService: SalesStatsService,
+    private exchangeRateService: ExchangeRateService,
   ) {}
 
   async createTransaction(agencyId: string, dto: CreateTransactionDto) {
@@ -200,14 +202,33 @@ export class CashflowService {
       },
     });
 
+    // Obtener tipo de cambio actual
+    const usdRate = await this.exchangeRateService.getUsdRate();
+
+    // Función para convertir a ARS
+    const convertToArs = (amount: Decimal, currency: Currency): Decimal => {
+      if (currency === Currency.ARS) {
+        return amount;
+      }
+      if (currency === Currency.USD) {
+        return amount.times(usdRate);
+      }
+      // EUR aproximado
+      if (currency === Currency.EUR) {
+        return amount.times(usdRate).times(1.1);
+      }
+      return amount;
+    };
+
     let totalIncome = new Decimal(0);
     let totalExpenses = new Decimal(0);
 
     transactions.forEach((t) => {
+      const amountInArs = convertToArs(t.amount, t.currency);
       if (t.type === 'income') {
-        totalIncome = totalIncome.plus(t.amount);
+        totalIncome = totalIncome.plus(amountInArs);
       } else {
-        totalExpenses = totalExpenses.plus(t.amount);
+        totalExpenses = totalExpenses.plus(amountInArs);
       }
     });
 
@@ -218,16 +239,21 @@ export class CashflowService {
       if (!acc[key]) {
         acc[key] = { income: new Decimal(0), expense: new Decimal(0) };
       }
+      const amountInArs = convertToArs(t.amount, t.currency);
       if (t.type === 'income') {
-        acc[key].income = acc[key].income.plus(t.amount);
+        acc[key].income = acc[key].income.plus(amountInArs);
       } else {
-        acc[key].expense = acc[key].expense.plus(t.amount);
+        acc[key].expense = acc[key].expense.plus(amountInArs);
       }
       return acc;
     }, {} as Record<string, { income: Decimal; expense: Decimal }>);
 
     return {
       period: { startDate, endDate },
+      exchangeRate: {
+        usdToArs: usdRate,
+        lastUpdated: await this.exchangeRateService.getLastUpdated(),
+      },
       summary: {
         totalIncome: totalIncome.toNumber(),
         totalExpenses: totalExpenses.toNumber(),

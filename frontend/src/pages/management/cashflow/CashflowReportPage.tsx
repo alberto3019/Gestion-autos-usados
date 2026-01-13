@@ -4,6 +4,7 @@ import { cashflowApi } from '../../../api/cashflow'
 import Button from '../../../components/common/Button'
 import Input from '../../../components/common/Input'
 import { formatNumber } from '../../../utils/format'
+import { translateCategory } from '../../../utils/categoryTranslations'
 
 export default function CashflowReportPage() {
   const [startDate, setStartDate] = useState(

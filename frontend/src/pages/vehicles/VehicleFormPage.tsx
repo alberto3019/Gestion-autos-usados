@@ -17,6 +17,7 @@ interface VehicleForm {
   fuelType: string
   transmission: string
   color: string
+  licensePlate: string
   price: number
   currency: string
   condition: string
@@ -70,6 +71,7 @@ export default function VehicleFormPage() {
         fuelType: vehicle.fuelType,
         transmission: vehicle.transmission,
         color: vehicle.color || '',
+        licensePlate: vehicle.licensePlate || '',
         price: vehicle.price,
         currency: vehicle.currency,
         condition: vehicle.condition,
@@ -181,6 +183,10 @@ export default function VehicleFormPage() {
           <Input
             label="Color"
             {...register('color')}
+          />
+          <Input
+            label="Patente"
+            {...register('licensePlate')}
           />
 
           <div>

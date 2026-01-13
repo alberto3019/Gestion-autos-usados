@@ -3,7 +3,6 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
-  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
@@ -114,17 +113,6 @@ export class VehiclesService {
       throw new ForbiddenException(
         'No puedes crear vehículos mientras tu agencia esté bloqueada o pendiente de aprobación',
       );
-    }
-
-    // Verificar que la patente no exista (solo si se proporciona)
-    if (dto.licensePlate) {
-      const existingVehicle = await this.prisma.vehicle.findUnique({
-        where: { licensePlate: dto.licensePlate },
-      });
-
-      if (existingVehicle) {
-        throw new ConflictException('Ya existe un vehículo con esta patente');
-      }
     }
 
     const vehicle = await this.prisma.vehicle.create({

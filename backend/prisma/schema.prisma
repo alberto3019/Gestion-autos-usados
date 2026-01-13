@@ -348,7 +348,7 @@ model AgencyModule {
 
   agency         Agency        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   Subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
-  subscriptionId String?
+  subscriptionId String?       @map("subscription_id")
 
   @@unique([agencyId, module])
   @@index([agencyId])

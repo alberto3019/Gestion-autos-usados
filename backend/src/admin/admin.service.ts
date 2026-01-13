@@ -651,6 +651,16 @@ export class AdminService {
         throw new NotFoundException('Agencia no encontrada');
       }
 
+      // Si no hay suscripción, crear una básica
+      let subscription = agency.subscription;
+      if (!subscription) {
+        subscription = await this.subscriptionsService.createOrUpdateSubscription(
+          agencyId,
+          'basic',
+          enabledBy,
+        );
+      }
+
       const agencyModule = await this.prisma.agencyModule.upsert({
         where: {
           agencyId_module: {
@@ -664,12 +674,13 @@ export class AdminService {
           isEnabled: true,
           enabledBy,
           enabledAt: new Date(),
-          subscriptionId: agency.subscription?.id || null,
+          subscriptionId: subscription.id,
         },
         update: {
           isEnabled: true,
           enabledBy,
           enabledAt: new Date(),
+          subscriptionId: subscription.id,
         },
       });
 

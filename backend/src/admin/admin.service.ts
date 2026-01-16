@@ -1047,6 +1047,11 @@ export class AdminService {
       const updateTotalAmount = Math.max(0, baseAmount + updateExtraAmount - updateDiscountAmount); // No permitir total negativo
 
       // Preparar datos para create
+      // Calcular el total considerando discountAmount si está presente
+      const createExtraAmount = dto.extraAmount ? Number(dto.extraAmount) || 0 : 0;
+      const createDiscountAmount = dto.discountAmount !== undefined ? Number(dto.discountAmount) || 0 : 0;
+      const createTotalAmount = Math.max(0, baseAmount + createExtraAmount - createDiscountAmount);
+      
       const createData: any = {
         agencyId: dto.agencyId,
         subscriptionId: agency.subscription.id,
@@ -1054,19 +1059,18 @@ export class AdminService {
         month: dto.month,
         dueDate,
         amount: baseAmount,
-        extraAmount: dto.extraAmount ? Number(dto.extraAmount) || 0 : 0,
-        totalAmount: Math.max(0, baseAmount + (dto.extraAmount ? Number(dto.extraAmount) || 0 : 0) - (dto.discountAmount ? Number(dto.discountAmount) || 0 : 0)),
+        extraAmount: createExtraAmount,
+        totalAmount: createTotalAmount,
         paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
         isPaid: dto.isPaid || false,
         paidAt: dto.isPaid ? (dto.paidAt ? new Date(dto.paidAt) : new Date()) : null,
         paidBy: dto.isPaid ? userId : null,
         notes: dto.notes,
       };
-      // Solo agregar discountAmount en create si el DTO lo especifica (porque el schema ya lo tiene)
+      // Solo agregar discountAmount en create si el DTO lo especifica explícitamente
+      // Esto evita errores si el campo no existe en la BD
       if (dto.discountAmount !== undefined) {
-        createData.discountAmount = Number(dto.discountAmount) || 0;
-      } else {
-        createData.discountAmount = 0; // Default para nuevos registros
+        createData.discountAmount = createDiscountAmount;
       }
 
       // Preparar datos para update

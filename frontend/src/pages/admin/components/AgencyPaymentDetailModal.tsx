@@ -43,17 +43,30 @@ export default function AgencyPaymentDetailModal({ agencyId, onClose }: AgencyPa
     },
   })
 
-  const paymentRecords = agencyDetails?.paymentRecords || []
-  const paymentHistory = agencyDetails?.paymentHistory || []
-  const agency = agencyDetails?.agency
-  const subscription = agencyDetails?.subscription
+  // Acceder a los datos correctamente desde la respuesta del backend
+  // El backend devuelve: { agency, subscription, paymentRecords, paymentHistory }
+  // Pero puede ser que los datos vengan directamente o anidados
+  const agency = agencyDetails?.agency || agencyDetails
+  const subscription = agencyDetails?.subscription || agency?.subscription
+  
+  // Intentar obtener paymentRecords de múltiples lugares posibles
+  let paymentRecords = agencyDetails?.paymentRecords || []
+  if (paymentRecords.length === 0) {
+    paymentRecords = subscription?.paymentRecords || []
+  }
+  if (paymentRecords.length === 0) {
+    paymentRecords = agency?.subscription?.paymentRecords || []
+  }
+  
+  const paymentHistory = agencyDetails?.paymentHistory || agency?.paymentHistory || []
+  const finalPaymentRecords = paymentRecords
 
   // Calcular deuda acumulada (meses sin pagar)
-  const unpaidMonths = paymentRecords.filter((r: any) => !r.isPaid && dayjs(r.dueDate).isBefore(dayjs()))
+  const unpaidMonths = finalPaymentRecords.filter((r: any) => !r.isPaid && dayjs(r.dueDate).isBefore(dayjs()))
   const totalDebt = unpaidMonths.reduce((sum: number, r: any) => sum + Number(r.totalAmount || 0), 0)
 
   // Calcular próximo vencimiento sugerido
-  const lastPaidRecord = paymentRecords
+  const lastPaidRecord = finalPaymentRecords
     .filter((r: any) => r.isPaid)
     .sort((a: any, b: any) => dayjs(b.dueDate).unix() - dayjs(a.dueDate).unix())[0]
   
@@ -190,7 +203,7 @@ export default function AgencyPaymentDetailModal({ agencyId, onClose }: AgencyPa
           <div>
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
               <CurrencyDollarIcon className="w-5 h-5 mr-2 text-primary-600" />
-              Registro de Pagos ({paymentRecords.length})
+              Registro de Pagos ({finalPaymentRecords.length})
             </h3>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -207,14 +220,14 @@ export default function AgencyPaymentDetailModal({ agencyId, onClose }: AgencyPa
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {paymentRecords.length === 0 ? (
+                  {finalPaymentRecords.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="px-4 py-4 text-center text-gray-500 text-sm">
                         No hay registros de pago
                       </td>
                     </tr>
                   ) : (
-                    paymentRecords.map((record: any) => {
+                    finalPaymentRecords.map((record: any) => {
                       const isOverdue = !record.isPaid && dayjs(record.dueDate).isBefore(dayjs())
                       const isUpcoming = !record.isPaid && dayjs(record.dueDate).isAfter(dayjs()) && dayjs(record.dueDate).diff(dayjs(), 'days') <= 7
 

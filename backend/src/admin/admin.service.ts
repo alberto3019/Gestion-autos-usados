@@ -784,7 +784,6 @@ export class AdminService {
     search?: string;
   }) {
     try {
-      const skip = (page - 1) * limit;
       const where: any = {
         status: 'active',
         subscription: {
@@ -800,34 +799,67 @@ export class AdminService {
         ];
       }
 
-      const agencies = await this.prisma.agency.findMany({
+      // Primero obtener todas las agencias sin paginación para filtrar correctamente
+      const allAgencies = await this.prisma.agency.findMany({
         where,
         include: {
           subscription: {
             include: {
               paymentRecords: {
-                where: filters?.month && filters?.year
-                  ? { month: filters.month, year: filters.year }
-                  : undefined,
-                orderBy: { createdAt: 'desc' },
-                take: 1,
+                // Incluir todos los registros, luego filtraremos en la respuesta
+                orderBy: [
+                  { year: 'desc' },
+                  { month: 'desc' },
+                  { createdAt: 'desc' },
+                ],
+                take: 10, // Tomar más registros para tener el del mes/año si existe
               },
             },
           },
         },
-        skip,
-        take: limit,
         orderBy: { createdAt: 'desc' },
       });
 
-      const total = await this.prisma.agency.count({ where });
+      // Seleccionar el registro de pago del mes/año especificado o el más reciente
+      const agenciesWithSelectedPayment = allAgencies.map((agency) => {
+        if (!agency.subscription?.paymentRecords || agency.subscription.paymentRecords.length === 0) {
+          return agency;
+        }
 
-      // Filter by payment status if needed
-      let filteredAgencies = agencies;
+        // Si hay filtro de mes/año, buscar ese registro específico
+        if (filters?.month && filters?.year) {
+          const selectedPayment = agency.subscription.paymentRecords.find(
+            (pr) => pr.month === filters.month && pr.year === filters.year
+          );
+          // Si existe, reemplazar el array con solo ese registro
+          if (selectedPayment) {
+            return {
+              ...agency,
+              subscription: {
+                ...agency.subscription,
+                paymentRecords: [selectedPayment],
+              },
+            };
+          }
+        }
+
+        // Si no hay filtro o no existe registro para ese mes/año, usar el más reciente
+        return {
+          ...agency,
+          subscription: {
+            ...agency.subscription,
+            paymentRecords: agency.subscription.paymentRecords.slice(0, 1),
+          },
+        };
+      });
+
+      // Filtrar por estado de pago y método de pago si es necesario
+      let filteredAgencies = agenciesWithSelectedPayment;
       if (filters?.isPaid !== undefined) {
-        filteredAgencies = agencies.filter((agency) => {
+        filteredAgencies = filteredAgencies.filter((agency) => {
           const lastPayment = agency.subscription?.paymentRecords?.[0];
-          if (!lastPayment) return !filters.isPaid;
+          // Si no tiene registro de pago y el filtro es "pagado", no incluirlo
+          if (!lastPayment) return filters.isPaid === false;
           return lastPayment.isPaid === filters.isPaid;
         });
       }
@@ -835,12 +867,18 @@ export class AdminService {
       if (filters?.paymentMethod) {
         filteredAgencies = filteredAgencies.filter((agency) => {
           const lastPayment = agency.subscription?.paymentRecords?.[0];
-          return lastPayment?.paymentMethod === filters.paymentMethod;
+          const paymentMethod = lastPayment?.paymentMethod || agency.subscription?.paymentMethod;
+          return paymentMethod && paymentMethod.toLowerCase().includes(filters.paymentMethod.toLowerCase());
         });
       }
 
+      // Aplicar paginación después de filtrar
+      const total = filteredAgencies.length;
+      const skip = (page - 1) * limit;
+      const paginatedAgencies = filteredAgencies.slice(skip, skip + limit);
+
       return {
-        data: filteredAgencies,
+        data: paginatedAgencies,
         pagination: {
           page,
           limit,

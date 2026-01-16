@@ -1038,9 +1038,58 @@ export class AdminService {
       });
 
       // Calcular valores para update (usar existentes si no se proporcionan nuevos)
-      const updateExtraAmount = dto.extraAmount !== undefined ? dto.extraAmount : (existingRecord ? Number(existingRecord.extraAmount || 0) : 0);
-      const updateDiscountAmount = dto.discountAmount !== undefined ? dto.discountAmount : (existingRecord ? Number(existingRecord.discountAmount || 0) : 0);
+      const updateExtraAmount = dto.extraAmount !== undefined ? Number(dto.extraAmount) || 0 : (existingRecord ? Number(existingRecord.extraAmount) || 0 : 0);
+      // Manejar el caso donde discountAmount podría no existir en la BD
+      const existingDiscountAmount = existingRecord ? (existingRecord as any).discountAmount : null;
+      const updateDiscountAmount = dto.discountAmount !== undefined 
+        ? Number(dto.discountAmount) || 0 
+        : (existingDiscountAmount !== null && existingDiscountAmount !== undefined ? Number(existingDiscountAmount) : 0);
       const updateTotalAmount = Math.max(0, baseAmount + updateExtraAmount - updateDiscountAmount); // No permitir total negativo
+
+      // Preparar datos para create
+      const createData: any = {
+        agencyId: dto.agencyId,
+        subscriptionId: agency.subscription.id,
+        year: dto.year,
+        month: dto.month,
+        dueDate,
+        amount: baseAmount,
+        extraAmount: dto.extraAmount ? Number(dto.extraAmount) || 0 : 0,
+        totalAmount: Math.max(0, baseAmount + (dto.extraAmount ? Number(dto.extraAmount) || 0 : 0) - (dto.discountAmount ? Number(dto.discountAmount) || 0 : 0)),
+        paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
+        isPaid: dto.isPaid || false,
+        paidAt: dto.isPaid ? (dto.paidAt ? new Date(dto.paidAt) : new Date()) : null,
+        paidBy: dto.isPaid ? userId : null,
+        notes: dto.notes,
+      };
+      // Solo agregar discountAmount en create si el DTO lo especifica (porque el schema ya lo tiene)
+      if (dto.discountAmount !== undefined) {
+        createData.discountAmount = Number(dto.discountAmount) || 0;
+      } else {
+        createData.discountAmount = 0; // Default para nuevos registros
+      }
+
+      // Preparar datos para update
+      const updateData: any = {
+        extraAmount: dto.extraAmount !== undefined ? Number(dto.extraAmount) || 0 : undefined,
+        totalAmount: updateTotalAmount,
+        paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : undefined,
+        isPaid: dto.isPaid !== undefined ? dto.isPaid : undefined,
+        paidAt: dto.isPaid
+          ? dto.paidAt
+            ? new Date(dto.paidAt)
+            : new Date()
+          : dto.isPaid === false
+          ? null
+          : undefined,
+        paidBy: dto.isPaid ? userId : dto.isPaid === false ? null : undefined,
+        notes: dto.notes !== undefined ? dto.notes : undefined,
+        updatedAt: new Date(),
+      };
+      // Solo agregar discountAmount en update si el DTO lo especifica o si ya existe en el registro
+      if (dto.discountAmount !== undefined || (existingDiscountAmount !== null && existingDiscountAmount !== undefined)) {
+        updateData.discountAmount = updateDiscountAmount;
+      }
 
       const paymentRecord = await this.prisma.paymentRecord.upsert({
         where: {
@@ -1050,39 +1099,8 @@ export class AdminService {
             month: dto.month,
           },
         },
-        create: {
-          agencyId: dto.agencyId,
-          subscriptionId: agency.subscription.id,
-          year: dto.year,
-          month: dto.month,
-          dueDate,
-          amount: baseAmount,
-          extraAmount: dto.extraAmount || 0,
-          discountAmount: dto.discountAmount || 0,
-          totalAmount: Math.max(0, baseAmount + (dto.extraAmount || 0) - (dto.discountAmount || 0)),
-          paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
-          isPaid: dto.isPaid || false,
-          paidAt: dto.isPaid ? (dto.paidAt ? new Date(dto.paidAt) : new Date()) : null,
-          paidBy: dto.isPaid ? userId : null,
-          notes: dto.notes,
-        },
-        update: {
-          extraAmount: dto.extraAmount !== undefined ? dto.extraAmount : undefined,
-          discountAmount: dto.discountAmount !== undefined ? dto.discountAmount : undefined,
-          totalAmount: updateTotalAmount,
-          paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : undefined,
-          isPaid: dto.isPaid !== undefined ? dto.isPaid : undefined,
-          paidAt: dto.isPaid
-            ? dto.paidAt
-              ? new Date(dto.paidAt)
-              : new Date()
-            : dto.isPaid === false
-            ? null
-            : undefined,
-          paidBy: dto.isPaid ? userId : dto.isPaid === false ? null : undefined,
-          notes: dto.notes !== undefined ? dto.notes : undefined,
-          updatedAt: new Date(),
-        },
+        create: createData,
+        update: updateData,
         include: {
           agency: true,
           subscription: true,
@@ -1105,8 +1123,12 @@ export class AdminService {
       }
 
       return paymentRecord;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en createOrUpdatePaymentRecord:', error);
+      // Si el error es por un campo que no existe en la BD, dar un mensaje más claro
+      if (error.message?.includes('discount_amount') || error.code === '42703') {
+        throw new Error('El campo de bonificación no existe en la base de datos. Por favor ejecuta la migración SQL primero: migration_add_discount_amount.sql');
+      }
       throw error;
     }
   }
@@ -1122,31 +1144,42 @@ export class AdminService {
         throw new NotFoundException('Registro de pago no encontrado');
       }
 
-      const baseAmount = Number(existingRecord.amount);
-      const extraAmount = dto.extraAmount !== undefined ? dto.extraAmount : Number(existingRecord.extraAmount || 0);
-      const discountAmount = dto.discountAmount !== undefined ? dto.discountAmount : Number(existingRecord.discountAmount || 0);
+      const baseAmount = Number(existingRecord.amount) || 0;
+      const extraAmount = dto.extraAmount !== undefined ? Number(dto.extraAmount) || 0 : Number(existingRecord.extraAmount) || 0;
+      // Manejar el caso donde discountAmount podría no existir en la BD
+      const existingDiscountAmount = (existingRecord as any).discountAmount;
+      const discountAmount = dto.discountAmount !== undefined 
+        ? Number(dto.discountAmount) || 0 
+        : (existingDiscountAmount !== null && existingDiscountAmount !== undefined ? Number(existingDiscountAmount) : 0);
       const totalAmount = Math.max(0, baseAmount + extraAmount - discountAmount); // No permitir total negativo
 
       const wasPaidBefore = existingRecord.isPaid;
       const isPaidNow = dto.isPaid !== undefined ? dto.isPaid : existingRecord.isPaid;
 
+      // Preparar el objeto de datos para el update, solo incluyendo discountAmount si el DTO lo especifica o si existe
+      const updateData: any = {
+        extraAmount,
+        totalAmount,
+        paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : existingRecord.paymentMethod,
+        isPaid: isPaidNow,
+        paidAt: isPaidNow
+          ? dto.paidAt
+            ? new Date(dto.paidAt)
+            : existingRecord.paidAt || new Date()
+          : null,
+        paidBy: isPaidNow ? userId : null,
+        notes: dto.notes !== undefined ? dto.notes : existingRecord.notes,
+        updatedAt: new Date(),
+      };
+
+      // Solo agregar discountAmount si el DTO lo especifica explícitamente o si ya existe en el registro
+      if (dto.discountAmount !== undefined || existingDiscountAmount !== null && existingDiscountAmount !== undefined) {
+        updateData.discountAmount = discountAmount;
+      }
+
       const paymentRecord = await this.prisma.paymentRecord.update({
         where: { id },
-        data: {
-          extraAmount,
-          discountAmount,
-          totalAmount,
-          paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : existingRecord.paymentMethod,
-          isPaid: isPaidNow,
-          paidAt: isPaidNow
-            ? dto.paidAt
-              ? new Date(dto.paidAt)
-              : existingRecord.paidAt || new Date()
-            : null,
-          paidBy: isPaidNow ? userId : null,
-          notes: dto.notes !== undefined ? dto.notes : existingRecord.notes,
-          updatedAt: new Date(),
-        },
+        data: updateData,
         include: {
           agency: true,
           subscription: true,
@@ -1169,8 +1202,12 @@ export class AdminService {
       }
 
       return paymentRecord;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en updatePaymentRecord:', error);
+      // Si el error es por un campo que no existe en la BD, dar un mensaje más claro
+      if (error.message?.includes('discount_amount') || error.code === '42703') {
+        throw new Error('El campo de bonificación no existe en la base de datos. Por favor ejecuta la migración SQL primero: migration_add_discount_amount.sql');
+      }
       throw error;
     }
   }

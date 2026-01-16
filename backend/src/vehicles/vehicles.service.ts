@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
@@ -266,11 +267,14 @@ export class VehiclesService {
 
     // Si se está actualizando la patente, verificar que no exista en otro vehículo
     if (vehicleData.licensePlate && vehicleData.licensePlate !== vehicle.licensePlate) {
-      const existingVehicle = await this.prisma.vehicle.findUnique({
-        where: { licensePlate: vehicleData.licensePlate },
+      const existingVehicle = await this.prisma.vehicle.findFirst({
+        where: { 
+          licensePlate: vehicleData.licensePlate,
+          id: { not: vehicleId },
+        },
       });
 
-      if (existingVehicle && existingVehicle.id !== vehicleId) {
+      if (existingVehicle) {
         throw new ConflictException('Ya existe un vehículo con esta patente');
       }
     }

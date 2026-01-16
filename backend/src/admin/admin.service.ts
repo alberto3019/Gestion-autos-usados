@@ -800,25 +800,49 @@ export class AdminService {
       }
 
       // Primero obtener todas las agencias sin paginación para filtrar correctamente
-      const allAgencies = await this.prisma.agency.findMany({
-        where,
-        include: {
-          subscription: {
-            include: {
-              paymentRecords: {
-                // Incluir todos los registros, luego filtraremos en la respuesta
-                orderBy: [
-                  { year: 'desc' },
-                  { month: 'desc' },
-                  { createdAt: 'desc' },
-                ],
-                take: 10, // Tomar más registros para tener el del mes/año si existe
+      // Usar try-catch para la relación paymentRecords en caso de que la tabla no exista aún
+      let allAgencies;
+      try {
+        allAgencies = await this.prisma.agency.findMany({
+          where,
+          include: {
+            subscription: {
+              include: {
+                paymentRecords: {
+                  // Incluir todos los registros, luego filtraremos en la respuesta
+                  orderBy: [
+                    { year: 'desc' },
+                    { month: 'desc' },
+                    { createdAt: 'desc' },
+                  ],
+                  take: 10, // Tomar más registros para tener el del mes/año si existe
+                },
               },
             },
           },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+          orderBy: { createdAt: 'desc' },
+        });
+      } catch (relationError: any) {
+        // Si hay error con paymentRecords (tabla no existe), incluir agencias sin paymentRecords
+        console.warn('Error al cargar paymentRecords, continuando sin ellos:', relationError.message);
+        allAgencies = await this.prisma.agency.findMany({
+          where,
+          include: {
+            subscription: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        // Agregar paymentRecords vacío a cada agencia
+        allAgencies = allAgencies.map((agency) => ({
+          ...agency,
+          subscription: agency.subscription
+            ? {
+                ...agency.subscription,
+                paymentRecords: [],
+              }
+            : null,
+        }));
+      }
 
       // Seleccionar el registro de pago del mes/año especificado o el más reciente
       const agenciesWithSelectedPayment = allAgencies.map((agency) => {
@@ -876,6 +900,8 @@ export class AdminService {
       const total = filteredAgencies.length;
       const skip = (page - 1) * limit;
       const paginatedAgencies = filteredAgencies.slice(skip, skip + limit);
+
+      console.log(`[getAgenciesWithPayments] Total agencies found: ${allAgencies.length}, Filtered: ${filteredAgencies.length}, Paginated: ${paginatedAgencies.length}`);
 
       return {
         data: paginatedAgencies,

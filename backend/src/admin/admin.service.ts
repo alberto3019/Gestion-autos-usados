@@ -773,5 +773,467 @@ export class AdminService {
       throw error;
     }
   }
+
+  // Payment Management Methods
+
+  async getAgenciesWithPayments(page: number = 1, limit: number = 20, filters?: {
+    month?: number;
+    year?: number;
+    isPaid?: boolean;
+    paymentMethod?: string;
+    search?: string;
+  }) {
+    try {
+      const skip = (page - 1) * limit;
+      const where: any = {
+        status: 'active',
+        subscription: {
+          isActive: true,
+        },
+      };
+
+      if (filters?.search) {
+        where.OR = [
+          { commercialName: { contains: filters.search, mode: 'insensitive' } },
+          { businessName: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+
+      const agencies = await this.prisma.agency.findMany({
+        where,
+        include: {
+          subscription: {
+            include: {
+              paymentRecords: {
+                where: filters?.month && filters?.year
+                  ? { month: filters.month, year: filters.year }
+                  : undefined,
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const total = await this.prisma.agency.count({ where });
+
+      // Filter by payment status if needed
+      let filteredAgencies = agencies;
+      if (filters?.isPaid !== undefined) {
+        filteredAgencies = agencies.filter((agency) => {
+          const lastPayment = agency.subscription?.paymentRecords?.[0];
+          if (!lastPayment) return !filters.isPaid;
+          return lastPayment.isPaid === filters.isPaid;
+        });
+      }
+
+      if (filters?.paymentMethod) {
+        filteredAgencies = filteredAgencies.filter((agency) => {
+          const lastPayment = agency.subscription?.paymentRecords?.[0];
+          return lastPayment?.paymentMethod === filters.paymentMethod;
+        });
+      }
+
+      return {
+        data: filteredAgencies,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      console.error('Error en getAgenciesWithPayments:', error);
+      throw error;
+    }
+  }
+
+  async getAgencyPaymentDetails(agencyId: string) {
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: agencyId },
+        include: {
+          subscription: {
+            include: {
+              paymentRecords: {
+                orderBy: [{ year: 'desc' }, { month: 'desc' }],
+              },
+            },
+          },
+        },
+      });
+
+      if (!agency) {
+        throw new NotFoundException('Agencia no encontrada');
+      }
+
+      return agency;
+    } catch (error) {
+      console.error('Error en getAgencyPaymentDetails:', error);
+      throw error;
+    }
+  }
+
+  async getPaymentRecords(filters?: {
+    agencyId?: string;
+    month?: number;
+    year?: number;
+    isPaid?: boolean;
+  }) {
+    try {
+      const where: any = {};
+
+      if (filters?.agencyId) {
+        where.agencyId = filters.agencyId;
+      }
+
+      if (filters?.month) {
+        where.month = filters.month;
+      }
+
+      if (filters?.year) {
+        where.year = filters.year;
+      }
+
+      if (filters?.isPaid !== undefined) {
+        where.isPaid = filters.isPaid;
+      }
+
+      const records = await this.prisma.paymentRecord.findMany({
+        where,
+        include: {
+          agency: true,
+          subscription: true,
+        },
+        orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
+      });
+
+      return records;
+    } catch (error) {
+      console.error('Error en getPaymentRecords:', error);
+      throw error;
+    }
+  }
+
+  async createOrUpdatePaymentRecord(dto: any, userId: string) {
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: dto.agencyId },
+        include: { subscription: true },
+      });
+
+      if (!agency || agency.status !== 'active') {
+        throw new NotFoundException('Agencia no encontrada o inactiva');
+      }
+
+      if (!agency.subscription) {
+        throw new NotFoundException('La agencia no tiene suscripción activa');
+      }
+
+      // Calcular monto base según el plan
+      const planAmounts = {
+        basic: 30,
+        premium: 70,
+        enterprise: 100,
+      };
+      const baseAmount = planAmounts[agency.subscription.plan] || 0;
+      const extraAmount = dto.extraAmount || 0;
+      const totalAmount = baseAmount + extraAmount;
+
+      // Calcular fecha de vencimiento
+      let dueDate: Date;
+      if (dto.dueDate) {
+        dueDate = new Date(dto.dueDate);
+      } else {
+        const billingDay = agency.subscription.billingDay || 1;
+        dueDate = new Date(dto.year, dto.month - 1, billingDay);
+        // Si el día de facturación es mayor al último día del mes, usar el último día
+        const lastDayOfMonth = new Date(dto.year, dto.month, 0).getDate();
+        if (billingDay > lastDayOfMonth) {
+          dueDate = new Date(dto.year, dto.month - 1, lastDayOfMonth);
+        }
+      }
+
+      const paymentRecord = await this.prisma.paymentRecord.upsert({
+        where: {
+          agencyId_year_month: {
+            agencyId: dto.agencyId,
+            year: dto.year,
+            month: dto.month,
+          },
+        },
+        create: {
+          agencyId: dto.agencyId,
+          subscriptionId: agency.subscription.id,
+          year: dto.year,
+          month: dto.month,
+          dueDate,
+          amount: baseAmount,
+          extraAmount,
+          totalAmount,
+          paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
+          isPaid: dto.isPaid || false,
+          paidAt: dto.isPaid ? (dto.paidAt ? new Date(dto.paidAt) : new Date()) : null,
+          paidBy: dto.isPaid ? userId : null,
+          notes: dto.notes,
+        },
+        update: {
+          extraAmount,
+          totalAmount,
+          paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
+          isPaid: dto.isPaid !== undefined ? dto.isPaid : undefined,
+          paidAt: dto.isPaid
+            ? dto.paidAt
+              ? new Date(dto.paidAt)
+              : new Date()
+            : dto.isPaid === false
+            ? null
+            : undefined,
+          paidBy: dto.isPaid ? userId : dto.isPaid === false ? null : undefined,
+          notes: dto.notes !== undefined ? dto.notes : undefined,
+          updatedAt: new Date(),
+        },
+        include: {
+          agency: true,
+          subscription: true,
+        },
+      });
+
+      // Si se marca como pagado, crear registro en PaymentHistory
+      if (paymentRecord.isPaid && !dto.skipHistory) {
+        await this.prisma.paymentHistory.create({
+          data: {
+            agencyId: dto.agencyId,
+            paymentRecordId: paymentRecord.id,
+            amount: paymentRecord.totalAmount,
+            paymentMethod: paymentRecord.paymentMethod || 'No especificado',
+            paymentDate: paymentRecord.paidAt || new Date(),
+            notes: paymentRecord.notes,
+            createdBy: userId,
+          },
+        });
+      }
+
+      return paymentRecord;
+    } catch (error) {
+      console.error('Error en createOrUpdatePaymentRecord:', error);
+      throw error;
+    }
+  }
+
+  async updatePaymentRecord(id: string, dto: any, userId: string) {
+    try {
+      const existingRecord = await this.prisma.paymentRecord.findUnique({
+        where: { id },
+        include: { agency: { include: { subscription: true } } },
+      });
+
+      if (!existingRecord) {
+        throw new NotFoundException('Registro de pago no encontrado');
+      }
+
+      const baseAmount = existingRecord.amount;
+      const extraAmount = dto.extraAmount !== undefined ? dto.extraAmount : existingRecord.extraAmount || 0;
+      const totalAmount = baseAmount + extraAmount;
+
+      const wasPaidBefore = existingRecord.isPaid;
+      const isPaidNow = dto.isPaid !== undefined ? dto.isPaid : existingRecord.isPaid;
+
+      const paymentRecord = await this.prisma.paymentRecord.update({
+        where: { id },
+        data: {
+          extraAmount,
+          totalAmount,
+          paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : existingRecord.paymentMethod,
+          isPaid: isPaidNow,
+          paidAt: isPaidNow
+            ? dto.paidAt
+              ? new Date(dto.paidAt)
+              : existingRecord.paidAt || new Date()
+            : null,
+          paidBy: isPaidNow ? userId : null,
+          notes: dto.notes !== undefined ? dto.notes : existingRecord.notes,
+          updatedAt: new Date(),
+        },
+        include: {
+          agency: true,
+          subscription: true,
+        },
+      });
+
+      // Si se marca como pagado por primera vez, crear registro en PaymentHistory
+      if (isPaidNow && !wasPaidBefore) {
+        await this.prisma.paymentHistory.create({
+          data: {
+            agencyId: existingRecord.agencyId,
+            paymentRecordId: paymentRecord.id,
+            amount: paymentRecord.totalAmount,
+            paymentMethod: paymentRecord.paymentMethod || 'No especificado',
+            paymentDate: paymentRecord.paidAt || new Date(),
+            notes: paymentRecord.notes,
+            createdBy: userId,
+          },
+        });
+      }
+
+      return paymentRecord;
+    } catch (error) {
+      console.error('Error en updatePaymentRecord:', error);
+      throw error;
+    }
+  }
+
+  async generatePaymentRecordsForMonth(month: number, year: number, userId: string) {
+    try {
+      const activeAgencies = await this.prisma.agency.findMany({
+        where: {
+          status: 'active',
+          subscription: {
+            isActive: true,
+          },
+        },
+        include: {
+          subscription: true,
+        },
+      });
+
+      const planAmounts = {
+        basic: 30,
+        premium: 70,
+        enterprise: 100,
+      };
+
+      const createdRecords = [];
+
+      for (const agency of activeAgencies) {
+        if (!agency.subscription) continue;
+
+        // Verificar si ya existe un registro para este mes/año
+        const existingRecord = await this.prisma.paymentRecord.findUnique({
+          where: {
+            agencyId_year_month: {
+              agencyId: agency.id,
+              year,
+              month,
+            },
+          },
+        });
+
+        if (existingRecord) {
+          continue; // Skip si ya existe
+        }
+
+        const baseAmount = planAmounts[agency.subscription.plan] || 0;
+        const billingDay = agency.subscription.billingDay || 1;
+        let dueDate = new Date(year, month - 1, billingDay);
+        const lastDayOfMonth = new Date(year, month, 0).getDate();
+        if (billingDay > lastDayOfMonth) {
+          dueDate = new Date(year, month - 1, lastDayOfMonth);
+        }
+
+        const record = await this.prisma.paymentRecord.create({
+          data: {
+            agencyId: agency.id,
+            subscriptionId: agency.subscription.id,
+            year,
+            month,
+            dueDate,
+            amount: baseAmount,
+            extraAmount: 0,
+            totalAmount: baseAmount,
+            paymentMethod: agency.subscription.paymentMethod,
+            isPaid: false,
+          },
+          include: {
+            agency: true,
+            subscription: true,
+          },
+        });
+
+        createdRecords.push(record);
+      }
+
+      return {
+        created: createdRecords.length,
+        records: createdRecords,
+      };
+    } catch (error) {
+      console.error('Error en generatePaymentRecordsForMonth:', error);
+      throw error;
+    }
+  }
+
+  async getPaymentAlerts() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const fiveDaysFromNow = new Date(today);
+      fiveDaysFromNow.setDate(today.getDate() + 5);
+
+      // Pagos próximos a vencer (5 días antes) sin pagar
+      const upcomingAlerts = await this.prisma.paymentRecord.findMany({
+        where: {
+          isPaid: false,
+          dueDate: {
+            gte: today,
+            lte: fiveDaysFromNow,
+          },
+        },
+        include: {
+          agency: true,
+          subscription: true,
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+
+      // Pagos vencidos sin pagar
+      const overdueAlerts = await this.prisma.paymentRecord.findMany({
+        where: {
+          isPaid: false,
+          dueDate: {
+            lt: today,
+          },
+        },
+        include: {
+          agency: true,
+          subscription: true,
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+
+      return {
+        upcoming: upcomingAlerts.map((record) => {
+          const daysUntilDue = Math.ceil(
+            (record.dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return {
+            paymentRecord: record,
+            daysUntilDue,
+            isOverdue: false,
+          };
+        }),
+        overdue: overdueAlerts.map((record) => {
+          const daysOverdue = Math.ceil(
+            (today.getTime() - record.dueDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return {
+            paymentRecord: record,
+            daysOverdue,
+            isOverdue: true,
+          };
+        }),
+      };
+    } catch (error) {
+      console.error('Error en getPaymentAlerts:', error);
+      throw error;
+    }
+  }
 }
 

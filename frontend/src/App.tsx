@@ -29,6 +29,7 @@ import UsersManagementPage from './pages/users/UsersManagementPage'
 import AdminActivitiesPage from './pages/admin/AdminActivitiesPage'
 import AdminSubscriptionsPage from './pages/admin/AdminSubscriptionsPage'
 import AdminAgencyModulesPage from './pages/admin/AdminAgencyModulesPage'
+import AdminPaymentsPage from './pages/admin/AdminPaymentsPage'
 
 // Management Pages
 import StockPage from './pages/management/stock/StockPage'
@@ -139,6 +140,14 @@ function App() {
             element={
               <RoleGuard roles={['super_admin']}>
                 <AdminAgencyModulesPage />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="admin/payments"
+            element={
+              <RoleGuard roles={['super_admin']}>
+                <AdminPaymentsPage />
               </RoleGuard>
             }
           />

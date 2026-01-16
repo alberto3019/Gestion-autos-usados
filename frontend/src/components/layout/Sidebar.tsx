@@ -100,6 +100,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       { name: 'Favoritos', href: '/favorites', icon: HeartIcon },
       { name: 'Mi Perfil', href: '/profile', icon: UserCircleIcon },
       { name: 'Actividades', href: '/admin/activities', icon: ClockIcon },
+      { name: 'Gestión de Pagos', href: '/admin/payments', icon: CurrencyDollarIcon },
     ]
   } else {
     // Navegación para agencias

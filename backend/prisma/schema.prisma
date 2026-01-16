@@ -153,6 +153,8 @@ model Agency {
   sales                Sale[]
   financings           Financing[]
   invoices             Invoice[]
+  paymentRecords       PaymentRecord[]
+  paymentHistory       PaymentHistory[]
 
   @@index([status])
   @@index([email])
@@ -200,7 +202,7 @@ model Vehicle {
   fuelType         FuelType         @map("fuel_type")
   transmission     Transmission
   color            String?
-  licensePlate     String?          @unique @map("license_plate")
+  licensePlate     String?          @map("license_plate")
   hideLicensePlate Boolean          @default(false) @map("hide_license_plate")
   price            Decimal          @db.Decimal(15, 2)
   currency         Currency         @default(ARS)
@@ -232,7 +234,6 @@ model Vehicle {
   @@index([status])
   @@index([year])
   @@index([price])
-  @@index([licensePlate])
   @@index([createdAt(sort: Desc)])
   @@map("vehicles")
 }
@@ -329,11 +330,14 @@ model Subscription {
   isActive  Boolean          @default(true) @map("is_active")
   startDate DateTime         @map("start_date")
   endDate   DateTime?        @map("end_date")
+  paymentMethod String?      @map("payment_method")
+  billingDay    Int?         @default(1) @map("billing_day")
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
 
   agency         Agency         @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   enabledModules AgencyModule[]
+  paymentRecords PaymentRecord[]
 
   @@map("subscriptions")
 }
@@ -545,4 +549,52 @@ model Invoice {
   @@index([agencyId])
   @@index([invoiceNumber])
   @@map("invoices")
+}
+
+model PaymentRecord {
+  id              String   @id @default(uuid())
+  agencyId        String   @map("agency_id")
+  subscriptionId  String   @map("subscription_id")
+  year            Int
+  month           Int      // 1-12
+  dueDate         DateTime @map("due_date")
+  amount          Decimal  @db.Decimal(10, 2)
+  extraAmount     Decimal? @default(0) @db.Decimal(10, 2) @map("extra_amount")
+  totalAmount     Decimal  @db.Decimal(10, 2) @map("total_amount")
+  paymentMethod   String?  @map("payment_method")
+  isPaid          Boolean  @default(false) @map("is_paid")
+  paidAt          DateTime? @map("paid_at")
+  paidBy          String?  @map("paid_by")
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  agency        Agency        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  subscription  Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  paymentHistory PaymentHistory[]
+
+  @@unique([agencyId, year, month])
+  @@index([agencyId])
+  @@index([dueDate])
+  @@index([isPaid])
+  @@map("payment_records")
+}
+
+model PaymentHistory {
+  id              String   @id @default(uuid())
+  agencyId        String   @map("agency_id")
+  paymentRecordId String?  @map("payment_record_id")
+  amount          Decimal  @db.Decimal(10, 2)
+  paymentMethod   String
+  paymentDate     DateTime @map("payment_date")
+  notes           String?  @db.Text
+  createdBy       String   @map("created_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  agency         Agency         @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  paymentRecord  PaymentRecord? @relation(fields: [paymentRecordId], references: [id], onDelete: SetNull)
+
+  @@index([agencyId])
+  @@index([paymentDate])
+  @@map("payment_history")
 }

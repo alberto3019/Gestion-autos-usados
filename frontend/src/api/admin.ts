@@ -56,5 +56,44 @@ export const adminApi = {
     const response = await apiClient.get(`/admin/agencies/${agencyId}/modules`)
     return response.data
   },
+
+  // Payment Management
+  getAgenciesWithPayments: async (params?: any): Promise<any> => {
+    const response = await apiClient.get('/admin/payments/agencies', { params })
+    return response.data
+  },
+
+  getAgencyPaymentDetails: async (agencyId: string): Promise<any> => {
+    const response = await apiClient.get(`/admin/payments/agencies/${agencyId}`)
+    return response.data
+  },
+
+  getPaymentRecords: async (params?: any): Promise<any> => {
+    const response = await apiClient.get('/admin/payments/records', { params })
+    return response.data
+  },
+
+  createOrUpdatePaymentRecord: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/admin/payments/records', data)
+    return response.data
+  },
+
+  updatePaymentRecord: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.patch(`/admin/payments/records/${id}`, data)
+    return response.data
+  },
+
+  generatePaymentRecordsForMonth: async (month: number, year: number): Promise<any> => {
+    const response = await apiClient.post('/admin/payments/records/generate-month', {
+      month,
+      year,
+    })
+    return response.data
+  },
+
+  getPaymentAlerts: async (): Promise<any> => {
+    const response = await apiClient.get('/admin/payments/alerts')
+    return response.data
+  },
 }
 

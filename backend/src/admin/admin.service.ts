@@ -597,7 +597,7 @@ export class AdminService {
 
   async updateAgencySubscription(
     agencyId: string,
-    plan: SubscriptionPlan,
+    dto: any,
     enabledBy: string,
   ) {
     try {
@@ -611,18 +611,22 @@ export class AdminService {
 
       const subscription = await this.subscriptionsService.createOrUpdateSubscription(
         agencyId,
-        plan,
+        dto.plan,
         enabledBy,
+        dto.billingDay,
+        dto.paymentMethod,
       );
 
       await this.activityLogsService.log({
         agencyId,
         type: 'agency_updated',
         action: 'Actualización de Suscripción',
-        description: `Plan actualizado a ${plan} para ${agency.commercialName}`,
+        description: `Plan actualizado a ${dto.plan} para ${agency.commercialName}`,
         metadata: {
           agencyId,
-          plan,
+          plan: dto.plan,
+          billingDay: dto.billingDay,
+          paymentMethod: dto.paymentMethod,
           enabledBy,
         },
       });
@@ -1013,7 +1017,7 @@ export class AdminService {
       if (dto.dueDate) {
         dueDate = new Date(dto.dueDate);
       } else {
-        const billingDay = agency.subscription.billingDay || 1;
+        const billingDay = agency.subscription.billingDay || 5;
         dueDate = new Date(dto.year, dto.month - 1, billingDay);
         // Si el día de facturación es mayor al último día del mes, usar el último día
         const lastDayOfMonth = new Date(dto.year, dto.month, 0).getDate();
@@ -1212,7 +1216,7 @@ export class AdminService {
         }
 
         const baseAmount = planAmounts[agency.subscription.plan] || 0;
-        const billingDay = agency.subscription.billingDay || 1;
+        const billingDay = agency.subscription.billingDay || 5;
         let dueDate = new Date(year, month - 1, billingDay);
         const lastDayOfMonth = new Date(year, month, 0).getDate();
         if (billingDay > lastDayOfMonth) {

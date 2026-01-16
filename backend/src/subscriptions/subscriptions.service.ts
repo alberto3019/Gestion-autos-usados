@@ -28,6 +28,8 @@ export class SubscriptionsService {
     agencyId: string,
     plan: SubscriptionPlan,
     enabledBy?: string,
+    billingDay?: number,
+    paymentMethod?: string,
   ) {
     const subscription = await this.prisma.subscription.upsert({
       where: { agencyId },
@@ -36,9 +38,13 @@ export class SubscriptionsService {
         plan,
         isActive: true,
         startDate: new Date(),
+        billingDay: billingDay !== undefined ? billingDay : 5,
+        paymentMethod: paymentMethod || null,
       },
       update: {
         plan,
+        ...(billingDay !== undefined && { billingDay }),
+        ...(paymentMethod !== undefined && { paymentMethod }),
         updatedAt: new Date(),
       },
     });

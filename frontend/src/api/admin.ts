@@ -43,7 +43,7 @@ export const adminApi = {
 
   updateAgencySubscription: async (
     agencyId: string,
-    data: { plan: 'basic' | 'premium' | 'enterprise' }
+    data: { plan: 'basic' | 'premium' | 'enterprise'; billingDay?: number; paymentMethod?: string }
   ): Promise<any> => {
     const response = await apiClient.patch(
       `/admin/agencies/${agencyId}/subscription`,

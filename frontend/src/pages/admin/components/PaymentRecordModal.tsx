@@ -32,10 +32,10 @@ export default function PaymentRecordModal({ record, onClose, onSave, isLoading 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const data = {
-      agencyId: record.agencyId || record.agency?.id,
-      year: record.year || dayjs().year(),
-      month: record.month || dayjs().month() + 1,
+    // Para actualización solo enviamos los campos permitidos
+    // Para creación enviamos todos los campos necesarios
+    const isUpdate = !!record.id
+    const data: any = {
       extraAmount: parseFloat(formData.extraAmount.toString()) || 0,
       discountAmount: parseFloat(formData.discountAmount.toString()) || 0,
       paymentMethod: formData.paymentMethod || undefined,
@@ -43,6 +43,14 @@ export default function PaymentRecordModal({ record, onClose, onSave, isLoading 
       paidAt: formData.isPaid && formData.paidAt ? formData.paidAt : undefined,
       notes: formData.notes || undefined,
     }
+    
+    // Solo agregar campos de creación si no es una actualización
+    if (!isUpdate) {
+      data.agencyId = record.agencyId || record.agency?.id
+      data.year = record.year || dayjs().year()
+      data.month = record.month || dayjs().month() + 1
+    }
+    
     onSave(data)
   }
 

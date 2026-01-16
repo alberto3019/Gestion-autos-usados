@@ -10,6 +10,8 @@ export default function AdminSubscriptionsPage() {
   const { agencyId } = useParams()
   const queryClient = useQueryClient()
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium' | 'enterprise'>('basic')
+  const [billingDay, setBillingDay] = useState<number>(5)
+  const [paymentMethod, setPaymentMethod] = useState<string>('')
 
   const { data: modulesData, isLoading } = useQuery({
     queryKey: ['agencyModules', agencyId],
@@ -17,16 +19,22 @@ export default function AdminSubscriptionsPage() {
     enabled: !!agencyId,
   })
 
-  // Inicializar el plan seleccionado con el plan actual
+  // Inicializar los valores con los datos actuales
   useEffect(() => {
     if (modulesData?.subscription?.plan) {
       setSelectedPlan(modulesData.subscription.plan as 'basic' | 'premium' | 'enterprise')
     }
-  }, [modulesData?.subscription?.plan])
+    if (modulesData?.subscription?.billingDay) {
+      setBillingDay(modulesData.subscription.billingDay)
+    }
+    if (modulesData?.subscription?.paymentMethod) {
+      setPaymentMethod(modulesData.subscription.paymentMethod)
+    }
+  }, [modulesData?.subscription])
 
   const updateMutation = useMutation({
-    mutationFn: (plan: 'basic' | 'premium' | 'enterprise') =>
-      adminApi.updateAgencySubscription(agencyId!, { plan }),
+    mutationFn: (data: { plan: 'basic' | 'premium' | 'enterprise'; billingDay?: number; paymentMethod?: string }) =>
+      adminApi.updateAgencySubscription(agencyId!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agencyModules', agencyId] })
       queryClient.invalidateQueries({ queryKey: ['adminAgencies'] })
@@ -88,8 +96,39 @@ export default function AdminSubscriptionsPage() {
               <option value="enterprise">Enterprise</option>
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Día de Vencimiento (1-31)
+            </label>
+            <Input
+              type="number"
+              min="1"
+              max="31"
+              value={billingDay}
+              onChange={(e) => setBillingDay(parseInt(e.target.value) || 5)}
+              placeholder="5"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Día del mes en que vence el pago mensual (por defecto: 5)
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Método de Pago
+            </label>
+            <Input
+              type="text"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              placeholder="Ej: Transferencia, Tarjeta, Mercado Pago"
+            />
+          </div>
           <Button
-            onClick={() => updateMutation.mutate(selectedPlan)}
+            onClick={() => updateMutation.mutate({ 
+              plan: selectedPlan, 
+              billingDay,
+              paymentMethod: paymentMethod || undefined 
+            })}
             disabled={updateMutation.isPending || isLoading}
             isLoading={updateMutation.isPending}
           >

@@ -78,7 +78,7 @@ export class AdminController {
   ) {
     return this.adminService.updateAgencySubscription(
       id,
-      dto.plan,
+      dto,
       req.user.id,
     );
   }

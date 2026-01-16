@@ -331,7 +331,7 @@ model Subscription {
   startDate DateTime         @map("start_date")
   endDate   DateTime?        @map("end_date")
   paymentMethod String?      @map("payment_method")
-  billingDay    Int?         @default(1) @map("billing_day")
+  billingDay    Int?         @default(5) @map("billing_day")
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
 

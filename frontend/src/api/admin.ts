@@ -95,5 +95,13 @@ export const adminApi = {
     const response = await apiClient.get('/admin/payments/alerts')
     return response.data
   },
+
+  generateDebtRecords: async (agencyId: string, nextDueDate: string, monthsToGenerate: number): Promise<any> => {
+    const response = await apiClient.post(`/admin/payments/agencies/${agencyId}/generate-debt`, {
+      nextDueDate,
+      monthsToGenerate,
+    })
+    return response.data
+  },
 }
 

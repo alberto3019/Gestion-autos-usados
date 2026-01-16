@@ -934,6 +934,10 @@ export class AdminService {
               },
             },
           },
+          paymentHistory: {
+            orderBy: { paymentDate: 'desc' },
+            take: 50, // Últimos 50 pagos
+          },
         },
       });
 
@@ -941,7 +945,12 @@ export class AdminService {
         throw new NotFoundException('Agencia no encontrada');
       }
 
-      return agency;
+      return {
+        agency,
+        subscription: agency.subscription,
+        paymentRecords: agency.subscription?.paymentRecords || [],
+        paymentHistory: agency.paymentHistory || [],
+      };
     } catch (error) {
       console.error('Error en getAgencyPaymentDetails:', error);
       throw error;
@@ -1360,6 +1369,143 @@ export class AdminService {
       };
     } catch (error) {
       console.error('Error en getPaymentAlerts:', error);
+      throw error;
+    }
+  }
+
+  async generateDebtRecords(
+    agencyId: string,
+    nextDueDate: string,
+    monthsToGenerate: number,
+    userId: string,
+  ) {
+    try {
+      const agency = await this.prisma.agency.findUnique({
+        where: { id: agencyId },
+        include: { subscription: true },
+      });
+
+      if (!agency || agency.status !== 'active') {
+        throw new NotFoundException('Agencia no encontrada o inactiva');
+      }
+
+      if (!agency.subscription) {
+        throw new NotFoundException('La agencia no tiene suscripción activa');
+      }
+
+      // Obtener el último registro de pago pagado
+      const lastPaidRecord = await this.prisma.paymentRecord.findFirst({
+        where: {
+          agencyId,
+          isPaid: true,
+        },
+        orderBy: [{ year: 'desc' }, { month: 'desc' }],
+      });
+
+      // Calcular monto base según el plan
+      const planAmounts = {
+        basic: 30,
+        premium: 70,
+        enterprise: 100,
+      };
+      const baseAmount = planAmounts[agency.subscription.plan] || 0;
+      const billingDay = agency.subscription.billingDay || 5;
+
+      // Determinar desde dónde empezar a generar
+      let startDate: Date;
+      if (lastPaidRecord) {
+        // Empezar desde el mes siguiente al último pago pagado
+        startDate = new Date(lastPaidRecord.year, lastPaidRecord.month, 1);
+        startDate.setMonth(startDate.getMonth() + 1);
+      } else {
+        // Si no hay pagos, empezar desde la fecha de alta
+        startDate = new Date(agency.createdAt);
+      }
+
+      const targetDate = new Date(nextDueDate);
+      const createdRecords = [];
+
+      // Generar registros mes por mes hasta llegar al próximo vencimiento
+      const currentDate = new Date(startDate);
+      let generatedCount = 0;
+
+      while (generatedCount < monthsToGenerate && currentDate <= targetDate) {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+
+        // Verificar si ya existe un registro para este mes/año
+        const existingRecord = await this.prisma.paymentRecord.findUnique({
+          where: {
+            agencyId_year_month: {
+              agencyId,
+              year,
+              month,
+            },
+          },
+        });
+
+        if (!existingRecord) {
+          // Calcular fecha de vencimiento para este mes
+          let dueDate = new Date(year, month - 1, billingDay);
+          const lastDayOfMonth = new Date(year, month, 0).getDate();
+          if (billingDay > lastDayOfMonth) {
+            dueDate = new Date(year, month - 1, lastDayOfMonth);
+          }
+
+          const record = await this.prisma.paymentRecord.create({
+            data: {
+              agencyId: agency.id,
+              subscriptionId: agency.subscription.id,
+              year,
+              month,
+              dueDate,
+              amount: baseAmount,
+              extraAmount: 0,
+              discountAmount: 0,
+              totalAmount: baseAmount,
+              paymentMethod: agency.subscription.paymentMethod,
+              isPaid: false,
+            },
+          });
+
+          createdRecords.push(record);
+          generatedCount++;
+        }
+
+        // Avanzar al siguiente mes
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+
+      // Actualizar el billingDay si es necesario (para próximos vencimientos)
+      const newBillingDay = new Date(nextDueDate).getDate();
+      if (newBillingDay !== billingDay) {
+        await this.prisma.subscription.update({
+          where: { agencyId },
+          data: { billingDay: newBillingDay },
+        });
+      }
+
+      await this.activityLogsService.log({
+        agencyId,
+        type: 'agency_updated',
+        action: 'Generación de Registros de Deuda',
+        description: `Generados ${createdRecords.length} registros de deuda acumulada para ${agency.commercialName}`,
+        metadata: {
+          agencyId,
+          recordsGenerated: createdRecords.length,
+          nextDueDate,
+          monthsToGenerate,
+          generatedBy: userId,
+        },
+      });
+
+      return {
+        message: `Se generaron ${createdRecords.length} registros de deuda acumulada`,
+        recordsGenerated: createdRecords.length,
+        records: createdRecords,
+      };
+    } catch (error) {
+      console.error('Error en generateDebtRecords:', error);
       throw error;
     }
   }

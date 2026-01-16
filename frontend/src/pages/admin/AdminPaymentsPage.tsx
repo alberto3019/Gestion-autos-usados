@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/es'
 import PaymentRecordModal from './components/PaymentRecordModal'
 import GenerateMonthModal from './components/GenerateMonthModal'
+import AgencyPaymentDetailModal from './components/AgencyPaymentDetailModal'
 
 dayjs.locale('es')
 
@@ -35,8 +36,10 @@ export default function AdminPaymentsPage() {
   const [selectedMonth, setSelectedMonth] = useState(dayjs().month() + 1)
   const [selectedYear, setSelectedYear] = useState(dayjs().year())
   const [selectedRecord, setSelectedRecord] = useState<any>(null)
+  const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   const { data: alertsData } = useQuery({
     queryKey: ['paymentAlerts'],
@@ -107,19 +110,33 @@ export default function AdminPaymentsPage() {
 
   const getPaymentStatus = (record: any) => {
     if (!record) return { status: 'pending', label: 'Sin registro', color: 'gray' }
-    if (record.isPaid) return { status: 'paid', label: 'Pagado', color: 'green' }
+    
+    // Si está pagado, mostrar como pagado
+    if (record.isPaid) {
+      // Pero verificar si es de un mes/año anterior al seleccionado
+      const recordDate = dayjs(`${record.year}-${record.month}-01`)
+      const currentMonthDate = dayjs(`${selectedYear}-${selectedMonth}-01`)
+      if (recordDate.isBefore(currentMonthDate, 'month')) {
+        // Es un pago de un mes anterior, no del mes actual
+        return { status: 'pending', label: 'Sin vencer', color: 'gray' }
+      }
+      return { status: 'paid', label: 'Pagado', color: 'green' }
+    }
 
     const today = dayjs()
     const dueDate = dayjs(record.dueDate)
     const daysUntilDue = dueDate.diff(today, 'day')
 
+    // Si el vencimiento ya pasó
     if (daysUntilDue < 0) {
       return { status: 'overdue', label: 'Vencido', color: 'red' }
     }
+    // Si está por vencer (5 días o menos)
     if (daysUntilDue <= 5) {
       return { status: 'upcoming', label: `Vence en ${daysUntilDue} días`, color: 'orange' }
     }
-    return { status: 'pending', label: 'Pendiente', color: 'gray' }
+    // Pendiente, sin vencer aún
+    return { status: 'pending', label: 'Sin vencer', color: 'gray' }
   }
 
   const agencies = agenciesData?.data || []
@@ -285,8 +302,12 @@ export default function AdminPaymentsPage() {
                 </tr>
               ) : (
                 agencies.map((agency: any) => {
-                  const lastPayment = agency.subscription?.paymentRecords?.[0]
-                  const status = getPaymentStatus(lastPayment)
+                  // Buscar el registro del mes/año seleccionado específicamente
+                  const currentMonthPayment = agency.subscription?.paymentRecords?.find(
+                    (r: any) => r.month === selectedMonth && r.year === selectedYear
+                  ) || agency.subscription?.paymentRecords?.[0] // Fallback al último si no hay del mes seleccionado
+                  
+                  const status = getPaymentStatus(currentMonthPayment)
                   const planPrice = PLAN_PRICES[agency.subscription?.plan as keyof typeof PLAN_PRICES] || 0
 
                   return (
@@ -303,7 +324,7 @@ export default function AdminPaymentsPage() {
                         {dayjs(agency.createdAt).format('DD/MM/YYYY')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {lastPayment ? dayjs(lastPayment.dueDate).format('DD/MM/YYYY') : 'N/A'}
+                        {currentMonthPayment ? dayjs(currentMonthPayment.dueDate).format('DD/MM/YYYY') : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -323,19 +344,31 @@ export default function AdminPaymentsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {lastPayment?.paymentMethod || agency.subscription?.paymentMethod || '-'}
+                        {currentMonthPayment?.paymentMethod || agency.subscription?.paymentMethod || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${lastPayment?.totalAmount ? Number(lastPayment.totalAmount).toFixed(2) : planPrice.toFixed(2)} USD
+                        ${currentMonthPayment?.totalAmount ? Number(currentMonthPayment.totalAmount).toFixed(2) : planPrice.toFixed(2)} USD
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleEditPayment(agency)}
-                        >
-                          Editar
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedAgencyId(agency.id)
+                              setIsDetailModalOpen(true)
+                            }}
+                          >
+                            Ver Detalle
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleEditPayment(agency)}
+                          >
+                            Editar
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -384,6 +417,16 @@ export default function AdminPaymentsPage() {
             generateMutation.mutate({ month, year })
           }}
           isLoading={generateMutation.isPending}
+        />
+      )}
+
+      {isDetailModalOpen && selectedAgencyId && (
+        <AgencyPaymentDetailModal
+          agencyId={selectedAgencyId}
+          onClose={() => {
+            setIsDetailModalOpen(false)
+            setSelectedAgencyId(null)
+          }}
         />
       )}
     </div>

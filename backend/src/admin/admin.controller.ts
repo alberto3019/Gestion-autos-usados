@@ -173,5 +173,14 @@ export class AdminController {
   async getPaymentAlerts() {
     return this.adminService.getPaymentAlerts();
   }
+
+  @Post('payments/agencies/:id/generate-debt')
+  async generateDebtRecords(
+    @Param('id') agencyId: string,
+    @Body() dto: { nextDueDate: string; monthsToGenerate: number },
+    @Request() req,
+  ) {
+    return this.adminService.generateDebtRecords(agencyId, dto.nextDueDate, dto.monthsToGenerate, req.user.id);
+  }
 }
 

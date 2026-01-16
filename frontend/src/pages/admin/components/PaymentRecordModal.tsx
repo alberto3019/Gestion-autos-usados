@@ -19,14 +19,14 @@ interface PaymentRecordModalProps {
 
 export default function PaymentRecordModal({ record, onClose, onSave, isLoading }: PaymentRecordModalProps) {
   const [formData, setFormData] = useState({
-    extraAmount: record?.extraAmount || 0,
+    extraAmount: record?.extraAmount ? Number(record.extraAmount) : 0,
     paymentMethod: record?.paymentMethod || record?.agency?.subscription?.paymentMethod || '',
     isPaid: record?.isPaid || false,
     paidAt: record?.paidAt ? dayjs(record.paidAt).format('YYYY-MM-DD') : '',
     notes: record?.notes || '',
   })
 
-  const baseAmount = record?.amount || PLAN_PRICES[record?.agency?.subscription?.plan as keyof typeof PLAN_PRICES] || 0
+  const baseAmount = record?.amount ? Number(record.amount) : PLAN_PRICES[record?.agency?.subscription?.plan as keyof typeof PLAN_PRICES] || 0
   const totalAmount = baseAmount + (formData.extraAmount || 0)
 
   const handleSubmit = (e: React.FormEvent) => {

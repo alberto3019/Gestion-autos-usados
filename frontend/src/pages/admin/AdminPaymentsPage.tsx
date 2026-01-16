@@ -326,7 +326,7 @@ export default function AdminPaymentsPage() {
                         {lastPayment?.paymentMethod || agency.subscription?.paymentMethod || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${lastPayment?.totalAmount?.toFixed(2) || planPrice.toFixed(2)} USD
+                        ${lastPayment?.totalAmount ? Number(lastPayment.totalAmount).toFixed(2) : planPrice.toFixed(2)} USD
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Button

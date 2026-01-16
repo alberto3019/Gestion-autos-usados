@@ -12,6 +12,9 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 
+// Web Landing Page
+import WebLandingPage from './pages/web/WebLandingPage'
+
 // Agency Pages
 import DashboardPage from './pages/dashboard/DashboardPage'
 import MyVehiclesPage from './pages/vehicles/MyVehiclesPage'
@@ -62,6 +65,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Web Landing Page - Public */}
+        <Route path="/web" element={<WebLandingPage />} />
+
         {/* Public Routes */}
         <Route
           path="/login"

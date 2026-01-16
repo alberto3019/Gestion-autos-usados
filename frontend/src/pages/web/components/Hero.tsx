@@ -10,6 +10,12 @@ export default function Hero() {
     window.open(url, '_blank')
   }
 
+  const handleRequestDemo = () => {
+    const message = encodeURIComponent('Hola, me gustaría solicitar una demo de AutoStock360')
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`
+    window.open(url, '_blank')
+  }
+
   const scrollToFeatures = () => {
     const element = document.querySelector('#features')
     if (element) {
@@ -68,11 +74,10 @@ export default function Hero() {
                 Contratar Ahora
               </button>
               <button
-                onClick={scrollToFeatures}
-                className="px-8 py-4 bg-white text-primary-600 border-2 border-primary-600 rounded-lg font-semibold text-lg hover:bg-primary-50 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+                onClick={handleRequestDemo}
+                className="px-8 py-4 bg-white text-primary-600 border-2 border-primary-600 rounded-lg font-semibold text-lg hover:bg-primary-50 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Ver Demo
-                <FaArrowDown className="w-4 h-4" />
+                Solicitar una Demo
               </button>
             </motion.div>
           </motion.div>

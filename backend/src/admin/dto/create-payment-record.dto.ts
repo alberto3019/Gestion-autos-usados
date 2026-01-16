@@ -23,6 +23,10 @@ export class CreatePaymentRecordDto {
   extraAmount?: number;
 
   @IsOptional()
+  @IsNumber()
+  discountAmount?: number;
+
+  @IsOptional()
   @IsString()
   paymentMethod?: string;
 

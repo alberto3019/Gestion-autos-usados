@@ -58,7 +58,7 @@ export default function AdminPaymentsPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: adminApi.updatePaymentRecord,
+    mutationFn: ({ id, ...data }: { id: string; [key: string]: any }) => adminApi.updatePaymentRecord(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agenciesWithPayments'] })
       queryClient.invalidateQueries({ queryKey: ['paymentAlerts'] })
@@ -365,8 +365,10 @@ export default function AdminPaymentsPage() {
             setSelectedRecord(null)
           }}
           onSave={(data) => {
-            if (selectedRecord.id) {
-              updateMutation.mutate({ id: selectedRecord.id, ...data })
+            // Verificar si el registro existe y tiene ID válido
+            const hasValidId = selectedRecord.id && typeof selectedRecord.id === 'string' && selectedRecord.id.length > 0
+            if (hasValidId) {
+              updateMutation.mutate({ id: String(selectedRecord.id), ...data })
             } else {
               createOrUpdateMutation.mutate(data)
             }

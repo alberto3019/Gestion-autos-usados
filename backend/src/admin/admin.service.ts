@@ -1007,9 +1007,7 @@ export class AdminService {
         enterprise: 100,
       };
       const baseAmount = planAmounts[agency.subscription.plan] || 0;
-      const extraAmount = dto.extraAmount || 0;
-      const totalAmount = baseAmount + extraAmount;
-
+      
       // Calcular fecha de vencimiento
       let dueDate: Date;
       if (dto.dueDate) {
@@ -1023,6 +1021,22 @@ export class AdminService {
           dueDate = new Date(dto.year, dto.month - 1, lastDayOfMonth);
         }
       }
+
+      // Para el update, necesitamos obtener el registro existente primero si existe
+      const existingRecord = await this.prisma.paymentRecord.findUnique({
+        where: {
+          agencyId_year_month: {
+            agencyId: dto.agencyId,
+            year: dto.year,
+            month: dto.month,
+          },
+        },
+      });
+
+      // Calcular valores para update (usar existentes si no se proporcionan nuevos)
+      const updateExtraAmount = dto.extraAmount !== undefined ? dto.extraAmount : (existingRecord ? Number(existingRecord.extraAmount || 0) : 0);
+      const updateDiscountAmount = dto.discountAmount !== undefined ? dto.discountAmount : (existingRecord ? Number(existingRecord.discountAmount || 0) : 0);
+      const updateTotalAmount = Math.max(0, baseAmount + updateExtraAmount - updateDiscountAmount); // No permitir total negativo
 
       const paymentRecord = await this.prisma.paymentRecord.upsert({
         where: {
@@ -1039,8 +1053,9 @@ export class AdminService {
           month: dto.month,
           dueDate,
           amount: baseAmount,
-          extraAmount,
-          totalAmount,
+          extraAmount: dto.extraAmount || 0,
+          discountAmount: dto.discountAmount || 0,
+          totalAmount: Math.max(0, baseAmount + (dto.extraAmount || 0) - (dto.discountAmount || 0)),
           paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
           isPaid: dto.isPaid || false,
           paidAt: dto.isPaid ? (dto.paidAt ? new Date(dto.paidAt) : new Date()) : null,
@@ -1048,9 +1063,10 @@ export class AdminService {
           notes: dto.notes,
         },
         update: {
-          extraAmount,
-          totalAmount,
-          paymentMethod: dto.paymentMethod || agency.subscription.paymentMethod,
+          extraAmount: dto.extraAmount !== undefined ? dto.extraAmount : undefined,
+          discountAmount: dto.discountAmount !== undefined ? dto.discountAmount : undefined,
+          totalAmount: updateTotalAmount,
+          paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : undefined,
           isPaid: dto.isPaid !== undefined ? dto.isPaid : undefined,
           paidAt: dto.isPaid
             ? dto.paidAt
@@ -1102,9 +1118,10 @@ export class AdminService {
         throw new NotFoundException('Registro de pago no encontrado');
       }
 
-      const baseAmount = existingRecord.amount;
-      const extraAmount = dto.extraAmount !== undefined ? dto.extraAmount : existingRecord.extraAmount || 0;
-      const totalAmount = baseAmount + extraAmount;
+      const baseAmount = Number(existingRecord.amount);
+      const extraAmount = dto.extraAmount !== undefined ? dto.extraAmount : Number(existingRecord.extraAmount || 0);
+      const discountAmount = dto.discountAmount !== undefined ? dto.discountAmount : Number(existingRecord.discountAmount || 0);
+      const totalAmount = Math.max(0, baseAmount + extraAmount - discountAmount); // No permitir total negativo
 
       const wasPaidBefore = existingRecord.isPaid;
       const isPaidNow = dto.isPaid !== undefined ? dto.isPaid : existingRecord.isPaid;
@@ -1113,6 +1130,7 @@ export class AdminService {
         where: { id },
         data: {
           extraAmount,
+          discountAmount,
           totalAmount,
           paymentMethod: dto.paymentMethod !== undefined ? dto.paymentMethod : existingRecord.paymentMethod,
           isPaid: isPaidNow,
@@ -1210,6 +1228,7 @@ export class AdminService {
             dueDate,
             amount: baseAmount,
             extraAmount: 0,
+            discountAmount: 0,
             totalAmount: baseAmount,
             paymentMethod: agency.subscription.paymentMethod,
             isPaid: false,

@@ -560,6 +560,7 @@ model PaymentRecord {
   dueDate         DateTime @map("due_date")
   amount          Decimal  @db.Decimal(10, 2)
   extraAmount     Decimal? @default(0) @db.Decimal(10, 2) @map("extra_amount")
+  discountAmount  Decimal? @default(0) @db.Decimal(10, 2) @map("discount_amount")
   totalAmount     Decimal  @db.Decimal(10, 2) @map("total_amount")
   paymentMethod   String?  @map("payment_method")
   isPaid          Boolean  @default(false) @map("is_paid")

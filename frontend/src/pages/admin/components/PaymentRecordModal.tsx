@@ -20,6 +20,7 @@ interface PaymentRecordModalProps {
 export default function PaymentRecordModal({ record, onClose, onSave, isLoading }: PaymentRecordModalProps) {
   const [formData, setFormData] = useState({
     extraAmount: record?.extraAmount ? Number(record.extraAmount) : 0,
+    discountAmount: record?.discountAmount ? Number(record.discountAmount) : 0,
     paymentMethod: record?.paymentMethod || record?.agency?.subscription?.paymentMethod || '',
     isPaid: record?.isPaid || false,
     paidAt: record?.paidAt ? dayjs(record.paidAt).format('YYYY-MM-DD') : '',
@@ -27,7 +28,7 @@ export default function PaymentRecordModal({ record, onClose, onSave, isLoading 
   })
 
   const baseAmount = record?.amount ? Number(record.amount) : PLAN_PRICES[record?.agency?.subscription?.plan as keyof typeof PLAN_PRICES] || 0
-  const totalAmount = baseAmount + (formData.extraAmount || 0)
+  const totalAmount = Math.max(0, baseAmount + (formData.extraAmount || 0) - (formData.discountAmount || 0))
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,6 +37,7 @@ export default function PaymentRecordModal({ record, onClose, onSave, isLoading 
       year: record.year || dayjs().year(),
       month: record.month || dayjs().month() + 1,
       extraAmount: parseFloat(formData.extraAmount.toString()) || 0,
+      discountAmount: parseFloat(formData.discountAmount.toString()) || 0,
       paymentMethod: formData.paymentMethod || undefined,
       isPaid: formData.isPaid,
       paidAt: formData.isPaid && formData.paidAt ? formData.paidAt : undefined,
@@ -93,6 +95,23 @@ export default function PaymentRecordModal({ record, onClose, onSave, isLoading 
               onChange={(e) => setFormData({ ...formData, extraAmount: parseFloat(e.target.value) || 0 })}
               placeholder="0.00"
             />
+          </div>
+
+          {/* Discount Amount (Bonificación) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bonificación / Descuento (USD)
+            </label>
+            <Input
+              type="number"
+              step="0.01"
+              value={formData.discountAmount}
+              onChange={(e) => setFormData({ ...formData, discountAmount: parseFloat(e.target.value) || 0 })}
+              placeholder="0.00"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Monto a descontar del total (bonificación para agencias específicas)
+            </p>
           </div>
 
           {/* Total Amount */}

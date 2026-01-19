@@ -66,6 +66,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateStereo = (field: keyof PeritajeMecanico['stereo'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       stereo: { ...prev.stereo, [field]: value },
@@ -73,6 +74,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateTransmision = (field: keyof PeritajeMecanico['transmision'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       transmision: { ...prev.transmision, [field]: value },
@@ -80,6 +82,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateOpcionales = (field: keyof PeritajeMecanico['opcionales'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       opcionales: { ...prev.opcionales, [field]: value },
@@ -87,6 +90,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateOpcionalesDireccion = (field: string, value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       opcionales: {
@@ -97,6 +101,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateEquipamiento = (field: keyof PeritajeMecanico['equipamiento'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       equipamiento: { ...prev.equipamiento, [field]: value },
@@ -104,6 +109,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateCarroceria = (field: keyof PeritajeMecanico['carroceria'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       carroceria: { ...prev.carroceria, [field]: value },
@@ -111,6 +117,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateMotor = (field: keyof PeritajeMecanico['motor'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       motor: { ...prev.motor, [field]: value },
@@ -118,6 +125,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updateNeumaticos = (field: keyof PeritajeMecanico['neumaticos'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       neumaticos: { ...prev.neumaticos, [field]: value },
@@ -125,6 +133,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }
 
   const updatePuntaje = (value: number) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       puntaje: { puntaje: value },

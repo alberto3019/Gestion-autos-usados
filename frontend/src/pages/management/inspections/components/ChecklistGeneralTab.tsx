@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import type { ChecklistGeneral } from '../utils/inspectionDataSchema'
 import Input from '../../../../components/common/Input'
 
@@ -9,13 +9,19 @@ interface Props {
 
 export default function ChecklistGeneralTab({ data, onChange }: Props) {
   const [localData, setLocalData] = useState<ChecklistGeneral>(data)
+  const isUpdatingRef = useRef(false)
 
   useEffect(() => {
-    setLocalData(data)
+    if (!isUpdatingRef.current) {
+      setLocalData(data)
+    }
   }, [data])
 
   useEffect(() => {
-    onChange(localData)
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false
+      onChange(localData)
+    }
   }, [localData, onChange])
 
   const updateItem = (index: number, field: keyof ChecklistGeneral['items'][0], value: any) => {

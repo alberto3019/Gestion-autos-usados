@@ -52,6 +52,12 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
     }))
   }
 
+  const handleDominioChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Solo permitir letras y números, convertir a mayúsculas
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    updateHeader('dominio', value)
+  }
+
   const updateStereo = (field: keyof PeritajeMecanico['stereo'], value: any) => {
     setLocalData((prev) => ({
       ...prev,
@@ -151,7 +157,10 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
         <Input
           label="DOMINIO"
           value={localData.header.dominio}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('dominio', e.target.value)}
+          onChange={handleDominioChange}
+          placeholder="ABC123"
+          pattern="[A-Z0-9]*"
+          title="Solo letras y números"
         />
         <Input
           label="MARCA"

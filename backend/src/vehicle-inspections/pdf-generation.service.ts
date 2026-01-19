@@ -204,6 +204,11 @@ export class PdfGenerationService {
       top: await this.loadImageAsBase64('arriba.png'),
     };
 
+    // Register Handlebars helpers
+    handlebars.registerHelper('eq', function(a: any, b: any) {
+      return a === b;
+    });
+
     // Prepare data for template
     const templateData = {
       vehicle: vehicleInfo,

@@ -5,6 +5,7 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { existsSync } from 'fs';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { InspectionDataDto } from './dto/inspection-data.dto';
@@ -226,7 +227,7 @@ export class PdfGenerationService {
 
     // Generate PDF with Puppeteer
     // Configure for production environments like Render.com
-    const executablePath = this.configService.get('PUPPETEER_EXECUTABLE_PATH') || 
+    let executablePath = this.configService.get('PUPPETEER_EXECUTABLE_PATH') || 
       process.env.PUPPETEER_EXECUTABLE_PATH;
     
     const launchOptions: any = {
@@ -240,10 +241,36 @@ export class PdfGenerationService {
         '--no-first-run',
         '--no-zygote',
         '--single-process', // Important for Render.com
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-sync',
       ],
     };
 
-    // Use explicit Chrome path if provided (for Render.com)
+    // Try to find Chrome in common locations if executablePath not provided
+    if (!executablePath) {
+      const commonPaths = [
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/snap/bin/chromium',
+      ];
+      
+      for (const path of commonPaths) {
+        try {
+          if (existsSync(path)) {
+            executablePath = path;
+            break;
+          }
+        } catch (e) {
+          // Continue searching
+        }
+      }
+    }
+
+    // Use explicit Chrome path if found
     if (executablePath) {
       launchOptions.executablePath = executablePath;
     }

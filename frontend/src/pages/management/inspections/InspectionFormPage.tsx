@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { inspectionsApi } from '../../../api/inspections'
@@ -129,7 +129,7 @@ export default function InspectionFormPage() {
     }
   }
 
-  const handleDataUpdate = (section: keyof InspectionData, data: any) => {
+  const handleDataUpdate = useCallback((section: keyof InspectionData, data: any) => {
     setFormData((prev) => ({
       ...prev,
       data: {
@@ -137,7 +137,7 @@ export default function InspectionFormPage() {
         [section]: data,
       },
     }))
-  }
+  }, [])
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'mecanico', label: 'PERITAJE MECÁNICO' },

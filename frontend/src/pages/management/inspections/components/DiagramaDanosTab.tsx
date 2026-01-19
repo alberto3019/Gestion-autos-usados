@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import type { DanosDiagrama, DamageMark } from '../utils/inspectionDataSchema'
 import VehicleDiagram from './VehicleDiagram'
 
@@ -17,16 +17,23 @@ const damageTypeLabels: Record<DamageMark['tipo'], string> = {
 export default function DiagramaDanosTab({ data, onChange }: Props) {
   const [localData, setLocalData] = useState<DanosDiagrama>(data)
   const [selectedDamageType, setSelectedDamageType] = useState<'0' | 'x' | '#' | 'z' | null>(null)
+  const isUpdatingRef = useRef(false)
 
   useEffect(() => {
-    setLocalData(data)
+    if (!isUpdatingRef.current) {
+      setLocalData(data)
+    }
   }, [data])
 
   useEffect(() => {
-    onChange(localData)
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false
+      onChange(localData)
+    }
   }, [localData, onChange])
 
   const handleDamageAdd = (view: keyof DanosDiagrama, damage: DamageMark) => {
+    isUpdatingRef.current = true
     setLocalData({
       ...localData,
       [view]: [...localData[view], damage],
@@ -34,6 +41,7 @@ export default function DiagramaDanosTab({ data, onChange }: Props) {
   }
 
   const handleDamageRemove = (view: keyof DanosDiagrama, index: number) => {
+    isUpdatingRef.current = true
     setLocalData({
       ...localData,
       [view]: localData[view].filter((_, i) => i !== index),

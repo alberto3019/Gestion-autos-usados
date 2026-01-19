@@ -230,6 +230,11 @@ export class PdfGenerationService {
     let executablePath = this.configService.get('PUPPETEER_EXECUTABLE_PATH') || 
       process.env.PUPPETEER_EXECUTABLE_PATH;
     
+    // Configure cache path for Render.com (default: /opt/render/.cache/puppeteer)
+    const cacheDir = process.env.PUPPETEER_CACHE_DIR || 
+      this.configService.get('PUPPETEER_CACHE_DIR') || 
+      '/opt/render/.cache/puppeteer';
+    
     const launchOptions: any = {
       headless: true,
       args: [
@@ -247,6 +252,12 @@ export class PdfGenerationService {
         '--disable-sync',
       ],
     };
+
+    // Set cache directory for Puppeteer
+    if (process.env.RENDER) {
+      // On Render.com, set the cache directory
+      process.env.PUPPETEER_CACHE_DIR = cacheDir;
+    }
 
     // Try to find Chrome in common locations if executablePath not provided
     if (!executablePath) {
@@ -273,6 +284,17 @@ export class PdfGenerationService {
     // Use explicit Chrome path if found
     if (executablePath) {
       launchOptions.executablePath = executablePath;
+    } else {
+      // Try to use Puppeteer's bundled Chrome
+      // This will use the Chrome installed via postinstall script
+      try {
+        const puppeteerExecutable = puppeteer.executablePath();
+        if (puppeteerExecutable && existsSync(puppeteerExecutable)) {
+          launchOptions.executablePath = puppeteerExecutable;
+        }
+      } catch (e) {
+        console.warn('Could not find Puppeteer executable path:', e);
+      }
     }
 
     const browser = await puppeteer.launch(launchOptions);

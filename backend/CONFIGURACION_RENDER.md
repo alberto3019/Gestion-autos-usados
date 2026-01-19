@@ -19,14 +19,15 @@ Tu `package.json` está **correctamente configurado**:
 - **Valor:** `backend`
 
 ### 2. Build Command
-- **Valor:** `npm install && npm run prisma:generate && npm run build`
+- **Valor:** `npm install && npx puppeteer browsers install chrome && npm run prisma:generate && npm run build`
 
 **Explicación:**
-- `npm install` - Instala dependencias (incluye instalación automática de Chrome para Puppeteer via postinstall)
+- `npm install` - Instala dependencias
+- `npx puppeteer browsers install chrome` - Instala Chrome para Puppeteer (necesario para generación de PDF)
 - `npm run prisma:generate` - Genera el cliente de Prisma (necesario antes del build)
 - `npm run build` - Compila el proyecto NestJS (ejecuta `nest build`)
 
-**Nota:** El script `postinstall` en package.json instalará automáticamente Chrome para Puppeteer después de `npm install`.
+**Nota:** El comando `npx puppeteer browsers install chrome` es necesario para instalar Chrome en Render.com. Esto descargará Chrome al directorio de cache de Puppeteer (`/opt/render/.cache/puppeteer`).
 
 ### 3. Start Command
 - **Valor:** `npm run start:prod`

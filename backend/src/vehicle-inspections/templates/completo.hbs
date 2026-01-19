@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peritaje Mecánico</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 10px;
+      line-height: 1.4;
+      padding: 10mm;
+      color: #000;
+    }
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 12px;
+      font-weight: bold;
+      margin: 8px 0 4px 0;
+    }
+    h3 {
+      font-size: 11px;
+      font-weight: bold;
+      margin: 6px 0 3px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 5px 0;
+      font-size: 9px;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 3px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    .header-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .header-field {
+      font-size: 9px;
+    }
+    .header-field label {
+      font-weight: bold;
+      display: block;
+    }
+    .header-field input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #000;
+      padding: 2px;
+    }
+    .three-column {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .section {
+      border: 1px solid #000;
+      padding: 5px;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+    }
+    .checkbox-label {
+      display: inline-block;
+      margin-right: 8px;
+      margin-bottom: 2px;
+      font-size: 9px;
+    }
+    .checkbox {
+      margin-right: 3px;
+    }
+    .legend {
+      background-color: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 4px;
+      margin: 5px 0;
+      font-size: 8px;
+    }
+    .print-page-break {
+      page-break-after: always;
+    }
+    @media print {
+      body { padding: 5mm; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1>PERITAJE MECÁNICO</h1>
+
+  <!-- Header Information -->
+  <div class="header-grid">
+    <div class="header-field">
+      <label>FECHA:</label>
+      <div>{{mecanico.header.fecha}}</div>
+    </div>
+    <div class="header-field">
+      <label>KILOMETRAJE:</label>
+      <div>{{mecanico.header.kilometraje}}</div>
+    </div>
+    <div class="header-field">
+      <label>PROPIETARIO:</label>
+      <div>{{mecanico.header.propietario}}</div>
+    </div>
+    <div class="header-field">
+      <label>TITULAR REGISTRAL:</label>
+      <div>{{mecanico.header.titularRegistral}}</div>
+    </div>
+    <div class="header-field">
+      <label>DOMINIO:</label>
+      <div>{{mecanico.header.dominio}}</div>
+    </div>
+    <div class="header-field">
+      <label>MARCA:</label>
+      <div>{{mecanico.header.marca}}</div>
+    </div>
+    <div class="header-field">
+      <label>MODELO:</label>
+      <div>{{mecanico.header.modelo}}</div>
+    </div>
+    <div class="header-field">
+      <label>AÑO:</label>
+      <div>{{mecanico.header.año}}</div>
+    </div>
+    <div class="header-field">
+      <label>COLOR:</label>
+      <div>{{mecanico.header.color}}</div>
+    </div>
+    <div class="header-field">
+      <label>TITULAR PLAN:</label>
+      <div>{{mecanico.header.titularPlan}}</div>
+    </div>
+    <div class="header-field">
+      <label>Nº SUSCRIPCIÓN:</label>
+      <div>{{mecanico.header.numeroSuscripcion}}</div>
+    </div>
+  </div>
+
+  <!-- Three Column Layout -->
+  <div class="three-column">
+    <!-- Left Column -->
+    <div>
+      <!-- STEREO -->
+      {{#if mecanico.stereo}}
+      <div class="section">
+        <h3>STEREO</h3>
+        <p><strong>Marca:</strong> {{mecanico.stereo.marca}}</p>
+        <div>
+          {{#if mecanico.stereo.radioPc}}☑ Radio/PC{{else}}☐ Radio/PC{{/if}}
+          {{#if mecanico.stereo.radioCd}}☑ Radio/CD{{else}}☐ Radio/CD{{/if}}
+          {{#if mecanico.stereo.mp3}}☑ MP3{{else}}☐ MP3{{/if}}
+          {{#if mecanico.stereo.usb}}☑ USB{{else}}☐ USB{{/if}}
+          {{#if mecanico.stereo.bluetooth}}☑ Bluetooth{{else}}☐ Bluetooth{{/if}}
+          {{#if mecanico.stereo.aux}}☑ Aux.{{else}}☐ Aux.{{/if}}
+          {{#if mecanico.stereo.ipod}}☑ Ipod{{else}}☐ Ipod{{/if}}
+        </div>
+        <p><strong>Pantalla/pulg.:</strong> {{mecanico.stereo.pantallaPulgadas}}</p>
+        <p><strong>Extraible:</strong> {{mecanico.stereo.extraible}}</p>
+        <p><strong>Lo trajo:</strong> {{mecanico.stereo.loTrajo}}</p>
+      </div>
+      {{/if}}
+
+      <!-- EQUIPAMIENTO -->
+      {{#if mecanico.equipamiento}}
+      <div class="section">
+        <h3>EQUIPAMIENTO</h3>
+        <div>
+          {{#if mecanico.equipamiento.auxilio}}☑ Auxilio{{else}}☐ Auxilio{{/if}}
+          {{#if mecanico.equipamiento.bulonesTuercasAntirrobo}}☑ Bulones/Tuercas Antirrobo{{else}}☐ Bulones/Tuercas Antirrobo{{/if}}
+          {{#if mecanico.equipamiento.gato}}☑ Gato{{else}}☐ Gato{{/if}}
+          {{#if mecanico.equipamiento.cubreAlfombras}}☑ Cubre alfombras ({{mecanico.equipamiento.cubreAlfombras}}){{else}}☐ Cubre alfombras{{/if}}
+          {{#if mecanico.equipamiento.apoyacabezas}}☑ Apoyacabezas{{else}}☐ Apoyacabezas{{/if}}
+          {{#if mecanico.equipamiento.manualFabricante}}☑ Manual del fabricante{{else}}☐ Manual del fabricante{{/if}}
+          {{#if mecanico.equipamiento.llaveDuplicado}}☑ Llave duplicado{{else}}☐ Llave duplicado{{/if}}
+          {{#if mecanico.equipamiento.tarjetaArranque}}☑ Tarjeta arranque{{else}}☐ Tarjeta arranque{{/if}}
+        </div>
+      </div>
+      {{/if}}
+
+      <!-- MOTOR -->
+      {{#if mecanico.motor}}
+      <div class="section">
+        <h3>MOTOR</h3>
+        <p><strong>Marca:</strong> {{mecanico.motor.marca}}</p>
+        <p><strong>Cilindrada:</strong> {{mecanico.motor.cilindrada}} ({{mecanico.motor.cilindradaKms}} Kms)</p>
+        <p><strong>Ubicación:</strong> {{mecanico.motor.ubicacion}}</p>
+        <p><strong>HP:</strong> {{mecanico.motor.hp}}</p>
+        <p><strong>Nº Cilindros:</strong> {{mecanico.motor.numeroCilindros}}</p>
+        <p><strong>Disposición:</strong> {{mecanico.motor.disposicion}}</p>
+        <p><strong>Combustible:</strong> {{mecanico.motor.combustible}}</p>
+        <p><strong>Aceite:</strong> {{mecanico.motor.aceiteMarca}} (Viscosidad: {{mecanico.motor.viscosidad}}, {{mecanico.motor.aceiteKms}} Kms)</p>
+        {{#if mecanico.motor.observaciones}}
+        <p><strong>Obs.:</strong> {{mecanico.motor.observaciones}}</p>
+        {{/if}}
+      </div>
+      {{/if}}
+    </div>
+
+    <!-- Middle Column -->
+    <div>
+      <!-- CAJA TRANSMISIÓN -->
+      {{#if mecanico.transmision}}
+      <div class="section">
+        <h3>CAJA TRANSMISIÓN</h3>
+        {{#if mecanico.transmision.cajaManual}}
+        <p>☑ Caja manual</p>
+        {{#if mecanico.transmision.tresCuatroMarchas}}☑ 3 ó 4 marchas{{/if}}
+        {{#if mecanico.transmision.mt5}}☑ MT 5{{/if}}
+        {{#if mecanico.transmision.mt6}}☑ MT6{{/if}}
+        {{else}}
+        <p>☐ Caja manual</p>
+        {{/if}}
+        <p><strong>AT Nº marchas:</strong> {{mecanico.transmision.atNumeroMarchas}}</p>
+        <p><strong>Marca:</strong> {{mecanico.transmision.marca}}</p>
+      </div>
+      {{/if}}
+
+      <!-- NEUMÁTICOS -->
+      {{#if mecanico.neumaticos}}
+      <div class="section">
+        <h3>NEUMÁTICOS</h3>
+        <div class="legend">
+          <strong>N = NUEVO | B = BUENO | R = REGULAR | M = MALO</strong>
+        </div>
+        {{#each mecanico.neumaticos.neumaticos}}
+        <p><strong>{{posicion}}:</strong> {{condicion}}</p>
+        {{/each}}
+        <p><strong>AUXILIO:</strong> {{mecanico.neumaticos.auxilioCondicion}}</p>
+      </div>
+      {{/if}}
+    </div>
+
+    <!-- Right Column -->
+    <div>
+      <!-- OPCIONALES -->
+      {{#if mecanico.opcionales}}
+      <div class="section">
+        <h3>OPCIONALES</h3>
+        <p><strong>DIRECCIÓN:</strong>
+          {{#if mecanico.opcionales.direccion.hidraulica}}Hidráulica{{/if}}
+          {{#if mecanico.opcionales.direccion.electrica}}Eléctrica{{/if}}
+        </p>
+        <p><strong>Cierre central:</strong> {{#if mecanico.opcionales.cierreCentral}}☑{{else}}☐{{/if}}</p>
+        <p><strong>Alarma:</strong> {{#if mecanico.opcionales.alarma}}☑{{else}}☐{{/if}} Funciona: {{mecanico.opcionales.alarmaFunciona}}</p>
+        <p><strong>Cinturones/seg.:</strong> {{mecanico.opcionales.cinturonesSeguridad}}</p>
+        <p><strong>Lev/vid. eléctricos:</strong> {{#if mecanico.opcionales.levVidElectricos}}☑{{else}}☐{{/if}}</p>
+        <p><strong>Aire acondicionado:</strong> {{#if mecanico.opcionales.aireAcondicionado}}☑{{else}}☐{{/if}} Funciona: {{mecanico.opcionales.climaFunciona}}</p>
+        <p><strong>Air bag/cantidad:</strong> {{mecanico.opcionales.airBagCantidad}}</p>
+        <p><strong>Seguridad:</strong>
+          {{#if mecanico.opcionales.abs}}ABS{{/if}}
+          {{#if mecanico.opcionales.asr}}ASR{{/if}}
+          {{#if mecanico.opcionales.esp}}ESP{{/if}}
+          {{#if mecanico.opcionales.ebd}}EBD{{/if}}
+          {{#if mecanico.opcionales.afu}}AFU{{/if}}
+        </p>
+        <p><strong>GNC/cant.m³:</strong> {{mecanico.opcionales.gncCantidad}}</p>
+        <p><strong>Frenos:</strong> {{mecanico.opcionales.frenos}}</p>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Carrocería tipo - Full width -->
+  {{#if mecanico.carroceria}}
+  <div class="section">
+    <h3>Carrocería tipo</h3>
+    <div>
+      {{#if mecanico.carroceria.sedanCuatroPuertas}}☑ Sedán 4Ptas{{/if}}
+      {{#if mecanico.carroceria.hatchbackCincoPuertas}}☑ Hatchback 5Ptas{{/if}}
+      {{#if mecanico.carroceria.hatchbackTresPuertas}}☑ ó 3Ptas{{/if}}
+      {{#if mecanico.carroceria.monovolumen}}☑ Monovolúmen{{/if}}
+      {{#if mecanico.carroceria.furgonChico}}☑ Furgón chico{{/if}}
+      {{#if mecanico.carroceria.furgonGrande}}☑ Grande{{/if}}
+      {{#if mecanico.carroceria.pickupChica}}☑ Pick-up chica{{/if}}
+      {{#if mecanico.carroceria.pickupMediana}}☑ Pick-up mediana{{/if}}
+      {{#if mecanico.carroceria.miniBus}}☑ Mini bus{{/if}}
+      {{#if mecanico.carroceria.coupeDeportiva}}☑ Coupé deportiva{{/if}}
+      {{#if mecanico.carroceria.motocicleta}}☑ Motocicleta ({{mecanico.carroceria.motocicletaCilindrada}} cm³){{/if}}
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- PUNTAJE -->
+  {{#if mecanico.puntaje}}
+  <div class="section">
+    <h3>PUNTAJE</h3>
+    <p>Puntaje: <strong>{{mecanico.puntaje.puntaje}}/10</strong></p>
+  </div>
+  {{/if}}
+
+  <!-- Chapa y pintura -->
+  {{#if mecanico.chapaPintura}}
+  <div class="section">
+    <h3>Chapa y pintura</h3>
+    <div class="legend">
+      <strong>B = BOLLO | R = RAYA | O = CORROCIÓN | C = CHOQUE | Q = CUARTEADO | M = MICROBOLLO | P = PIEDRA | E = REEMPLAZO | RPP = REPINTADO PARCIAL | K = CHAPA PICADA</strong>
+    </div>
+    {{#each mecanico.chapaPintura.danos}}
+    <p><strong>{{tipo}}:</strong> {{posicion}} - {{descripcion}}</p>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <div class="print-page-break"></div>
+
+  <!-- CHECKLIST GENERAL -->
+  {{#if checklist}}
+  <h1>CHECKLIST GENERAL</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ITEM</th>
+        <th>OK</th>
+        <th>COMENTARIO</th>
+        <th>PRECIO</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each checklist.items}}
+      <tr>
+        <td>{{item}}</td>
+        <td>{{#if ok}}☑{{else}}☐{{/if}}</td>
+        <td>{{comentario}}</td>
+        <td>{{precio}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div style="margin-top: 10px;">
+    <p><strong>OBSERVACIONES:</strong> {{checklist.observaciones}}</p>
+    <p><strong>VALOR REACONDICIONADO:</strong> {{checklist.valorReacondicionado}}</p>
+    <p><strong>VALOR REPARACIÓN:</strong> {{checklist.valorReparacion}}</p>
+    <p><strong>VALOR DE TOMA:</strong> {{checklist.valorToma}}</p>
+    <p><strong>TOTAL:</strong> {{checklist.total}}</p>
+  </div>
+  {{/if}}
+
+  <div class="print-page-break"></div>
+
+  <!-- CONTROL TREN -->
+  {{#if tren}}
+  <h1>CONTROL TREN DELANTERO Y TRASERO</h1>
+  
+  <h2>CONTROL TREN DELANTERO</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>REPUESTO</th>
+        <th>OK</th>
+        <th>NO</th>
+        <th>DETALLE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each tren.trenDelantero}}
+      <tr>
+        <td>{{repuesto}}</td>
+        <td>{{#if ok}}☑{{else}}☐{{/if}}</td>
+        <td>{{#if no}}☑{{else}}☐{{/if}}</td>
+        <td>{{detalle}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h2>CONTROL TREN TRASERO</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>REPUESTO</th>
+        <th>OK</th>
+        <th>NO</th>
+        <th>DETALLE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each tren.trenTrasero}}
+      <tr>
+        <td>{{repuesto}}</td>
+        <td>{{#if ok}}☑{{else}}☐{{/if}}</td>
+        <td>{{#if no}}☑{{else}}☐{{/if}}</td>
+        <td>{{detalle}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{/if}}
+
+  <div class="print-page-break"></div>
+
+  <!-- SISTEMA DE FRENOS -->
+  {{#if frenos}}
+  <h1>SISTEMA DE FRENOS</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>COMPONENTE</th>
+        <th>OK</th>
+        <th>COMENTARIO</th>
+        <th>PRECIO</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each frenos.componentes}}
+      <tr>
+        <td>{{componente}}</td>
+        <td>{{#if ok}}☑{{else}}☐{{/if}}</td>
+        <td>{{comentario}}</td>
+        <td>{{precio}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="legend" style="margin-top: 10px;">
+    <strong>Leyenda de Daños:</strong><br>
+    0 = DAÑO DE CHAPA | X = DAÑO DE PINTURA | # = DAÑO DE CRISTAL | Z = DAÑO DE ÓPTICAS
+  </div>
+
+  {{#if frenos.danosDiagrama}}
+  <h3>Daños Marcados:</h3>
+  {{#each frenos.danosDiagrama}}
+  <p><strong>{{tipo}}:</strong> Posición ({{x}}%, {{y}}%) - {{descripcion}}</p>
+  {{/each}}
+  {{/if}}
+  {{/if}}
+
+</body>
+</html>
+

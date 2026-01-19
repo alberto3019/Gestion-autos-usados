@@ -190,6 +190,8 @@ export interface VehicleStockStatus {
   vehicle: Vehicle
 }
 
+import type { InspectionData } from '../pages/management/inspections/utils/inspectionDataSchema'
+
 export interface VehicleInspection {
   id: string
   vehicleId: string
@@ -198,7 +200,7 @@ export interface VehicleInspection {
   inspectionDate: string
   observations?: string
   status: string
-  data: Record<string, any>
+  data: InspectionData | Record<string, any>
   pdfUrl?: string
   createdAt: string
   updatedAt: string

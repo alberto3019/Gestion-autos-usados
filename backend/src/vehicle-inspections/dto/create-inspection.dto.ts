@@ -1,4 +1,6 @@
-import { IsString, IsDateString, IsOptional, IsObject, IsEnum } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsObject, IsEnum, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { InspectionDataDto } from './inspection-data.dto';
 
 export class CreateInspectionDto {
   @IsString()
@@ -17,8 +19,14 @@ export class CreateInspectionDto {
   @IsEnum(['approved', 'rejected', 'pending'])
   status: string;
 
+  @ValidateNested()
+  @Type(() => InspectionDataDto)
+  @IsOptional()
+  data?: InspectionDataDto;
+
+  // Backward compatibility: also accept Record<string, any>
   @IsObject()
   @IsOptional()
-  data?: Record<string, any>;
+  dataRaw?: Record<string, any>;
 }
 

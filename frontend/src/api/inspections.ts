@@ -30,5 +30,10 @@ export const inspectionsApi = {
   deleteInspection: async (id: string): Promise<void> => {
     await apiClient.delete(`/vehicle-inspections/${id}`)
   },
+
+  generatePdf: async (id: string): Promise<{ pdfUrl: string }> => {
+    const response = await apiClient.post(`/vehicle-inspections/${id}/pdf`)
+    return response.data
+  },
 }
 

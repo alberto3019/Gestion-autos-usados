@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInspectionDto } from './dto/create-inspection.dto';
+import { PdfGenerationService } from './pdf-generation.service';
 
 @Injectable()
 export class VehicleInspectionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private pdfGenerationService: PdfGenerationService,
+  ) {}
 
   async createInspection(agencyId: string, dto: CreateInspectionDto) {
     const vehicle = await this.prisma.vehicle.findUnique({
@@ -23,7 +27,7 @@ export class VehicleInspectionsService {
         inspectionDate: new Date(dto.inspectionDate),
         observations: dto.observations,
         status: dto.status,
-        data: dto.data || {},
+        data: dto.data || dto.dataRaw || {},
       },
       include: {
         vehicle: {
@@ -105,7 +109,7 @@ export class VehicleInspectionsService {
           : undefined,
         observations: data.observations,
         status: data.status,
-        data: data.data,
+        data: data.data || data.dataRaw,
       },
       include: {
         vehicle: {
@@ -134,6 +138,45 @@ export class VehicleInspectionsService {
     });
 
     return { message: 'Peritaje eliminado exitosamente' };
+  }
+
+  async generatePdf(id: string, agencyId: string) {
+    const inspection = await this.prisma.vehicleInspection.findFirst({
+      where: { id, agencyId },
+      include: {
+        vehicle: true,
+      },
+    });
+
+    if (!inspection) {
+      throw new NotFoundException('Peritaje no encontrado');
+    }
+
+    // Generate PDF
+    const pdfUrl = await this.pdfGenerationService.generateAndSavePdf(
+      inspection.data as any,
+      {
+        brand: inspection.vehicle.brand,
+        model: inspection.vehicle.model,
+        year: inspection.vehicle.year,
+        color: inspection.vehicle.color || undefined,
+        licensePlate: inspection.vehicle.licensePlate || undefined,
+        kilometers: inspection.vehicle.kilometers,
+      },
+      {
+        inspectorName: inspection.inspectorName,
+        inspectionDate: inspection.inspectionDate.toISOString().split('T')[0],
+        observations: inspection.observations || undefined,
+      },
+    );
+
+    // Update inspection with PDF URL
+    const updated = await this.prisma.vehicleInspection.update({
+      where: { id },
+      data: { pdfUrl },
+    });
+
+    return { pdfUrl: updated.pdfUrl };
   }
 }
 

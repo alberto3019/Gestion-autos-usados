@@ -82,5 +82,12 @@ export class VehicleInspectionsController {
       req.user.agencyId,
     );
   }
+
+  @Post(':id/pdf')
+  @RequireModulePermission(ManagementModule.vehicle_inspection)
+  @Roles('agency_admin', 'agency_user')
+  async generatePdf(@Request() req, @Param('id') id: string) {
+    return this.vehicleInspectionsService.generatePdf(id, req.user.agencyId);
+  }
 }
 

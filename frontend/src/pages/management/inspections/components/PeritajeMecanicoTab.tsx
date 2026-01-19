@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import type { PeritajeMecanico } from '../utils/inspectionDataSchema'
 import Input from '../../../../components/common/Input'
 import TireDiagram from './TireDiagram'
@@ -18,13 +18,19 @@ interface Props {
 
 export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Props) {
   const [localData, setLocalData] = useState<PeritajeMecanico>(data)
+  const isUpdatingRef = useRef(false)
 
   useEffect(() => {
-    setLocalData(data)
+    if (!isUpdatingRef.current) {
+      setLocalData(data)
+    }
   }, [data])
 
   useEffect(() => {
-    onChange(localData)
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false
+      onChange(localData)
+    }
   }, [localData, onChange])
 
   // Auto-fill header when vehicle is selected
@@ -46,6 +52,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
   }, [vehicleData])
 
   const updateHeader = (field: keyof PeritajeMecanico['header'], value: any) => {
+    isUpdatingRef.current = true
     setLocalData((prev) => ({
       ...prev,
       header: { ...prev.header, [field]: value },

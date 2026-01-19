@@ -25,12 +25,14 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
   }, [localData, onChange])
 
   const updateItem = (index: number, field: keyof ChecklistGeneral['items'][0], value: any) => {
+    isUpdatingRef.current = true
     const newItems = [...localData.items]
     newItems[index] = { ...newItems[index], [field]: value }
     setLocalData({ ...localData, items: newItems })
   }
 
   const updateField = (field: keyof ChecklistGeneral, value: any) => {
+    isUpdatingRef.current = true
     setLocalData({ ...localData, [field]: value })
   }
 

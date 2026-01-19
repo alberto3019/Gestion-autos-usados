@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import type { ControlTren } from '../utils/inspectionDataSchema'
 
 interface Props {
@@ -8,13 +8,19 @@ interface Props {
 
 export default function ControlTrenTab({ data, onChange }: Props) {
   const [localData, setLocalData] = useState<ControlTren>(data)
+  const isUpdatingRef = useRef(false)
 
   useEffect(() => {
-    setLocalData(data)
+    if (!isUpdatingRef.current) {
+      setLocalData(data)
+    }
   }, [data])
 
   useEffect(() => {
-    onChange(localData)
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false
+      onChange(localData)
+    }
   }, [localData, onChange])
 
   const updateComponent = (
@@ -23,6 +29,7 @@ export default function ControlTrenTab({ data, onChange }: Props) {
     field: keyof ControlTren['trenDelantero'][0],
     value: any
   ) => {
+    isUpdatingRef.current = true
     const newComponents = [...localData[tren]]
     newComponents[index] = { ...newComponents[index], [field]: value }
     

@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent } from 'react'
 import type { SistemaFrenos } from '../utils/inspectionDataSchema'
 
 interface Props {
@@ -8,16 +8,23 @@ interface Props {
 
 export default function SistemaFrenosTab({ data, onChange }: Props) {
   const [localData, setLocalData] = useState<SistemaFrenos>(data)
+  const isUpdatingRef = useRef(false)
 
   useEffect(() => {
-    setLocalData(data)
+    if (!isUpdatingRef.current) {
+      setLocalData(data)
+    }
   }, [data])
 
   useEffect(() => {
-    onChange(localData)
+    if (isUpdatingRef.current) {
+      isUpdatingRef.current = false
+      onChange(localData)
+    }
   }, [localData, onChange])
 
   const updateComponent = (index: number, field: keyof SistemaFrenos['componentes'][0], value: any) => {
+    isUpdatingRef.current = true
     const newComponents = [...localData.componentes]
     newComponents[index] = { ...newComponents[index], [field]: value }
     setLocalData({ ...localData, componentes: newComponents })

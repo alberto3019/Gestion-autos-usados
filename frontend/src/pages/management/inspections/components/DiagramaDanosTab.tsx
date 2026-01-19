@@ -52,7 +52,7 @@ export default function DiagramaDanosTab({ data, onChange }: Props) {
     }
 
     Object.entries(localData).forEach(([view, damages]) => {
-      damages.forEach((damage, index) => {
+      damages.forEach((damage: DamageMark, index: number) => {
         result.push({
           view,
           viewLabel: viewLabels[view as keyof DanosDiagrama],

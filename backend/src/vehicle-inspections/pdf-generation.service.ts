@@ -225,10 +225,30 @@ export class PdfGenerationService {
     const html = template(templateData);
 
     // Generate PDF with Puppeteer
-    const browser = await puppeteer.launch({
+    // Configure for production environments like Render.com
+    const executablePath = this.configService.get('PUPPETEER_EXECUTABLE_PATH') || 
+      process.env.PUPPETEER_EXECUTABLE_PATH;
+    
+    const launchOptions: any = {
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // Important for Render.com
+      ],
+    };
+
+    // Use explicit Chrome path if provided (for Render.com)
+    if (executablePath) {
+      launchOptions.executablePath = executablePath;
+    }
+
+    const browser = await puppeteer.launch(launchOptions);
 
     try {
       const page = await browser.newPage();

@@ -22,9 +22,11 @@ Tu `package.json` está **correctamente configurado**:
 - **Valor:** `npm install && npm run prisma:generate && npm run build`
 
 **Explicación:**
-- `npm install` - Instala dependencias
+- `npm install` - Instala dependencias (incluye instalación automática de Chrome para Puppeteer via postinstall)
 - `npm run prisma:generate` - Genera el cliente de Prisma (necesario antes del build)
 - `npm run build` - Compila el proyecto NestJS (ejecuta `nest build`)
+
+**Nota:** El script `postinstall` en package.json instalará automáticamente Chrome para Puppeteer después de `npm install`.
 
 ### 3. Start Command
 - **Valor:** `npm run start:prod`
@@ -60,8 +62,16 @@ SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
 SMTP_FROM=...
+```
+
+### Para PDF Generation (Puppeteer):
+```
+# En Render.com, Puppeteer debería funcionar automáticamente con el script postinstall
+# Si tienes problemas, puedes probar con:
 PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
-# O usar: PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# O:
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Nota: Generalmente no es necesario configurar esto en Render.com
 ```
 
 ## ⚠️ Comandos que NO debes usar

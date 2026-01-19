@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import type { PeritajeMecanico } from '../utils/inspectionDataSchema'
-import Input from '../../../components/common/Input'
+import Input from '../../../../components/common/Input'
 
 interface Props {
   data: PeritajeMecanico

@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import type { ChecklistGeneral } from '../utils/inspectionDataSchema'
-import Input from '../../../components/common/Input'
+import Input from '../../../../components/common/Input'
 
 interface Props {
   data: ChecklistGeneral

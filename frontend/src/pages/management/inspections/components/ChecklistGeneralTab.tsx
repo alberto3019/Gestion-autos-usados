@@ -36,6 +36,15 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
     setLocalData({ ...localData, [field]: value })
   }
 
+  // Calculate valorReparacion automatically from items prices
+  useEffect(() => {
+    const valorReparacion = localData.items.reduce((sum, item) => sum + (item.precio || 0), 0)
+    if (valorReparacion !== (localData.valorReparacion || 0)) {
+      isUpdatingRef.current = true
+      setLocalData((prev) => ({ ...prev, valorReparacion }))
+    }
+  }, [localData.items])
+
   // Calculate total automatically
   useEffect(() => {
     const total =
@@ -43,6 +52,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
       (localData.valorReparacion || 0) +
       (localData.valorToma || 0)
     if (total !== localData.total) {
+      isUpdatingRef.current = true
       setLocalData((prev) => ({ ...prev, total }))
     }
   }, [localData.valorReacondicionado, localData.valorReparacion, localData.valorToma])
@@ -131,9 +141,11 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
             <Input
               type="number"
               value={localData.valorReparacion || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('valorReparacion', parseFloat(e.target.value) || 0)}
+              readOnly
+              className="bg-gray-100 font-bold"
               step="0.01"
               min="0"
+              title="Se calcula automáticamente sumando los precios de todos los items"
             />
           </div>
           <div>

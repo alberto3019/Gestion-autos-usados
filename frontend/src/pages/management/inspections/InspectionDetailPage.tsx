@@ -162,17 +162,17 @@ export default function InspectionDetailPage() {
                     <td className="border p-2">{item.item}</td>
                     <td className="border p-2 text-center">{item.ok ? '✓' : '✗'}</td>
                     <td className="border p-2">{item.comentario || '-'}</td>
-                    <td className="border p-2">{item.precio || 0}</td>
+                    <td className="border p-2">${((item.precio || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div><strong>Valor Reacondicionado:</strong> ${inspectionData.checklist.valorReacondicionado || 0}</div>
-            <div><strong>Valor Reparación:</strong> ${inspectionData.checklist.valorReparacion || 0}</div>
-            <div><strong>Valor de Toma:</strong> ${inspectionData.checklist.valorToma || 0}</div>
-            <div><strong>Total:</strong> ${inspectionData.checklist.total || 0}</div>
+            <div><strong>Valor Reacondicionado:</strong> ${(inspectionData.checklist.valorReacondicionado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div><strong>Valor Reparación:</strong> ${(inspectionData.checklist.valorReparacion || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div><strong>Valor de Toma:</strong> ${(inspectionData.checklist.valorToma || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div><strong>Total Checklist:</strong> ${(inspectionData.checklist.total || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           </div>
         </div>
       )}
@@ -258,27 +258,81 @@ export default function InspectionDetailPage() {
                     <td className="border p-2">{comp.componente}</td>
                     <td className="border p-2 text-center">{comp.ok ? '✓' : '✗'}</td>
                     <td className="border p-2">{comp.comentario || '-'}</td>
-                    <td className="border p-2">{comp.precio || 0}</td>
+                    <td className="border p-2">${(comp.precio || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="bg-gray-200 font-bold">
+                  <td colSpan={3} className="border p-2 text-right">Total Sistema de Frenos:</td>
+                  <td className="border p-2">${(inspectionData.frenos.componentes?.reduce((sum: number, comp: any) => sum + (comp.precio || 0), 0) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              </tfoot>
             </table>
           </div>
-          {inspectionData.frenos.danosDiagrama && inspectionData.frenos.danosDiagrama.length > 0 && (
-            <div className="mt-4">
-              <h3 className="font-semibold mb-2">Daños Marcados</h3>
-              <div className="space-y-1">
-                {inspectionData.frenos.danosDiagrama.map((dano: any, idx: number) => (
-                  <div key={idx} className="text-sm">
-                    <strong>{dano.tipo}:</strong> Posición ({dano.x}%, {dano.y}%)
-                    {dano.descripcion && ` - ${dano.descripcion}`}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
+
+      {/* Diagrama de Daños */}
+      {inspectionData.danosDiagrama && (
+        <div className="card mb-6">
+          <h2 className="text-lg font-semibold mb-4">Diagrama de Daños</h2>
+          <div className="space-y-4">
+            {Object.entries(inspectionData.danosDiagrama).map(([view, damages]: [string, any]) => {
+              if (!damages || damages.length === 0) return null
+              const viewLabels: Record<string, string> = {
+                front: 'Vista Frontal',
+                rear: 'Vista Trasera',
+                sideDriver: 'Vista Lateral Conductor',
+                side: 'Vista Lateral Acompañante',
+                top: 'Vista Superior',
+              }
+              const damageLabels: Record<string, string> = {
+                '0': 'CHAPA',
+                'x': 'PINTURA',
+                '#': 'CRISTAL',
+                'z': 'ÓPTICAS',
+              }
+              return (
+                <div key={view} className="border-t pt-4">
+                  <h3 className="font-semibold mb-2">{viewLabels[view] || view}</h3>
+                  <div className="space-y-1">
+                    {damages.map((dano: any, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <strong>{damageLabels[dano.tipo] || dano.tipo}:</strong> Posición ({dano.x?.toFixed(1)}%, {dano.y?.toFixed(1)}%)
+                        {dano.descripcion && ` - ${dano.descripcion}`}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Resumen Total General */}
+      {(() => {
+        const checklistTotal = inspectionData.checklist?.total || 0
+        const frenosTotal = inspectionData.frenos?.componentes?.reduce((sum: number, comp: any) => sum + (comp.precio || 0), 0) || 0
+        const totalGeneral = checklistTotal + frenosTotal
+        return totalGeneral > 0 ? (
+          <div className="card mb-6 bg-blue-50 border-blue-300">
+            <h2 className="text-xl font-bold mb-4 text-blue-900">RESUMEN TOTAL GENERAL</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-lg">
+              <div>
+                <strong>Total Checklist:</strong> ${checklistTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div>
+                <strong>Total Sistema de Frenos:</strong> ${frenosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="font-bold text-xl text-blue-900 border-t-2 border-blue-300 pt-2">
+                <strong>TOTAL GENERAL:</strong> ${totalGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            </div>
+          </div>
+        ) : null
+      })()}
 
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={() => navigate(`/management/inspections/${id}/edit`)}>

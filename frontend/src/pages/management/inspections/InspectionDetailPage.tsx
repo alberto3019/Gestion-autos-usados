@@ -16,12 +16,23 @@ export default function InspectionDetailPage() {
   })
 
   const generatePdfMutation = useMutation({
-    mutationFn: () => inspectionsApi.generatePdf(id!),
+    mutationFn: () => {
+      console.log('📄 Generando PDF para peritaje:', id)
+      return inspectionsApi.generatePdf(id!)
+    },
     onSuccess: (data) => {
+      console.log('✅ PDF generado exitosamente:', data)
       if (data.pdfUrl) {
         window.open(data.pdfUrl, '_blank')
+      } else {
+        alert('PDF generado pero no se obtuvo la URL')
       }
       queryClient.invalidateQueries({ queryKey: ['inspection', id] })
+    },
+    onError: (error: any) => {
+      console.error('❌ Error al generar PDF:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al generar el PDF'
+      alert(`Error al generar el PDF: ${errorMessage}`)
     },
   })
 

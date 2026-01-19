@@ -89,6 +89,11 @@ export default function InspectionFormPage() {
       queryClient.invalidateQueries({ queryKey: ['inspections'] })
       navigate('/management/inspections')
     },
+    onError: (error: any) => {
+      console.error('❌ Error al crear peritaje:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear el peritaje'
+      alert(`Error al crear el peritaje: ${errorMessage}`)
+    },
   })
 
   const updateMutation = useMutation({
@@ -97,17 +102,29 @@ export default function InspectionFormPage() {
       queryClient.invalidateQueries({ queryKey: ['inspections'] })
       navigate('/management/inspections')
     },
+    onError: (error: any) => {
+      console.error('❌ Error al actualizar peritaje:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al actualizar el peritaje'
+      alert(`Error al actualizar el peritaje: ${errorMessage}`)
+    },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('📝 Enviando formulario de peritaje...', { isEditing, formData })
+    
     const submitData = {
       ...formData,
       data: formData.data,
     }
+    
+    console.log('📦 Datos a enviar:', JSON.stringify(submitData, null, 2))
+    
     if (isEditing) {
+      console.log('🔄 Actualizando peritaje...')
       updateMutation.mutate(submitData as any)
     } else {
+      console.log('✨ Creando nuevo peritaje...')
       createMutation.mutate(submitData as any)
     }
   }
@@ -141,7 +158,7 @@ export default function InspectionFormPage() {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         {/* Basic Info Section */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold mb-4">Información General</h2>

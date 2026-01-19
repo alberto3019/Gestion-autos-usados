@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import type { SistemaFrenos } from '../utils/inspectionDataSchema'
 import VehicleDiagram from './VehicleDiagram'
 
@@ -64,14 +64,14 @@ export default function SistemaFrenosTab({ data, onChange }: Props) {
                   <input
                     type="checkbox"
                     checked={component.ok || false}
-                    onChange={(e) => updateComponent(index, 'ok', e.target.checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateComponent(index, 'ok', e.target.checked)}
                     className="checkbox mx-auto"
                   />
                 </td>
                 <td className="border border-gray-300 print:border-black p-2">
                   <textarea
                     value={component.comentario}
-                    onChange={(e) => updateComponent(index, 'comentario', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateComponent(index, 'comentario', e.target.value)}
                     className="w-full border-0 resize-none focus:ring-0 p-0 min-h-[40px]"
                     rows={2}
                     placeholder="Comentario..."
@@ -81,7 +81,7 @@ export default function SistemaFrenosTab({ data, onChange }: Props) {
                   <input
                     type="number"
                     value={component.precio || ''}
-                    onChange={(e) => updateComponent(index, 'precio', parseFloat(e.target.value) || 0)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateComponent(index, 'precio', parseFloat(e.target.value) || 0)}
                     className="w-full border-0 focus:ring-0 p-0 text-right"
                     step="0.01"
                     min="0"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import type { PeritajeMecanico } from '../utils/inspectionDataSchema'
 import Input from '../../../components/common/Input'
 
@@ -129,59 +129,59 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
           label="FECHA"
           type="date"
           value={localData.header.fecha || ''}
-          onChange={(e) => updateHeader('fecha', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('fecha', e.target.value)}
         />
         <Input
           label="KILOMETRAJE"
           type="number"
           value={localData.header.kilometraje || ''}
-          onChange={(e) => updateHeader('kilometraje', parseInt(e.target.value) || 0)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('kilometraje', parseInt(e.target.value) || 0)}
         />
         <Input
           label="PROPIETARIO"
           value={localData.header.propietario}
-          onChange={(e) => updateHeader('propietario', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('propietario', e.target.value)}
         />
         <Input
           label="TITULAR REGISTRAL"
           value={localData.header.titularRegistral}
-          onChange={(e) => updateHeader('titularRegistral', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('titularRegistral', e.target.value)}
         />
         <Input
           label="DOMINIO"
           value={localData.header.dominio}
-          onChange={(e) => updateHeader('dominio', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('dominio', e.target.value)}
         />
         <Input
           label="MARCA"
           value={localData.header.marca}
-          onChange={(e) => updateHeader('marca', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('marca', e.target.value)}
         />
         <Input
           label="MODELO"
           value={localData.header.modelo}
-          onChange={(e) => updateHeader('modelo', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('modelo', e.target.value)}
         />
         <Input
           label="AÑO"
           type="number"
           value={localData.header.año || ''}
-          onChange={(e) => updateHeader('año', parseInt(e.target.value) || 0)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('año', parseInt(e.target.value) || 0)}
         />
         <Input
           label="COLOR"
           value={localData.header.color}
-          onChange={(e) => updateHeader('color', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('color', e.target.value)}
         />
         <Input
           label="TITULAR PLAN"
           value={localData.header.titularPlan}
-          onChange={(e) => updateHeader('titularPlan', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('titularPlan', e.target.value)}
         />
         <Input
           label="Nº SUSCRIPCIÓN"
           value={localData.header.numeroSuscripcion}
-          onChange={(e) => updateHeader('numeroSuscripcion', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => updateHeader('numeroSuscripcion', e.target.value)}
         />
       </div>
 
@@ -195,14 +195,14 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="Marca"
               value={localData.stereo.marca}
-              onChange={(e) => updateStereo('marca', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('marca', e.target.value)}
             />
             <div className="space-y-1 mt-2">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={localData.stereo.radioPc || false}
-                  onChange={(e) => updateStereo('radioPc', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('radioPc', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Radio/PC</span>
@@ -211,7 +211,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.radioCd || false}
-                  onChange={(e) => updateStereo('radioCd', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('radioCd', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Radio/CD</span>
@@ -220,7 +220,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.mp3 || false}
-                  onChange={(e) => updateStereo('mp3', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('mp3', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">MP3</span>
@@ -229,7 +229,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.usb || false}
-                  onChange={(e) => updateStereo('usb', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('usb', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">USB</span>
@@ -238,7 +238,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.bluetooth || false}
-                  onChange={(e) => updateStereo('bluetooth', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('bluetooth', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Bluetooth</span>
@@ -247,7 +247,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.aux || false}
-                  onChange={(e) => updateStereo('aux', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('aux', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Aux.</span>
@@ -256,7 +256,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.stereo.ipod || false}
-                  onChange={(e) => updateStereo('ipod', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('ipod', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Ipod</span>
@@ -265,7 +265,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="Pantalla/pulg."
               value={localData.stereo.pantallaPulgadas}
-              onChange={(e) => updateStereo('pantallaPulgadas', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('pantallaPulgadas', e.target.value)}
               className="mt-2"
             />
             <div className="mt-2">
@@ -277,7 +277,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="extraible"
                     value="si"
                     checked={localData.stereo.extraible === 'si'}
-                    onChange={(e) => updateStereo('extraible', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('extraible', e.target.value)}
                   />
                   <span className="text-sm">Si</span>
                 </label>
@@ -287,7 +287,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="extraible"
                     value="no"
                     checked={localData.stereo.extraible === 'no'}
-                    onChange={(e) => updateStereo('extraible', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('extraible', e.target.value)}
                   />
                   <span className="text-sm">No</span>
                 </label>
@@ -302,7 +302,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="loTrajo"
                     value="si"
                     checked={localData.stereo.loTrajo === 'si'}
-                    onChange={(e) => updateStereo('loTrajo', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('loTrajo', e.target.value)}
                   />
                   <span className="text-sm">Si</span>
                 </label>
@@ -312,7 +312,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="loTrajo"
                     value="no"
                     checked={localData.stereo.loTrajo === 'no'}
-                    onChange={(e) => updateStereo('loTrajo', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateStereo('loTrajo', e.target.value)}
                   />
                   <span className="text-sm">No</span>
                 </label>
@@ -328,7 +328,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.auxilio || false}
-                  onChange={(e) => updateEquipamiento('auxilio', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('auxilio', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Auxilio</span>
@@ -337,7 +337,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.bulonesTuercasAntirrobo || false}
-                  onChange={(e) => updateEquipamiento('bulonesTuercasAntirrobo', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('bulonesTuercasAntirrobo', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Bulones/Tuercas Antirrobo</span>
@@ -346,7 +346,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.gato || false}
-                  onChange={(e) => updateEquipamiento('gato', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('gato', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Gato</span>
@@ -356,7 +356,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                   <input
                     type="checkbox"
                     checked={!!localData.equipamiento.cubreAlfombras}
-                    onChange={(e) => {
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
                       if (!e.target.checked) {
                         updateEquipamiento('cubreAlfombras', '')
                       }
@@ -374,7 +374,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                           name="cubreAlfombras"
                           value={val}
                           checked={localData.equipamiento.cubreAlfombras === val}
-                          onChange={(e) => updateEquipamiento('cubreAlfombras', e.target.value)}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('cubreAlfombras', e.target.value)}
                         />
                         <span className="text-sm">{val}</span>
                       </label>
@@ -386,7 +386,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.apoyacabezas || false}
-                  onChange={(e) => updateEquipamiento('apoyacabezas', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('apoyacabezas', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Apoyacabezas</span>
@@ -395,7 +395,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.manualFabricante || false}
-                  onChange={(e) => updateEquipamiento('manualFabricante', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('manualFabricante', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Manual del fabricante</span>
@@ -404,7 +404,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.llaveDuplicado || false}
-                  onChange={(e) => updateEquipamiento('llaveDuplicado', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('llaveDuplicado', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Llave duplicado</span>
@@ -413,7 +413,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.equipamiento.tarjetaArranque || false}
-                  onChange={(e) => updateEquipamiento('tarjetaArranque', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateEquipamiento('tarjetaArranque', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Tarjeta arranque</span>
@@ -427,18 +427,18 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="Marca"
               value={localData.motor.marca}
-              onChange={(e) => updateMotor('marca', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('marca', e.target.value)}
             />
             <div className="grid grid-cols-2 gap-2 mt-2">
               <Input
                 label="Cilindrada"
                 value={localData.motor.cilindrada}
-                onChange={(e) => updateMotor('cilindrada', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('cilindrada', e.target.value)}
               />
               <Input
                 label="Kms"
                 value={localData.motor.cilindradaKms}
-                onChange={(e) => updateMotor('cilindradaKms', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('cilindradaKms', e.target.value)}
               />
             </div>
             <div className="mt-2">
@@ -450,7 +450,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="ubicacion"
                     value="delantera"
                     checked={localData.motor.ubicacion === 'delantera'}
-                    onChange={(e) => updateMotor('ubicacion', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('ubicacion', e.target.value)}
                   />
                   <span className="text-sm">Delantera</span>
                 </label>
@@ -460,7 +460,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="ubicacion"
                     value="trasera"
                     checked={localData.motor.ubicacion === 'trasera'}
-                    onChange={(e) => updateMotor('ubicacion', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('ubicacion', e.target.value)}
                   />
                   <span className="text-sm">Trasera</span>
                 </label>
@@ -471,7 +471,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.motor.longitudinal || false}
-                  onChange={(e) => updateMotor('longitudinal', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('longitudinal', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Long.</span>
@@ -480,7 +480,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.motor.transversal || false}
-                  onChange={(e) => updateMotor('transversal', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('transversal', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Transv.</span>
@@ -489,7 +489,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="HP"
               value={localData.motor.hp}
-              onChange={(e) => updateMotor('hp', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('hp', e.target.value)}
               className="mt-2"
             />
             <div className="mt-2">
@@ -502,7 +502,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                       name="numeroCilindros"
                       value={val}
                       checked={localData.motor.numeroCilindros === val}
-                      onChange={(e) => updateMotor('numeroCilindros', e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('numeroCilindros', e.target.value)}
                     />
                     <span className="text-sm">{val}</span>
                   </label>
@@ -518,7 +518,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="disposicion"
                     value="v"
                     checked={localData.motor.disposicion === 'v'}
-                    onChange={(e) => updateMotor('disposicion', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('disposicion', e.target.value)}
                   />
                   <span className="text-sm">en V</span>
                 </label>
@@ -528,7 +528,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="disposicion"
                     value="linea"
                     checked={localData.motor.disposicion === 'linea'}
-                    onChange={(e) => updateMotor('disposicion', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('disposicion', e.target.value)}
                   />
                   <span className="text-sm">en línea</span>
                 </label>
@@ -538,7 +538,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="disposicion"
                     value="boxer"
                     checked={localData.motor.disposicion === 'boxer'}
-                    onChange={(e) => updateMotor('disposicion', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('disposicion', e.target.value)}
                   />
                   <span className="text-sm">Boxer</span>
                 </label>
@@ -553,7 +553,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="combustible"
                     value="naftero"
                     checked={localData.motor.combustible === 'naftero'}
-                    onChange={(e) => updateMotor('combustible', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('combustible', e.target.value)}
                   />
                   <span className="text-sm">Naftero</span>
                 </label>
@@ -563,7 +563,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="combustible"
                     value="diesel"
                     checked={localData.motor.combustible === 'diesel'}
-                    onChange={(e) => updateMotor('combustible', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('combustible', e.target.value)}
                   />
                   <span className="text-sm">Diesel</span>
                 </label>
@@ -574,7 +574,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.motor.inyeccionElectronica || false}
-                  onChange={(e) => updateMotor('inyeccionElectronica', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('inyeccionElectronica', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Inyecc. Electr.</span>
@@ -583,7 +583,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.motor.commonRail || false}
-                  onChange={(e) => updateMotor('commonRail', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('commonRail', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Common-rail</span>
@@ -598,7 +598,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="aspirado"
                     value="turbo"
                     checked={localData.motor.aspirado === 'turbo'}
-                    onChange={(e) => updateMotor('aspirado', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('aspirado', e.target.value)}
                   />
                   <span className="text-sm">Turbo</span>
                 </label>
@@ -608,7 +608,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="aspirado"
                     value="biturbo"
                     checked={localData.motor.aspirado === 'biturbo'}
-                    onChange={(e) => updateMotor('aspirado', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('aspirado', e.target.value)}
                   />
                   <span className="text-sm">Biturbo</span>
                 </label>
@@ -618,7 +618,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               <Input
                 label="Aceite Marca"
                 value={localData.motor.aceiteMarca}
-                onChange={(e) => updateMotor('aceiteMarca', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('aceiteMarca', e.target.value)}
               />
               <div>
                 <label className="block text-sm font-medium mb-1">Viscocidad</label>
@@ -629,7 +629,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                       name="viscocidad"
                       value="f10"
                       checked={localData.motor.viscosidad === 'f10'}
-                      onChange={(e) => updateMotor('viscosidad', e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('viscosidad', e.target.value)}
                     />
                     <span className="text-sm">F10</span>
                   </label>
@@ -639,7 +639,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                       name="viscocidad"
                       value="f15"
                       checked={localData.motor.viscosidad === 'f15'}
-                      onChange={(e) => updateMotor('viscosidad', e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('viscosidad', e.target.value)}
                     />
                     <span className="text-sm">F15</span>
                   </label>
@@ -649,7 +649,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="Kms"
               value={localData.motor.aceiteKms}
-              onChange={(e) => updateMotor('aceiteKms', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('aceiteKms', e.target.value)}
               className="mt-2"
             />
             <div className="mt-2">
@@ -657,20 +657,22 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.motor.aceiteOtro || false}
-                  onChange={(e) => updateMotor('aceiteOtro', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateMotor('aceiteOtro', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Otro</span>
               </label>
             </div>
-            <textarea
-              label="Obs."
-              value={localData.motor.observaciones}
-              onChange={(e) => updateMotor('observaciones', e.target.value)}
-              className="input mt-2"
-              rows={2}
-              placeholder="Observaciones"
-            />
+            <div className="mt-2">
+              <label className="block text-sm font-medium mb-1">Obs.</label>
+              <textarea
+                value={localData.motor.observaciones}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateMotor('observaciones', e.target.value)}
+                className="input"
+                rows={2}
+                placeholder="Observaciones"
+              />
+            </div>
           </div>
         </div>
 
@@ -683,7 +685,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               <input
                 type="checkbox"
                 checked={localData.transmision.cajaManual || false}
-                onChange={(e) => updateTransmision('cajaManual', e.target.checked)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('cajaManual', e.target.checked)}
                 className="checkbox"
               />
               <span className="text-sm">Caja manual</span>
@@ -693,7 +695,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.transmision.tresCuatroMarchas || false}
-                  onChange={(e) => updateTransmision('tresCuatroMarchas', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('tresCuatroMarchas', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">3 ó 4 marchas</span>
@@ -702,7 +704,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.transmision.mt5 || false}
-                  onChange={(e) => updateTransmision('mt5', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('mt5', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">MT 5</span>
@@ -711,7 +713,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.transmision.mt6 || false}
-                  onChange={(e) => updateTransmision('mt6', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('mt6', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">MT6</span>
@@ -720,13 +722,13 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="AT Nº marchas"
               value={localData.transmision.atNumeroMarchas}
-              onChange={(e) => updateTransmision('atNumeroMarchas', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('atNumeroMarchas', e.target.value)}
               className="mt-2"
             />
             <Input
               label="Marca"
               value={localData.transmision.marca}
-              onChange={(e) => updateTransmision('marca', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateTransmision('marca', e.target.value)}
               className="mt-2"
             />
           </div>
@@ -757,7 +759,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                             name={`neumatico_${key}`}
                             value={cond}
                             checked={neumatico?.condicion === cond}
-                            onChange={(e) => {
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
                               const existing = localData.neumaticos.neumaticos.filter((n) => n.posicion !== key)
                               updateNeumaticos('neumaticos', [
                                 ...existing,
@@ -782,7 +784,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                         name="auxilioCondicion"
                         value={cond}
                         checked={localData.neumaticos.auxilioCondicion === cond}
-                        onChange={(e) => updateNeumaticos('auxilioCondicion', e.target.value)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateNeumaticos('auxilioCondicion', e.target.value)}
                       />
                       <span className="text-sm uppercase">{cond}</span>
                     </label>
@@ -805,7 +807,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                   <input
                     type="checkbox"
                     checked={localData.opcionales.direccion.hidraulica || false}
-                    onChange={(e) => updateOpcionalesDireccion('hidraulica', e.target.checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionalesDireccion('hidraulica', e.target.checked)}
                     className="checkbox"
                   />
                   <span className="text-sm">Hidráulica</span>
@@ -814,7 +816,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                   <input
                     type="checkbox"
                     checked={localData.opcionales.direccion.electrica || false}
-                    onChange={(e) => updateOpcionalesDireccion('electrica', e.target.checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionalesDireccion('electrica', e.target.checked)}
                     className="checkbox"
                   />
                   <span className="text-sm">Eléctrica</span>
@@ -823,7 +825,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               <Input
                 label="Obs."
                 value={localData.opcionales.direccion.observaciones}
-                onChange={(e) => updateOpcionalesDireccion('observaciones', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionalesDireccion('observaciones', e.target.value)}
               />
             </div>
             <div className="mt-2">
@@ -831,7 +833,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.cierreCentral || false}
-                  onChange={(e) => updateOpcionales('cierreCentral', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('cierreCentral', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Cierre central</span>
@@ -842,7 +844,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.alarma || false}
-                  onChange={(e) => updateOpcionales('alarma', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('alarma', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Alarma</span>
@@ -854,7 +856,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="alarmaFunciona"
                     value="si"
                     checked={localData.opcionales.alarmaFunciona === 'si'}
-                    onChange={(e) => updateOpcionales('alarmaFunciona', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('alarmaFunciona', e.target.value)}
                   />
                   <span className="text-sm">FUNCIONA: Si</span>
                 </label>
@@ -864,7 +866,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="alarmaFunciona"
                     value="no"
                     checked={localData.opcionales.alarmaFunciona === 'no'}
-                    onChange={(e) => updateOpcionales('alarmaFunciona', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('alarmaFunciona', e.target.value)}
                   />
                   <span className="text-sm">No</span>
                 </label>
@@ -879,7 +881,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="cinturonesSeguridad"
                     value="4"
                     checked={localData.opcionales.cinturonesSeguridad === '4'}
-                    onChange={(e) => updateOpcionales('cinturonesSeguridad', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('cinturonesSeguridad', e.target.value)}
                   />
                   <span className="text-sm">4</span>
                 </label>
@@ -889,7 +891,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="cinturonesSeguridad"
                     value="5"
                     checked={localData.opcionales.cinturonesSeguridad === '5'}
-                    onChange={(e) => updateOpcionales('cinturonesSeguridad', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('cinturonesSeguridad', e.target.value)}
                   />
                   <span className="text-sm">5</span>
                 </label>
@@ -900,7 +902,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.levVidElectricos || false}
-                  onChange={(e) => updateOpcionales('levVidElectricos', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('levVidElectricos', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Lev/vid. eléctricos</span>
@@ -909,7 +911,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.soloDelanteros || false}
-                  onChange={(e) => updateOpcionales('soloDelanteros', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('soloDelanteros', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Sólo Delanteros</span>
@@ -918,7 +920,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.cuatroPuertas || false}
-                  onChange={(e) => updateOpcionales('cuatroPuertas', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('cuatroPuertas', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">4 puertas</span>
@@ -930,7 +932,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="ventanasFuncionan"
                     value="si"
                     checked={localData.opcionales.ventanasFuncionan === 'si'}
-                    onChange={(e) => updateOpcionales('ventanasFuncionan', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('ventanasFuncionan', e.target.value)}
                   />
                   <span className="text-sm">FUNCIONAN: Si</span>
                 </label>
@@ -940,7 +942,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="ventanasFuncionan"
                     value="no"
                     checked={localData.opcionales.ventanasFuncionan === 'no'}
-                    onChange={(e) => updateOpcionales('ventanasFuncionan', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('ventanasFuncionan', e.target.value)}
                   />
                   <span className="text-sm">No</span>
                 </label>
@@ -951,7 +953,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.aireAcondicionado || false}
-                  onChange={(e) => updateOpcionales('aireAcondicionado', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('aireAcondicionado', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Aire acondicionado</span>
@@ -960,7 +962,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.climatizadorAut || false}
-                  onChange={(e) => updateOpcionales('climatizadorAut', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('climatizadorAut', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Climatizador aut.</span>
@@ -969,7 +971,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.bizona || false}
-                  onChange={(e) => updateOpcionales('bizona', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('bizona', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Bizona</span>
@@ -981,7 +983,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="climaFunciona"
                     value="si"
                     checked={localData.opcionales.climaFunciona === 'si'}
-                    onChange={(e) => updateOpcionales('climaFunciona', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('climaFunciona', e.target.value)}
                   />
                   <span className="text-sm">FUNCIONA: Si</span>
                 </label>
@@ -991,7 +993,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="climaFunciona"
                     value="no"
                     checked={localData.opcionales.climaFunciona === 'no'}
-                    onChange={(e) => updateOpcionales('climaFunciona', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('climaFunciona', e.target.value)}
                   />
                   <span className="text-sm">No</span>
                 </label>
@@ -1000,7 +1002,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="Air bag/cantidad"
               value={localData.opcionales.airBagCantidad}
-              onChange={(e) => updateOpcionales('airBagCantidad', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('airBagCantidad', e.target.value)}
               className="mt-2"
             />
             <div className="mt-2 flex gap-2 flex-wrap">
@@ -1008,7 +1010,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.abs || false}
-                  onChange={(e) => updateOpcionales('abs', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('abs', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">ABS</span>
@@ -1017,7 +1019,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.asr || false}
-                  onChange={(e) => updateOpcionales('asr', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('asr', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">ASR</span>
@@ -1026,7 +1028,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.esp || false}
-                  onChange={(e) => updateOpcionales('esp', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('esp', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">ESP</span>
@@ -1035,7 +1037,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.ebd || false}
-                  onChange={(e) => updateOpcionales('ebd', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('ebd', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">EBD</span>
@@ -1044,7 +1046,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.afu || false}
-                  onChange={(e) => updateOpcionales('afu', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('afu', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">AFU</span>
@@ -1053,7 +1055,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <Input
               label="GNC/cant.m³"
               value={localData.opcionales.gncCantidad}
-              onChange={(e) => updateOpcionales('gncCantidad', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('gncCantidad', e.target.value)}
               className="mt-2"
             />
             <div className="mt-2 space-y-1">
@@ -1061,7 +1063,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.techoCorredizo || false}
-                  onChange={(e) => updateOpcionales('techoCorredizo', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('techoCorredizo', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Techo corredizo</span>
@@ -1070,7 +1072,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                 <input
                   type="checkbox"
                   checked={localData.opcionales.espejosElectricos || false}
-                  onChange={(e) => updateOpcionales('espejosElectricos', e.target.checked)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('espejosElectricos', e.target.checked)}
                   className="checkbox"
                 />
                 <span className="text-sm">Espejos eléctricos</span>
@@ -1081,7 +1083,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               <div className="flex items-center gap-2">
                 <Input
                   value={localData.opcionales.llantasAleacion}
-                  onChange={(e) => updateOpcionales('llantasAleacion', e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('llantasAleacion', e.target.value)}
                 />
                 <span className="text-sm">pulgadas</span>
               </div>
@@ -1095,7 +1097,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="frenos"
                     value="tambor"
                     checked={localData.opcionales.frenos === 'tambor'}
-                    onChange={(e) => updateOpcionales('frenos', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('frenos', e.target.value)}
                   />
                   <span className="text-sm">A tambor</span>
                 </label>
@@ -1105,7 +1107,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="frenos"
                     value="dos_tambor_dos_disco"
                     checked={localData.opcionales.frenos === 'dos_tambor_dos_disco'}
-                    onChange={(e) => updateOpcionales('frenos', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('frenos', e.target.value)}
                   />
                   <span className="text-sm">2 a tambor y 2 a disco</span>
                 </label>
@@ -1115,7 +1117,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                     name="frenos"
                     value="discos_cuatro_ruedas"
                     checked={localData.opcionales.frenos === 'discos_cuatro_ruedas'}
-                    onChange={(e) => updateOpcionales('frenos', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateOpcionales('frenos', e.target.value)}
                   />
                   <span className="text-sm">Discos en las 4 ruedas</span>
                 </label>
@@ -1133,7 +1135,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.sedanCuatroPuertas || false}
-              onChange={(e) => updateCarroceria('sedanCuatroPuertas', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('sedanCuatroPuertas', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Sedán 4Ptas</span>
@@ -1142,7 +1144,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.hatchbackCincoPuertas || false}
-              onChange={(e) => updateCarroceria('hatchbackCincoPuertas', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('hatchbackCincoPuertas', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Hatchback 5Ptas</span>
@@ -1151,7 +1153,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.hatchbackTresPuertas || false}
-              onChange={(e) => updateCarroceria('hatchbackTresPuertas', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('hatchbackTresPuertas', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">ó 3Ptas</span>
@@ -1160,7 +1162,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.monovolumen || false}
-              onChange={(e) => updateCarroceria('monovolumen', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('monovolumen', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Monovolúmen</span>
@@ -1169,7 +1171,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.furgonChico || false}
-              onChange={(e) => updateCarroceria('furgonChico', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('furgonChico', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Furgón chico</span>
@@ -1178,7 +1180,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.furgonGrande || false}
-              onChange={(e) => updateCarroceria('furgonGrande', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('furgonGrande', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Grande</span>
@@ -1187,7 +1189,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.pickupChica || false}
-              onChange={(e) => updateCarroceria('pickupChica', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('pickupChica', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Pick-up chica</span>
@@ -1196,7 +1198,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.pickupMediana || false}
-              onChange={(e) => updateCarroceria('pickupMediana', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('pickupMediana', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Pick-up mediana</span>
@@ -1205,7 +1207,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.miniBus || false}
-              onChange={(e) => updateCarroceria('miniBus', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('miniBus', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Mini bus</span>
@@ -1214,7 +1216,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <input
               type="checkbox"
               checked={localData.carroceria.coupeDeportiva || false}
-              onChange={(e) => updateCarroceria('coupeDeportiva', e.target.checked)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('coupeDeportiva', e.target.checked)}
               className="checkbox"
             />
             <span className="text-sm">Coupé deportiva</span>
@@ -1224,7 +1226,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               <input
                 type="checkbox"
                 checked={localData.carroceria.motocicleta || false}
-                onChange={(e) => updateCarroceria('motocicleta', e.target.checked)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('motocicleta', e.target.checked)}
                 className="checkbox"
               />
               <span className="text-sm">Motocicleta</span>
@@ -1232,7 +1234,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             {localData.carroceria.motocicleta && (
               <Input
                 value={localData.carroceria.motocicletaCilindrada}
-                onChange={(e) => updateCarroceria('motocicletaCilindrada', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateCarroceria('motocicletaCilindrada', e.target.value)}
                 placeholder="cm³"
                 className="w-24"
               />
@@ -1253,7 +1255,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
                   name="puntaje"
                   value={num}
                   checked={localData.puntaje.puntaje === num}
-                  onChange={(e) => updatePuntaje(parseInt(e.target.value))}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => updatePuntaje(parseInt(e.target.value))}
                 />
                 <span className="text-sm font-bold">{num}</span>
               </label>
@@ -1278,7 +1280,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
             <div key={idx} className="flex gap-2 items-center">
               <select
                 value={dano.tipo}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                   const newDanos = [...localData.chapaPintura.danos]
                   newDanos[idx] = { ...dano, tipo: e.target.value as any }
                   setLocalData((prev) => ({
@@ -1301,7 +1303,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               </select>
               <Input
                 value={dano.posicion}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newDanos = [...localData.chapaPintura.danos]
                   newDanos[idx] = { ...dano, posicion: e.target.value }
                   setLocalData((prev) => ({
@@ -1313,7 +1315,7 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
               />
               <Input
                 value={dano.descripcion || ''}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newDanos = [...localData.chapaPintura.danos]
                   newDanos[idx] = { ...dano, descripcion: e.target.value }
                   setLocalData((prev) => ({

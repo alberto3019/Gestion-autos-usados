@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { InspectionData } from './dto/inspection-data.dto';
+import type { InspectionDataDto } from './dto/inspection-data.dto';
 
 @Injectable()
 export class PdfGenerationService {
@@ -163,7 +163,7 @@ export class PdfGenerationService {
   }
 
   async generatePdf(
-    inspectionData: InspectionData,
+    inspectionData: InspectionDataDto | Record<string, any>,
     vehicleInfo: {
       brand: string;
       model: string;
@@ -216,14 +216,14 @@ export class PdfGenerationService {
         },
       });
 
-      return pdfBuffer;
+      return Buffer.from(pdfBuffer);
     } finally {
       await browser.close();
     }
   }
 
   async generateAndSavePdf(
-    inspectionData: InspectionData,
+    inspectionData: InspectionDataDto | Record<string, any>,
     vehicleInfo: any,
     inspectorInfo: any,
   ): Promise<string> {

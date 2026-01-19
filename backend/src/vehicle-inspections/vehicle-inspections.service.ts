@@ -27,7 +27,7 @@ export class VehicleInspectionsService {
         inspectionDate: new Date(dto.inspectionDate),
         observations: dto.observations,
         status: dto.status,
-        data: dto.data || dto.dataRaw || {},
+        data: (dto.data ? JSON.parse(JSON.stringify(dto.data)) : dto.dataRaw) || {},
       },
       include: {
         vehicle: {
@@ -109,7 +109,7 @@ export class VehicleInspectionsService {
           : undefined,
         observations: data.observations,
         status: data.status,
-        data: data.data || data.dataRaw,
+        data: data.data ? JSON.parse(JSON.stringify(data.data)) : data.dataRaw,
       },
       include: {
         vehicle: {

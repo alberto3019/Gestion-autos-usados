@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import type { ChecklistGeneral } from '../utils/inspectionDataSchema'
 import Input from '../../../components/common/Input'
 
@@ -64,14 +64,14 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
                   <input
                     type="checkbox"
                     checked={item.ok || false}
-                    onChange={(e) => updateItem(index, 'ok', e.target.checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateItem(index, 'ok', e.target.checked)}
                     className="checkbox mx-auto"
                   />
                 </td>
                 <td className="border border-gray-300 print:border-black p-2">
                   <textarea
                     value={item.comentario}
-                    onChange={(e) => updateItem(index, 'comentario', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateItem(index, 'comentario', e.target.value)}
                     className="w-full border-0 resize-none focus:ring-0 p-0 min-h-[40px]"
                     rows={2}
                     placeholder="Comentario..."
@@ -81,7 +81,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
                   <input
                     type="number"
                     value={item.precio || ''}
-                    onChange={(e) => updateItem(index, 'precio', parseFloat(e.target.value) || 0)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateItem(index, 'precio', parseFloat(e.target.value) || 0)}
                     className="w-full border-0 focus:ring-0 p-0 text-right"
                     step="0.01"
                     min="0"
@@ -100,7 +100,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
           <label className="block text-sm font-medium text-gray-700 mb-2">OBSERVACIONES</label>
           <textarea
             value={localData.observaciones}
-            onChange={(e) => updateField('observaciones', e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateField('observaciones', e.target.value)}
             className="input w-full"
             rows={4}
             placeholder="Observaciones generales..."
@@ -113,7 +113,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
             <Input
               type="number"
               value={localData.valorReacondicionado || ''}
-              onChange={(e) => updateField('valorReacondicionado', parseFloat(e.target.value) || 0)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('valorReacondicionado', parseFloat(e.target.value) || 0)}
               step="0.01"
               min="0"
             />
@@ -123,7 +123,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
             <Input
               type="number"
               value={localData.valorReparacion || ''}
-              onChange={(e) => updateField('valorReparacion', parseFloat(e.target.value) || 0)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('valorReparacion', parseFloat(e.target.value) || 0)}
               step="0.01"
               min="0"
             />
@@ -133,7 +133,7 @@ export default function ChecklistGeneralTab({ data, onChange }: Props) {
             <Input
               type="number"
               value={localData.valorToma || ''}
-              onChange={(e) => updateField('valorToma', parseFloat(e.target.value) || 0)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('valorToma', parseFloat(e.target.value) || 0)}
               step="0.01"
               min="0"
             />

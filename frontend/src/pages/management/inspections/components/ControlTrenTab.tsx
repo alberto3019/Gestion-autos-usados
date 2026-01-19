@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import type { ControlTren } from '../utils/inspectionDataSchema'
 
 interface Props {
@@ -64,7 +64,7 @@ export default function ControlTrenTab({ data, onChange }: Props) {
                     <input
                       type="checkbox"
                       checked={component.ok || false}
-                      onChange={(e) => updateComponent(trenKey, index, 'ok', e.target.checked)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateComponent(trenKey, index, 'ok', e.target.checked)}
                       className="checkbox mx-auto"
                     />
                   </td>
@@ -72,14 +72,14 @@ export default function ControlTrenTab({ data, onChange }: Props) {
                     <input
                       type="checkbox"
                       checked={component.no || false}
-                      onChange={(e) => updateComponent(trenKey, index, 'no', e.target.checked)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateComponent(trenKey, index, 'no', e.target.checked)}
                       className="checkbox mx-auto"
                     />
                   </td>
                   <td className="border border-gray-300 print:border-black p-2">
                     <textarea
                       value={component.detalle}
-                      onChange={(e) => updateComponent(trenKey, index, 'detalle', e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateComponent(trenKey, index, 'detalle', e.target.value)}
                       className="w-full border-0 resize-none focus:ring-0 p-0 min-h-[40px]"
                       rows={2}
                       placeholder="Detalle..."

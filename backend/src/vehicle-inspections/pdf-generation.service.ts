@@ -212,6 +212,7 @@ export class PdfGenerationService {
       checklist: inspectionData.checklist || {},
       tren: inspectionData.tren || {},
       frenos: inspectionData.frenos || {},
+      danosDiagrama: inspectionData.danosDiagrama || {},
       images,
     };
 

@@ -9,6 +9,7 @@ import PeritajeMecanicoTab from './components/PeritajeMecanicoTab'
 import ChecklistGeneralTab from './components/ChecklistGeneralTab'
 import ControlTrenTab from './components/ControlTrenTab'
 import SistemaFrenosTab from './components/SistemaFrenosTab'
+import DiagramaDanosTab from './components/DiagramaDanosTab'
 import {
   InspectionData,
   createEmptyInspectionData,
@@ -16,10 +17,11 @@ import {
   type ChecklistGeneral,
   type ControlTren,
   type SistemaFrenos,
+  type DanosDiagrama,
 } from './utils/inspectionDataSchema'
 import clsx from 'clsx'
 
-type TabId = 'mecanico' | 'checklist' | 'tren' | 'frenos'
+type TabId = 'mecanico' | 'checklist' | 'tren' | 'frenos' | 'danos'
 
 export default function InspectionFormPage() {
   const { id } = useParams()
@@ -125,6 +127,7 @@ export default function InspectionFormPage() {
     { id: 'checklist', label: 'Checklist General' },
     { id: 'tren', label: 'Control Tren' },
     { id: 'frenos', label: 'Sistema de Frenos' },
+    { id: 'danos', label: 'Diagrama de Daños' },
   ]
 
   return (
@@ -278,6 +281,13 @@ export default function InspectionFormPage() {
               <SistemaFrenosTab
                 data={formData.data.frenos}
                 onChange={(data) => handleDataUpdate('frenos', data)}
+              />
+            )}
+
+            {activeTab === 'danos' && (
+              <DiagramaDanosTab
+                data={formData.data.danosDiagrama}
+                onChange={(data) => handleDataUpdate('danosDiagrama', data)}
               />
             )}
           </div>

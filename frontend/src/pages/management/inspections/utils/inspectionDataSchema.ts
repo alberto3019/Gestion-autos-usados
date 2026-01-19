@@ -192,9 +192,16 @@ export interface DamageMark {
   descripcion?: string
 }
 
+export interface DanosDiagrama {
+  front: DamageMark[]
+  rear: DamageMark[]
+  sideDriver: DamageMark[]
+  side: DamageMark[]
+  top: DamageMark[]
+}
+
 export interface SistemaFrenos {
   componentes: FrenoComponent[]
-  danosDiagrama: DamageMark[]
 }
 
 export interface InspectionData {
@@ -202,6 +209,7 @@ export interface InspectionData {
   checklist: ChecklistGeneral
   tren: ControlTren
   frenos: SistemaFrenos
+  danosDiagrama: DanosDiagrama
 }
 
 // Helper function to create empty inspection data
@@ -414,7 +422,13 @@ export function createEmptyInspectionData(): InspectionData {
         { componente: 'Campanas de freno derecha', ok: false, comentario: '', precio: 0 },
         { componente: 'Líquido de frenos', ok: false, comentario: '', precio: 0 },
       ],
-      danosDiagrama: [],
+    },
+    danosDiagrama: {
+      front: [],
+      rear: [],
+      sideDriver: [],
+      side: [],
+      top: [],
     },
   }
 }

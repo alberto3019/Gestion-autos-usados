@@ -443,11 +443,103 @@
     0 = DAÑO DE CHAPA | X = DAÑO DE PINTURA | # = DAÑO DE CRISTAL | Z = DAÑO DE ÓPTICAS
   </div>
 
-  {{#if frenos.danosDiagrama}}
+  {{#if images.front}}
+  <div style="margin: 15px 0;">
+    <h3>Diagramas de Daños</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
+      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+        <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Frontal</p>
+        <img src="{{images.front}}" alt="Vista frontal" style="max-width: 100%; height: auto; max-height: 100px;" />
+      </div>
+      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+        <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Trasera</p>
+        <img src="{{images.rear}}" alt="Vista trasera" style="max-width: 100%; height: auto; max-height: 100px;" />
+      </div>
+      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+        <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Lateral Conductor</p>
+        <img src="{{images.sideDriver}}" alt="Vista lateral conductor" style="max-width: 100%; height: auto; max-height: 100px;" />
+      </div>
+      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+        <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Lateral Acompañante</p>
+        <img src="{{images.side}}" alt="Vista lateral acompañante" style="max-width: 100%; height: auto; max-height: 100px;" />
+      </div>
+      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+        <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Superior</p>
+        <img src="{{images.top}}" alt="Vista superior" style="max-width: 100%; height: auto; max-height: 100px;" />
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if danosDiagrama}}
   <h3>Daños Marcados:</h3>
-  {{#each frenos.danosDiagrama}}
-  <p><strong>{{tipo}}:</strong> Posición ({{x}}%, {{y}}%) - {{descripcion}}</p>
-  {{/each}}
+  <div style="margin: 10px 0;">
+    {{#if danosDiagrama.front}}
+      {{#each danosDiagrama.front}}
+      <p style="font-size: 9px; margin: 3px 0;">
+        <strong>Vista Frontal - 
+        {{#if (eq tipo "0")}}CHAPA{{/if}}
+        {{#if (eq tipo "x")}}PINTURA{{/if}}
+        {{#if (eq tipo "#")}}CRISTAL{{/if}}
+        {{#if (eq tipo "z")}}ÓPTICAS{{/if}}:</strong>
+        Posición ({{x}}%, {{y}}%)
+        {{#if descripcion}} - {{descripcion}}{{/if}}
+      </p>
+      {{/each}}
+    {{/if}}
+    {{#if danosDiagrama.rear}}
+      {{#each danosDiagrama.rear}}
+      <p style="font-size: 9px; margin: 3px 0;">
+        <strong>Vista Trasera - 
+        {{#if (eq tipo "0")}}CHAPA{{/if}}
+        {{#if (eq tipo "x")}}PINTURA{{/if}}
+        {{#if (eq tipo "#")}}CRISTAL{{/if}}
+        {{#if (eq tipo "z")}}ÓPTICAS{{/if}}:</strong>
+        Posición ({{x}}%, {{y}}%)
+        {{#if descripcion}} - {{descripcion}}{{/if}}
+      </p>
+      {{/each}}
+    {{/if}}
+    {{#if danosDiagrama.sideDriver}}
+      {{#each danosDiagrama.sideDriver}}
+      <p style="font-size: 9px; margin: 3px 0;">
+        <strong>Vista Lateral Conductor - 
+        {{#if (eq tipo "0")}}CHAPA{{/if}}
+        {{#if (eq tipo "x")}}PINTURA{{/if}}
+        {{#if (eq tipo "#")}}CRISTAL{{/if}}
+        {{#if (eq tipo "z")}}ÓPTICAS{{/if}}:</strong>
+        Posición ({{x}}%, {{y}}%)
+        {{#if descripcion}} - {{descripcion}}{{/if}}
+      </p>
+      {{/each}}
+    {{/if}}
+    {{#if danosDiagrama.side}}
+      {{#each danosDiagrama.side}}
+      <p style="font-size: 9px; margin: 3px 0;">
+        <strong>Vista Lateral Acompañante - 
+        {{#if (eq tipo "0")}}CHAPA{{/if}}
+        {{#if (eq tipo "x")}}PINTURA{{/if}}
+        {{#if (eq tipo "#")}}CRISTAL{{/if}}
+        {{#if (eq tipo "z")}}ÓPTICAS{{/if}}:</strong>
+        Posición ({{x}}%, {{y}}%)
+        {{#if descripcion}} - {{descripcion}}{{/if}}
+      </p>
+      {{/each}}
+    {{/if}}
+    {{#if danosDiagrama.top}}
+      {{#each danosDiagrama.top}}
+      <p style="font-size: 9px; margin: 3px 0;">
+        <strong>Vista Superior - 
+        {{#if (eq tipo "0")}}CHAPA{{/if}}
+        {{#if (eq tipo "x")}}PINTURA{{/if}}
+        {{#if (eq tipo "#")}}CRISTAL{{/if}}
+        {{#if (eq tipo "z")}}ÓPTICAS{{/if}}:</strong>
+        Posición ({{x}}%, {{y}}%)
+        {{#if descripcion}} - {{descripcion}}{{/if}}
+      </p>
+      {{/each}}
+    {{/if}}
+  </div>
   {{/if}}
   {{/if}}
 

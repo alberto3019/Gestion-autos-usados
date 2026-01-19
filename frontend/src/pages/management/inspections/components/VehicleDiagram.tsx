@@ -64,10 +64,8 @@ export default function VehicleDiagram({
     })
   }
 
-  // Filter damages by view (in the future, we could add view property to damages)
+  // Damages are already filtered by view (passed from parent)
   const getViewDamages = () => {
-    // For now, show all damages on all views
-    // In a real implementation, you'd filter by view
     return damages
   }
 

@@ -622,12 +622,38 @@ export class SistemaFrenosDto {
   @Type(() => FrenoComponentDto)
   @IsOptional()
   componentes?: FrenoComponentDto[];
+}
+
+export class DanosDiagramaDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DamageMarkDto)
+  @IsOptional()
+  front?: DamageMarkDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DamageMarkDto)
   @IsOptional()
-  danosDiagrama?: DamageMarkDto[];
+  rear?: DamageMarkDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DamageMarkDto)
+  @IsOptional()
+  sideDriver?: DamageMarkDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DamageMarkDto)
+  @IsOptional()
+  side?: DamageMarkDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DamageMarkDto)
+  @IsOptional()
+  top?: DamageMarkDto[];
 }
 
 export class InspectionDataDto {
@@ -650,5 +676,10 @@ export class InspectionDataDto {
   @Type(() => SistemaFrenosDto)
   @IsOptional()
   frenos?: SistemaFrenosDto;
+
+  @ValidateNested()
+  @Type(() => DanosDiagramaDto)
+  @IsOptional()
+  danosDiagrama?: DanosDiagramaDto;
 }
 

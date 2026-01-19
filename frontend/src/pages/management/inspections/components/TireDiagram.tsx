@@ -61,7 +61,7 @@ export default function TireDiagram({ neumaticos, auxilioCondicion, onUpdate }: 
         
         {/* Tire position markers */}
         {Object.entries(tirePositions).map(([key, position]) => {
-          const condicion = getTireCondition(key as TireCondition['posicion'])
+          const condicion = getTireCondition(key as NeumaticoCondition['posicion'])
           const label = key
             .split('_')
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

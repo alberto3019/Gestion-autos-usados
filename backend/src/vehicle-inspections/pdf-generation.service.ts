@@ -68,6 +68,19 @@ export class PdfGenerationService {
     }
   }
 
+  private async loadImageAsBase64(imageName: string): Promise<string> {
+    const imagePath = path.join(this.templatesDir, 'images', imageName);
+    try {
+      const imageBuffer = await fs.readFile(imagePath);
+      const base64 = imageBuffer.toString('base64');
+      const ext = path.extname(imageName).slice(1);
+      return `data:image/${ext};base64,${base64}`;
+    } catch (error) {
+      console.warn(`Image ${imageName} not found:`, error);
+      return '';
+    }
+  }
+
   private getDefaultTemplate(): string {
     return `
 <!DOCTYPE html>
@@ -182,6 +195,15 @@ export class PdfGenerationService {
     const templateContent = await this.loadTemplate('completo');
     const template = handlebars.compile(templateContent);
 
+    // Load images as base64
+    const images = {
+      front: await this.loadImageAsBase64('frente.png'),
+      rear: await this.loadImageAsBase64('trasero.png'),
+      side: await this.loadImageAsBase64('lateral acompañante.png'),
+      sideDriver: await this.loadImageAsBase64('lateral conductor.png'),
+      top: await this.loadImageAsBase64('arriba.png'),
+    };
+
     // Prepare data for template
     const templateData = {
       vehicle: vehicleInfo,
@@ -190,6 +212,7 @@ export class PdfGenerationService {
       checklist: inspectionData.checklist || {},
       tren: inspectionData.tren || {},
       frenos: inspectionData.frenos || {},
+      images,
     };
 
     // Render HTML
@@ -203,7 +226,11 @@ export class PdfGenerationService {
 
     try {
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      // Set a longer timeout for images to load
+      await page.setContent(html, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000 
+      });
 
       const pdfBuffer = await page.pdf({
         format: 'A4',

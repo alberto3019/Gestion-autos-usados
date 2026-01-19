@@ -237,9 +237,20 @@
         <div class="legend">
           <strong>N = NUEVO | B = BUENO | R = REGULAR | M = MALO</strong>
         </div>
+        {{#if images.top}}
+        <div style="text-align: center; margin: 10px 0;">
+          <img src="{{images.top}}" alt="Vista superior" style="max-width: 100%; height: auto; max-height: 150px;" />
+          <div style="font-size: 8px; margin-top: 5px;">
+            {{#each mecanico.neumaticos.neumaticos}}
+            <span style="display: inline-block; margin: 2px 5px;"><strong>{{posicion}}:</strong> {{condicion}}</span>
+            {{/each}}
+          </div>
+        </div>
+        {{else}}
         {{#each mecanico.neumaticos.neumaticos}}
         <p><strong>{{posicion}}:</strong> {{condicion}}</p>
         {{/each}}
+        {{/if}}
         <p><strong>AUXILIO:</strong> {{mecanico.neumaticos.auxilioCondicion}}</p>
       </div>
       {{/if}}

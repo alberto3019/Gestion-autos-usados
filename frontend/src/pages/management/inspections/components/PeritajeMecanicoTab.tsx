@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import type { PeritajeMecanico } from '../utils/inspectionDataSchema'
 import Input from '../../../../components/common/Input'
+import TireDiagram from './TireDiagram'
 
 interface Props {
   data: PeritajeMecanico
@@ -734,65 +735,14 @@ export default function PeritajeMecanicoTab({ data, onChange, vehicleData }: Pro
           </div>
 
           {/* NEUMÁTICOS */}
-          <div className="border p-3 print:border-black">
-            <h3 className="font-bold mb-2">NEUMÁTICOS</h3>
-            <div className="text-xs mb-2 p-2 bg-red-100 border border-red-300 print:bg-red-50">
-              <p><strong>N = NUEVO</strong> | <strong>B = BUENO</strong> | <strong>R = REGULAR</strong> | <strong>M = MALO</strong></p>
-            </div>
-            {/* Simple tire condition selector - will be enhanced with diagrams later */}
-            <div className="space-y-2">
-              {[
-                { key: 'delantero_derecho', label: 'Delantero Derecho' },
-                { key: 'delantero_izquierdo', label: 'Delantero Izquierdo' },
-                { key: 'trasero_derecho', label: 'Trasero Derecho' },
-                { key: 'trasero_izquierdo', label: 'Trasero Izquierdo' },
-              ].map(({ key, label }) => {
-                const neumatico = localData.neumaticos.neumaticos.find((n) => n.posicion === key)
-                return (
-                  <div key={key}>
-                    <label className="block text-sm font-medium mb-1">{label}</label>
-                    <div className="flex gap-2">
-                      {['n', 'b', 'r', 'm'].map((cond) => (
-                        <label key={cond} className="flex items-center gap-1">
-                          <input
-                            type="radio"
-                            name={`neumatico_${key}`}
-                            value={cond}
-                            checked={neumatico?.condicion === cond}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                              const existing = localData.neumaticos.neumaticos.filter((n) => n.posicion !== key)
-                              updateNeumaticos('neumaticos', [
-                                ...existing,
-                                { posicion: key, condicion: cond as any },
-                              ])
-                            }}
-                          />
-                          <span className="text-sm uppercase">{cond}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
-              <div>
-                <label className="block text-sm font-medium mb-1">AUXILIO</label>
-                <div className="flex gap-2">
-                  {['n', 'b', 'r', 'o'].map((cond) => (
-                    <label key={cond} className="flex items-center gap-1">
-                      <input
-                        type="radio"
-                        name="auxilioCondicion"
-                        value={cond}
-                        checked={localData.neumaticos.auxilioCondicion === cond}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateNeumaticos('auxilioCondicion', e.target.value)}
-                      />
-                      <span className="text-sm uppercase">{cond}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <TireDiagram
+            neumaticos={localData.neumaticos.neumaticos}
+            auxilioCondicion={localData.neumaticos.auxilioCondicion}
+            onUpdate={(newNeumaticos, newAuxilio) => {
+              updateNeumaticos('neumaticos', newNeumaticos)
+              updateNeumaticos('auxilioCondicion', newAuxilio)
+            }}
+          />
         </div>
 
         {/* Right Column */}

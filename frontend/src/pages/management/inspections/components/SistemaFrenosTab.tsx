@@ -190,7 +190,7 @@ export default function SistemaFrenosTab({ data, onChange }: Props) {
             selectedDamageType={selectedDamageType}
           />
           <VehicleDiagram
-            view="side"
+            view="side-driver"
             damages={localData.danosDiagrama}
             onDamageAdd={handleDamageAdd}
             onDamageRemove={handleDamageRemove}

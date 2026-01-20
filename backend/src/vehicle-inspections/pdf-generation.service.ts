@@ -260,7 +260,10 @@ export class PdfGenerationService {
         '--disable-background-networking',
         '--disable-default-apps',
         '--disable-sync',
+        '--disable-web-security', // Allow loading local images
+        '--disable-features=IsolateOrigins,site-per-process', // Help with rendering
       ],
+      timeout: 60000, // 60 seconds timeout for browser launch
     };
 
     // Try to use Puppeteer's bundled Chrome first (installed via postinstall/npx puppeteer browsers install)

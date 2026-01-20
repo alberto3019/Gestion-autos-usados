@@ -416,10 +416,16 @@ export class PdfGenerationService {
 
     try {
       const page = await browser.newPage();
+      
+      // Set longer timeouts for page operations
+      page.setDefaultNavigationTimeout(60000); // 60 seconds
+      page.setDefaultTimeout(60000); // 60 seconds
+      
       // Set a longer timeout for images to load
+      // Use networkidle2 instead of networkidle0 (less strict, better for Render.com)
       await page.setContent(html, { 
-        waitUntil: 'networkidle0',
-        timeout: 30000 
+        waitUntil: 'networkidle2', // Changed from networkidle0 to networkidle2
+        timeout: 60000 // Increased from 30s to 60s
       });
 
       const pdfBuffer = await page.pdf({

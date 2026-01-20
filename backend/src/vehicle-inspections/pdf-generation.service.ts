@@ -281,9 +281,23 @@ export class PdfGenerationService {
 
     // Try to find Chrome in Render.com cache directory directly
     if (!executablePath && process.env.RENDER) {
+      console.log('🔍 Searching for Chrome in Render cache directory:', cacheDir);
+      
+      // Check if cache directory exists
+      if (existsSync(cacheDir)) {
+        console.log('✅ Cache directory exists:', cacheDir);
+        try {
+          const cacheContents = readdirSync(cacheDir);
+          console.log('📁 Cache directory contents:', cacheContents);
+        } catch (e) {
+          console.warn('⚠️ Could not read cache directory:', e);
+        }
+      } else {
+        console.warn('⚠️ Cache directory does not exist:', cacheDir);
+      }
+      
       const renderChromePaths = [
         `${cacheDir}/chrome/linux-143.0.7499.192/chrome-linux64/chrome`,
-        `${cacheDir}/chrome/linux-*/chrome-linux64/chrome`,
       ];
       
       // Try exact version path first
@@ -291,19 +305,29 @@ export class PdfGenerationService {
         executablePath = renderChromePaths[0];
         console.log('✅ Using Chrome from Render cache:', executablePath);
       } else {
+        console.warn('⚠️ Chrome not found at exact path:', renderChromePaths[0]);
+        
         // Try to find any chrome version in cache
         try {
           const chromeDir = `${cacheDir}/chrome`;
           if (existsSync(chromeDir)) {
+            console.log('✅ Chrome directory exists:', chromeDir);
             const versions = readdirSync(chromeDir);
+            console.log('📦 Available Chrome versions:', versions);
+            
             for (const version of versions) {
               const chromePath = `${chromeDir}/${version}/chrome-linux64/chrome`;
+              console.log('🔍 Checking path:', chromePath);
               if (existsSync(chromePath)) {
                 executablePath = chromePath;
                 console.log('✅ Using Chrome from Render cache (found version):', executablePath);
                 break;
+              } else {
+                console.warn('⚠️ Chrome not found at:', chromePath);
               }
             }
+          } else {
+            console.warn('⚠️ Chrome directory does not exist:', chromeDir);
           }
         } catch (e) {
           console.warn('⚠️ Could not search Render cache directory:', e);
@@ -342,10 +366,47 @@ export class PdfGenerationService {
       console.error('❌ No Chrome executable found!');
       console.error('Cache directory:', cacheDir);
       console.error('RENDER env:', process.env.RENDER);
-      throw new Error(
-        `No Chrome executable found. Cache directory: ${cacheDir}. ` +
-        `Please ensure Chrome is installed during build with: npx puppeteer browsers install chrome`
-      );
+      console.error('PUPPETEER_CACHE_DIR env:', process.env.PUPPETEER_CACHE_DIR);
+      
+      // Last resort: Try to install Chrome in runtime (this is slow but may work)
+      if (process.env.RENDER) {
+        console.log('🔄 Attempting to install Chrome in runtime...');
+        try {
+          const { execSync } = require('child_process');
+          execSync('npx puppeteer browsers install chrome', { 
+            stdio: 'inherit',
+            timeout: 120000, // 2 minutes timeout
+            env: { ...process.env, PUPPETEER_CACHE_DIR: cacheDir }
+          });
+          
+          // Try puppeteer.executablePath() again after installation
+          const puppeteerExecutable = puppeteer.executablePath();
+          if (puppeteerExecutable && existsSync(puppeteerExecutable)) {
+            executablePath = puppeteerExecutable;
+            launchOptions.executablePath = executablePath;
+            console.log('✅ Chrome installed and found at:', executablePath);
+          } else {
+            throw new Error(
+              `Chrome installation completed but executable not found. ` +
+              `Cache directory: ${cacheDir}. ` +
+              `Please ensure Chrome is installed during build with: npx puppeteer browsers install chrome`
+            );
+          }
+        } catch (installError) {
+          console.error('❌ Failed to install Chrome in runtime:', installError);
+          throw new Error(
+            `No Chrome executable found and runtime installation failed. ` +
+            `Cache directory: ${cacheDir}. ` +
+            `Please ensure Chrome is installed during build with: npx puppeteer browsers install chrome. ` +
+            `Error: ${installError.message}`
+          );
+        }
+      } else {
+        throw new Error(
+          `No Chrome executable found. Cache directory: ${cacheDir}. ` +
+          `Please ensure Chrome is installed during build with: npx puppeteer browsers install chrome`
+        );
+      }
     }
 
     const browser = await puppeteer.launch(launchOptions);

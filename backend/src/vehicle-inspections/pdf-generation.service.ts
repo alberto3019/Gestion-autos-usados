@@ -235,6 +235,16 @@ export class PdfGenerationService {
       this.configService.get('PUPPETEER_CACHE_DIR') || 
       '/opt/render/.cache/puppeteer';
     
+    // Set cache directory for Puppeteer BEFORE calling executablePath()
+    // This is critical for Render.com
+    if (process.env.RENDER || !process.env.PUPPETEER_CACHE_DIR) {
+      process.env.PUPPETEER_CACHE_DIR = cacheDir;
+      // Also set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD if Chrome is already installed
+      if (!process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD) {
+        process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
+      }
+    }
+
     const launchOptions: any = {
       headless: true,
       args: [
@@ -253,21 +263,52 @@ export class PdfGenerationService {
       ],
     };
 
-    // Set cache directory for Puppeteer if on Render.com
-    if (process.env.RENDER) {
-      process.env.PUPPETEER_CACHE_DIR = cacheDir;
-    }
-
     // Try to use Puppeteer's bundled Chrome first (installed via postinstall/npx puppeteer browsers install)
     if (!executablePath) {
       try {
+        // Set cache dir before calling executablePath
         const puppeteerExecutable = puppeteer.executablePath();
         if (puppeteerExecutable && existsSync(puppeteerExecutable)) {
           executablePath = puppeteerExecutable;
           console.log('✅ Using Puppeteer bundled Chrome:', executablePath);
+        } else {
+          console.warn('⚠️ Puppeteer executablePath() returned:', puppeteerExecutable);
         }
       } catch (e) {
-        console.warn('⚠️ Could not find Puppeteer executable path:', e);
+        console.warn('⚠️ Error calling puppeteer.executablePath():', e);
+      }
+    }
+
+    // Try to find Chrome in Render.com cache directory directly
+    if (!executablePath && process.env.RENDER) {
+      const renderChromePaths = [
+        `${cacheDir}/chrome/linux-143.0.7499.192/chrome-linux64/chrome`,
+        `${cacheDir}/chrome/linux-*/chrome-linux64/chrome`,
+      ];
+      
+      // Try exact version path first
+      if (existsSync(renderChromePaths[0])) {
+        executablePath = renderChromePaths[0];
+        console.log('✅ Using Chrome from Render cache:', executablePath);
+      } else {
+        // Try to find any chrome version in cache
+        try {
+          const fsSync = require('fs');
+          const chromeDir = `${cacheDir}/chrome`;
+          if (existsSync(chromeDir)) {
+            const versions = fsSync.readdirSync(chromeDir);
+            for (const version of versions) {
+              const chromePath = `${chromeDir}/${version}/chrome-linux64/chrome`;
+              if (existsSync(chromePath)) {
+                executablePath = chromePath;
+                console.log('✅ Using Chrome from Render cache (found version):', executablePath);
+                break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not search Render cache directory:', e);
+        }
       }
     }
 
@@ -297,8 +338,15 @@ export class PdfGenerationService {
     // Use explicit Chrome path if found or provided
     if (executablePath) {
       launchOptions.executablePath = executablePath;
+      console.log('🚀 Launching Puppeteer with Chrome at:', executablePath);
     } else {
-      console.warn('⚠️ No Chrome executable found, Puppeteer will try to use default');
+      console.error('❌ No Chrome executable found!');
+      console.error('Cache directory:', cacheDir);
+      console.error('RENDER env:', process.env.RENDER);
+      throw new Error(
+        `No Chrome executable found. Cache directory: ${cacheDir}. ` +
+        `Please ensure Chrome is installed during build with: npx puppeteer browsers install chrome`
+      );
     }
 
     const browser = await puppeteer.launch(launchOptions);

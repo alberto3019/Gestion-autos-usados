@@ -100,6 +100,9 @@ export class VehicleInspectionsService {
       throw new NotFoundException('Peritaje no encontrado');
     }
 
+    // If data is being updated, clear the PDF URL so a new PDF can be generated
+    const shouldClearPdf = data.data !== undefined || data.dataRaw !== undefined;
+
     const updated = await this.prisma.vehicleInspection.update({
       where: { id },
       data: {
@@ -110,6 +113,8 @@ export class VehicleInspectionsService {
         observations: data.observations,
         status: data.status,
         data: data.data ? JSON.parse(JSON.stringify(data.data)) : data.dataRaw,
+        // Clear PDF URL when inspection data is updated so user can generate a new PDF
+        pdfUrl: shouldClearPdf ? null : undefined,
       },
       include: {
         vehicle: {

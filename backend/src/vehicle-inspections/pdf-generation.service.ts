@@ -417,16 +417,19 @@ export class PdfGenerationService {
     try {
       const page = await browser.newPage();
       
-      // Set longer timeouts for page operations
-      page.setDefaultNavigationTimeout(60000); // 60 seconds
-      page.setDefaultTimeout(60000); // 60 seconds
+      // Set reasonable timeouts for page operations
+      page.setDefaultNavigationTimeout(10000); // 10 seconds (should be enough for static HTML)
+      page.setDefaultTimeout(10000); // 10 seconds
       
-      // Set a longer timeout for images to load
-      // Use networkidle2 instead of networkidle0 (less strict, better for Render.com)
+      // Since images are base64-encoded (data URIs), we don't need to wait for network
+      // Use 'load' which waits for DOM and resources to load (much faster than networkidle)
       await page.setContent(html, { 
-        waitUntil: 'networkidle2', // Changed from networkidle0 to networkidle2
-        timeout: 60000 // Increased from 30s to 60s
+        waitUntil: 'load', // 'load' is much faster - waits for DOM and embedded resources only
+        timeout: 10000 // 10 seconds should be plenty for static HTML with base64 images
       });
+      
+      // Small delay to ensure all base64 images are rendered
+      await page.waitForTimeout(500); // 500ms should be enough for base64 images
 
       const pdfBuffer = await page.pdf({
         format: 'A4',

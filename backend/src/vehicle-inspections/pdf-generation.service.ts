@@ -253,13 +253,25 @@ export class PdfGenerationService {
       ],
     };
 
-    // Set cache directory for Puppeteer
+    // Set cache directory for Puppeteer if on Render.com
     if (process.env.RENDER) {
-      // On Render.com, set the cache directory
       process.env.PUPPETEER_CACHE_DIR = cacheDir;
     }
 
-    // Try to find Chrome in common locations if executablePath not provided
+    // Try to use Puppeteer's bundled Chrome first (installed via postinstall/npx puppeteer browsers install)
+    if (!executablePath) {
+      try {
+        const puppeteerExecutable = puppeteer.executablePath();
+        if (puppeteerExecutable && existsSync(puppeteerExecutable)) {
+          executablePath = puppeteerExecutable;
+          console.log('✅ Using Puppeteer bundled Chrome:', executablePath);
+        }
+      } catch (e) {
+        console.warn('⚠️ Could not find Puppeteer executable path:', e);
+      }
+    }
+
+    // Try to find Chrome in common system locations if Puppeteer's Chrome not found
     if (!executablePath) {
       const commonPaths = [
         '/usr/bin/google-chrome',
@@ -273,6 +285,7 @@ export class PdfGenerationService {
         try {
           if (existsSync(path)) {
             executablePath = path;
+            console.log('✅ Using system Chrome:', executablePath);
             break;
           }
         } catch (e) {
@@ -281,20 +294,11 @@ export class PdfGenerationService {
       }
     }
 
-    // Use explicit Chrome path if found
+    // Use explicit Chrome path if found or provided
     if (executablePath) {
       launchOptions.executablePath = executablePath;
     } else {
-      // Try to use Puppeteer's bundled Chrome
-      // This will use the Chrome installed via postinstall script
-      try {
-        const puppeteerExecutable = puppeteer.executablePath();
-        if (puppeteerExecutable && existsSync(puppeteerExecutable)) {
-          launchOptions.executablePath = puppeteerExecutable;
-        }
-      } catch (e) {
-        console.warn('Could not find Puppeteer executable path:', e);
-      }
+      console.warn('⚠️ No Chrome executable found, Puppeteer will try to use default');
     }
 
     const browser = await puppeteer.launch(launchOptions);

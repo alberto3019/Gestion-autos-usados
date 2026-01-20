@@ -5,7 +5,7 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { InspectionDataDto } from './dto/inspection-data.dto';
@@ -293,10 +293,9 @@ export class PdfGenerationService {
       } else {
         // Try to find any chrome version in cache
         try {
-          const fsSync = require('fs');
           const chromeDir = `${cacheDir}/chrome`;
           if (existsSync(chromeDir)) {
-            const versions = fsSync.readdirSync(chromeDir);
+            const versions = readdirSync(chromeDir);
             for (const version of versions) {
               const chromePath = `${chromeDir}/${version}/chrome-linux64/chrome`;
               if (existsSync(chromePath)) {

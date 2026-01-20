@@ -429,7 +429,8 @@ export class PdfGenerationService {
       });
       
       // Small delay to ensure all base64 images are rendered
-      await page.waitForTimeout(500); // 500ms should be enough for base64 images
+      // Using setTimeout wrapped in Promise since waitForTimeout was removed in newer Puppeteer versions
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const pdfBuffer = await page.pdf({
         format: 'A4',

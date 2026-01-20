@@ -447,25 +447,65 @@
   <div style="margin: 15px 0;">
     <h3>Diagramas de Daños</h3>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
-      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+      <!-- Vista Frontal -->
+      <div style="text-align: center; border: 1px solid #000; padding: 5px; position: relative;">
         <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Frontal</p>
-        <img src="{{images.front}}" alt="Vista frontal" style="max-width: 100%; height: auto; max-height: 100px;" />
+        <div style="position: relative; display: inline-block;">
+          <img src="{{images.front}}" alt="Vista frontal" style="max-width: 100%; height: auto; max-height: 100px; display: block;" />
+          {{#if danosDiagrama.front}}
+            {{#each danosDiagrama.front}}
+            <span style="position: absolute; left: {{x}}%; top: {{y}}%; transform: translate(-50%, -50%); font-size: 12px; font-weight: bold; color: red; z-index: 10; text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;">{{tipo}}</span>
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
-      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+      <!-- Vista Trasera -->
+      <div style="text-align: center; border: 1px solid #000; padding: 5px; position: relative;">
         <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Trasera</p>
-        <img src="{{images.rear}}" alt="Vista trasera" style="max-width: 100%; height: auto; max-height: 100px;" />
+        <div style="position: relative; display: inline-block;">
+          <img src="{{images.rear}}" alt="Vista trasera" style="max-width: 100%; height: auto; max-height: 100px; display: block;" />
+          {{#if danosDiagrama.rear}}
+            {{#each danosDiagrama.rear}}
+            <span style="position: absolute; left: {{x}}%; top: {{y}}%; transform: translate(-50%, -50%); font-size: 12px; font-weight: bold; color: red; z-index: 10; text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;">{{tipo}}</span>
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
-      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+      <!-- Vista Lateral Conductor -->
+      <div style="text-align: center; border: 1px solid #000; padding: 5px; position: relative;">
         <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Lateral Conductor</p>
-        <img src="{{images.sideDriver}}" alt="Vista lateral conductor" style="max-width: 100%; height: auto; max-height: 100px;" />
+        <div style="position: relative; display: inline-block;">
+          <img src="{{images.sideDriver}}" alt="Vista lateral conductor" style="max-width: 100%; height: auto; max-height: 100px; display: block;" />
+          {{#if danosDiagrama.sideDriver}}
+            {{#each danosDiagrama.sideDriver}}
+            <span style="position: absolute; left: {{x}}%; top: {{y}}%; transform: translate(-50%, -50%); font-size: 12px; font-weight: bold; color: red; z-index: 10; text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;">{{tipo}}</span>
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
-      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+      <!-- Vista Lateral Acompañante -->
+      <div style="text-align: center; border: 1px solid #000; padding: 5px; position: relative;">
         <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Lateral Acompañante</p>
-        <img src="{{images.side}}" alt="Vista lateral acompañante" style="max-width: 100%; height: auto; max-height: 100px;" />
+        <div style="position: relative; display: inline-block;">
+          <img src="{{images.side}}" alt="Vista lateral acompañante" style="max-width: 100%; height: auto; max-height: 100px; display: block;" />
+          {{#if danosDiagrama.side}}
+            {{#each danosDiagrama.side}}
+            <span style="position: absolute; left: {{x}}%; top: {{y}}%; transform: translate(-50%, -50%); font-size: 12px; font-weight: bold; color: red; z-index: 10; text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;">{{tipo}}</span>
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
-      <div style="text-align: center; border: 1px solid #000; padding: 5px;">
+      <!-- Vista Superior -->
+      <div style="text-align: center; border: 1px solid #000; padding: 5px; position: relative;">
         <p style="font-size: 9px; font-weight: bold; margin-bottom: 5px;">Vista Superior</p>
-        <img src="{{images.top}}" alt="Vista superior" style="max-width: 100%; height: auto; max-height: 100px;" />
+        <div style="position: relative; display: inline-block;">
+          <img src="{{images.top}}" alt="Vista superior" style="max-width: 100%; height: auto; max-height: 100px; display: block;" />
+          {{#if danosDiagrama.top}}
+            {{#each danosDiagrama.top}}
+            <span style="position: absolute; left: {{x}}%; top: {{y}}%; transform: translate(-50%, -50%); font-size: 12px; font-weight: bold; color: red; z-index: 10; text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;">{{tipo}}</span>
+            {{/each}}
+          {{/if}}
+        </div>
       </div>
     </div>
   </div>

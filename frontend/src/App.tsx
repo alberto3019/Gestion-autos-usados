@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuthStore } from './store/authStore'
+import { startKeepAlive } from './utils/keepAlive'
 
 // Layout
 import Layout from './components/layout/Layout'
@@ -62,6 +64,12 @@ import ModuleGuard from './components/common/ModuleGuard'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
+
+  // Iniciar keep-alive para mantener el servidor activo
+  useEffect(() => {
+    const cleanup = startKeepAlive()
+    return cleanup
+  }, [])
 
   return (
     <BrowserRouter>
